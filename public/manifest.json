@@ -1,10 +1,17 @@
 {
-"manifest_version": 3,
-"name": "IUH Study Tracker Extension",
-"description": "Chrome Extension",
-"version": "1.0",
-"action": {
-"default_popup": "index.html"
-},
-"permissions": ["tabs"]
+  "manifest_version": 3,
+  "name": "IUH Study Tracker Extension",
+  "description": "Chrome Extension",
+  "version": "1.0",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "permissions": ["tabs"],
+  "content_scripts": [
+    {
+      "matches": ["https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html*"],
+      "js": ["contentScript.js"],
+      "run_at": "document_end"
+    }
+  ]
 }

@@ -17,10 +17,10 @@ function App() {
       setError("Key không hợp lệ (quá ngắn)");
       return false;
     }
-    if (!inputKey.includes("IUH") && !inputKey.includes("npUdG8auRX8sVUZ")) {
-      setError("Key không tồn tại hoặc không hợp lệ");
-      return false;
-    }
+    // if (!inputKey.includes("IUH") && !inputKey.includes("npUdG8auRX8sVUZ")) {
+    //   setError("Key không tồn tại hoặc không hợp lệ");
+    //   return false;
+    // }
     setError("");
     return true;
   };
