@@ -1,4 +1,3 @@
-
 const { motion, AnimatePresence } = window.Motion || {};
 
 function Layout({ children, title }) {
@@ -200,6 +199,8 @@ function GradesPage() {
             setIsLoading(false);
         }
     };
+
+    window.location.href = window.location.href.replace('GradesPage.html', 'MainPage.html');
 
     return React.createElement(Layout, { title: "Xem Điểm" },
         React.createElement('div', { className: 'page-content' },
