@@ -6,12 +6,28 @@
   "action": {
     "default_popup": "index.html"
   },
-  "permissions": ["tabs"],
+  "permissions": [
+    "tabs"
+  ],
   "content_scripts": [
     {
-      "matches": ["https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html*"],
-      "js": ["contentScript.js"],
+      "matches": [
+        "https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html*"
+      ],
+      "js": [
+        "contentScript.js"
+      ],
       "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "grades.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }

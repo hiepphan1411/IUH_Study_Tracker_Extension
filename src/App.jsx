@@ -1,5 +1,5 @@
 import "./App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { guideTemplate } from "./templates/guideTemplate";
 
 function App() {
@@ -7,6 +7,19 @@ function App() {
   const [key, setKey] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const savedKey = localStorage.getItem("iuh-tracker-key");
+    if (savedKey) {
+      setKey(savedKey);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (key.trim()) {
+      localStorage.setItem("iuh-tracker-key", key);
+    }
+  }, [key]);
 
   const validateKey = (inputKey) => {
     if (!inputKey.trim()) {
@@ -17,11 +30,9 @@ function App() {
       setError("Key không hợp lệ (quá ngắn)");
       return false;
     }
-    // if (!inputKey.includes("IUH") && !inputKey.includes("npUdG8auRX8sVUZ")) {
-    //   setError("Key không tồn tại hoặc không hợp lệ");
-    //   return false;
-    // }
     setError("");
+
+    localStorage.setItem("iuh-tracker-key", inputKey);
     return true;
   };
 
@@ -53,10 +64,10 @@ function App() {
     setIsLoading(true);
 
     //Xử lý xem điểm tại đây
-    const scheduleUrl = `https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html?k=${encodeURIComponent(
-      key
-    )}`;
-    window.open(scheduleUrl, "_blank");
+  const gradesUrl = `page/MainPage.html?k=${encodeURIComponent(key)}`;
+    
+    window.open(gradesUrl, "_blank");
+    setIsLoading(false);
   };
 
   const handleTabClick = (tabId) => {
@@ -355,5 +366,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
