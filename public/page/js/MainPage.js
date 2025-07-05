@@ -1,6 +1,11 @@
-
 const { motion, AnimatePresence } = window.Motion || {};
+const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } = window.Recharts || {};
 
+console.log("Có chạy!!!")
+console.log('Window.Recharts:', window.Recharts);
+console.log('Window.Motion:', window.Motion);
+console.log('React:', typeof React);
+console.log('ReactDOM:', typeof ReactDOM);
 function Layout({ children, title }) {
     return React.createElement('div', { className: 'layout' },
         React.createElement(Sidebar),
@@ -21,7 +26,7 @@ const SIDEBAR_ITEMS = [
         href: "/overview",
         onClick: () => {
             const key = new URLSearchParams(window.location.search).get('k');
-            const baseUrl = window.location.origin + window.location.pathname.replace('/GradesPage.html', '');
+            const baseUrl = window.location.origin + window.location.pathname.replace('/MainPage.html', '');
             window.location.href = `${baseUrl}/MainPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
         }
     },
@@ -32,7 +37,7 @@ const SIDEBAR_ITEMS = [
         href: "/courses",
         onClick: () => {
             const key = new URLSearchParams(window.location.search).get('k');
-            const baseUrl = window.location.origin + window.location.pathname.replace('/GradesPage.html', '');
+            const baseUrl = window.location.origin + window.location.pathname.replace('/MainPage.html', '');
             window.location.href = `${baseUrl}/GradesPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
         }
     },
@@ -154,7 +159,7 @@ function Header({ title }) {
                         strokeLinecap: 'round',
                         strokeLinejoin: 'round',
                         strokeWidth: 2,
-                        d: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
+                        d: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
                     })
                 )
             ),
@@ -163,117 +168,109 @@ function Header({ title }) {
     );
 }
 
-function GradesPage() {
-    const [key, setKey] = React.useState('');
-    const [gradesData, setGradesData] = React.useState(null);
-    const [isLoading, setIsLoading] = React.useState(false);
+const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 
-    React.useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const keyParam = urlParams.get('k');
-        if (keyParam) {
-            setKey(keyParam);
-            loadGrades(keyParam);
+function ColUserNewStatistic({ users }) {
+    const monthlyUserData = React.useMemo(() => {
+        if (!users || users.length === 0) {
+            return [];
         }
-    }, []);
-
-    const loadGrades = async (key) => {
-        setIsLoading(true);
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            setGradesData({
-                studentInfo: {
-                    name: "Họ tên",
-                    studentId: "21000000",
-                    class: "DHKTPM18A"
-                },
-                subjects: [
-                    { id: 1, name: "Lập trình Java", grade: 8.5, credits: 3 },
-                    { id: 2, name: "Cơ sở dữ liệu", grade: 9.0, credits: 3 },
-                    { id: 3, name: "Mạng máy tính", grade: 10, credits: 2 }
-                ]
-            });
-        } catch (error) {
-            console.error('Error loading grades:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return React.createElement(Layout, { title: "Xem Điểm" },
-        React.createElement('div', { className: 'page-content' },
-            React.createElement('div', { className: 'card' },
-                React.createElement('h2', { className: 'card-title' }, 'Kết quả học tập'),
-                React.createElement('p', { className: 'key-text' }, `Key: ${key}`),
-                
-                isLoading ? React.createElement('div', { className: 'loading' },
-                    React.createElement('div', { className: 'spinner' }),
-                    React.createElement('span', { className: 'loading-text' }, 'Đang tải dữ liệu...')
-                ) : gradesData ? React.createElement('div', { className: 'info-section' },
-                    React.createElement('div', { className: 'info-card' },
-                        React.createElement('h3', { className: 'info-card-title' }, 'Thông tin sinh viên'),
-                        React.createElement('div', { className: 'info-grid' },
-                            React.createElement('div', { className: 'info-item' },
-                                React.createElement('span', { className: 'info-label' }, 'Họ tên:'),
-                                React.createElement('span', { className: 'info-value' }, gradesData.studentInfo.name)
-                            ),
-                            React.createElement('div', { className: 'info-item' },
-                                React.createElement('span', { className: 'info-label' }, 'MSSV:'),
-                                React.createElement('span', { className: 'info-value' }, gradesData.studentInfo.studentId)
-                            ),
-                            React.createElement('div', { className: 'info-item' },
-                                React.createElement('span', { className: 'info-label' }, 'Lớp:'),
-                                React.createElement('span', { className: 'info-value' }, gradesData.studentInfo.class)
-                            )
-                        )
-                    ),
-                    React.createElement('div', { className: 'info-card' },
-                        React.createElement('h3', { className: 'info-card-title' }, 'Bảng điểm'),
-                        React.createElement('div', { className: 'table-container' },
-                            React.createElement('table', { className: 'grades-table' },
-                                React.createElement('thead', null,
-                                    React.createElement('tr', null,
-                                        React.createElement('th', null, 'Môn học'),
-                                        React.createElement('th', null, 'Tín chỉ'),
-                                        React.createElement('th', null, 'Điểm'),
-                                        React.createElement('th', null, 'Xếp loại')
-                                    )
-                                ),
-                                React.createElement('tbody', null,
-                                    gradesData.subjects.map((subject) =>
-                                        React.createElement('tr', { key: subject.id },
-                                            React.createElement('td', null, subject.name),
-                                            React.createElement('td', null, subject.credits),
-                                            React.createElement('td', { className: 'grade-value' }, subject.grade),
-                                            React.createElement('td', null,
-                                                React.createElement('span', {
-                                                    className: `grade-badge ${
-                                                        subject.grade >= 8.5 ? 'grade-excellent' :
-                                                        subject.grade >= 7.0 ? 'grade-good' :
-                                                        subject.grade >= 5.5 ? 'grade-average' :
-                                                        'grade-poor'
-                                                    }`
-                                                },
-                                                    subject.grade >= 8.5 ? 'Giỏi' :
-                                                    subject.grade >= 7.0 ? 'Khá' :
-                                                    subject.grade >= 5.5 ? 'Trung bình' : 'Yếu'
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        )
+        
+        const monthCounts = {};
+        const months = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", 
+                        "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", 
+                        "Tháng 11", "Tháng 12"];
+        
+        months.forEach(month => {
+            monthCounts[month] = 0;
+        });
+        
+        users.forEach(user => {
+            const createdAt = new Date(user.createdAt);
+            const monthIndex = createdAt.getMonth(); 
+            const monthName = months[monthIndex];
+            monthCounts[monthName]++;
+        });
+      
+        return Object.keys(monthCounts)
+            .filter(month => monthCounts[month] > 0)
+            .map(month => ({
+                name: month,
+                value: monthCounts[month]
+            }));
+    }, [users]);
+    
+    return React.createElement('div', {
+        className: "chart-container"
+    },
+        React.createElement('h2', { 
+            className: "chart-title" 
+        }, "Thống kê người dùng mới"),
+        React.createElement('div', { className: "chart-content" },
+            React.createElement('div', { className: "simple-chart" },
+                monthlyUserData.map((item, index) =>
+                    React.createElement('div', {
+                        key: index,
+                        className: "chart-bar",
+                        style: { 
+                            height: `${(item.value / Math.max(...monthlyUserData.map(d => d.value))) * 200}px`,
+                            backgroundColor: COLORS[index % COLORS.length]
+                        }
+                    },
+                        React.createElement('div', { className: "chart-bar-label" }, item.name),
+                        React.createElement('div', { className: "chart-bar-value" }, item.value)
                     )
-                ) : React.createElement('div', { className: 'no-data' },
-                    React.createElement('p', null, 'Không có dữ liệu để hiển thị')
                 )
             )
         )
     );
 }
 
-ReactDOM.render(React.createElement(GradesPage), document.getElementById('root'));
+function MainPage() {
+    const [loading, setLoading] = React.useState(true);
+    const [users, setUsers] = React.useState([]);
 
+    React.useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Sample data
+                setUsers([
+                    { id: 1, createdAt: "2024-01-15" },
+                    { id: 2, createdAt: "2024-02-20" },
+                    { id: 3, createdAt: "2024-03-10" },
+                    { id: 4, createdAt: "2024-03-25" },
+                    { id: 5, createdAt: "2024-04-05" },
+                    { id: 6, createdAt: "2024-04-15" },
+                    { id: 7, createdAt: "2024-05-01" },
+                    { id: 8, createdAt: "2024-05-20" },
+                    { id: 9, createdAt: "2024-06-10" },
+                    { id: 10, createdAt: "2024-07-05" }
+                ]);
+            } catch (error) {
+                console.error('Error loading data:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
+        loadData();
+    }, []);
+
+    return React.createElement(Layout, { title: "Tổng quan" },
+        React.createElement('div', { className: 'page-content' },
+            React.createElement('div', { className: 'card' },
+                loading ? React.createElement('div', { className: 'loading' },
+                    React.createElement('div', { className: 'spinner' }),
+                    React.createElement('span', { className: 'loading-text' }, 'Đang tải dữ liệu...')
+                ) : React.createElement('div', { className: 'dashboard-content' },
+                    React.createElement(ColUserNewStatistic, { users: users })
+                )
+            )
+        )
+    );
+}
+
+ReactDOM.render(React.createElement(MainPage), document.getElementById('root'));
