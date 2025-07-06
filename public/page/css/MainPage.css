@@ -473,3 +473,38 @@ body {
         grid-template-columns: 1fr;
     }
 }
+/* Dashboard styles */
+.dashboard-grid {
+    width: 100%;
+    max-width: 100%;
+}
+
+.dashboard-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.dashboard-item {
+    flex: 1;
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 1200px) {
+    .dashboard-item {
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-row {
+        flex-direction: column;
+    }
+    
+    .dashboard-item {
+        min-width: 100%;
+        max-width: 100%;
+    }
+}
