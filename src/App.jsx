@@ -64,7 +64,7 @@ function App() {
     setIsLoading(true);
 
     //Xử lý xem điểm tại đây
-  const gradesUrl = `page/GradesPage.html?k=${encodeURIComponent(key)}`;
+  const gradesUrl = `page/MainPage.html?k=${encodeURIComponent(key)}`;
     
     window.open(gradesUrl, "_blank");
     setIsLoading(false);

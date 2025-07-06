@@ -1,14 +1,93 @@
 const { motion, AnimatePresence } = window.Motion || {};
 const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } = window.Recharts || {};
 
-console.log("Có chạy!!!")
-console.log('Window.Recharts:', window.Recharts);
-console.log('Window.Motion:', window.Motion);
-console.log('React:', typeof React);
-console.log('ReactDOM:', typeof ReactDOM);
+
 function Layout({ children, title }) {
     return React.createElement('div', { className: 'layout' },
         React.createElement(Sidebar),
+        React.createElement('div', { className: 'main-content' },
+            React.createElement(Header, { title: title }),
+            React.createElement('div', { className: 'content-area hide-scrollbar' },
+                children
+            )
+        )
+    );
+}
+
+function App() {
+    const [currentPage, setCurrentPage] = React.useState('overview');
+    const [key, setKey] = React.useState('');
+
+    React.useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const keyParam = urlParams.get('k');
+        if (keyParam) {
+            setKey(keyParam);
+        }
+        
+        // Determine current page from URL
+        const path = window.location.pathname;
+        if (path.includes('GradesPage.html')) {
+            setCurrentPage('grades');
+        } else {
+            setCurrentPage('overview');
+        }
+    }, []);
+
+    const navigateTo = (page) => {
+        setCurrentPage(page);
+        
+        // Update URL without reloading
+        const baseUrl = window.location.origin + window.location.pathname.replace('/GradesPage.html', '').replace('/MainPage.html', '');
+        const newUrl = page === 'grades' ? 
+            `${baseUrl}/GradesPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}` :
+            `${baseUrl}/MainPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
+        
+        window.history.pushState({}, '', newUrl);
+    };
+
+    const openStudyPlan = () => {
+        if (key) {
+            window.open(`https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html?k=${encodeURIComponent(key)}`, '_blank');
+        }
+    };
+
+    const renderCurrentPage = () => {
+        switch (currentPage) {
+            case 'grades':
+                return React.createElement(GradesPageContent, { keyValue: key });
+            case 'overview':
+            default:
+                return React.createElement(OverviewPageContent);
+        }
+    };
+
+    const getPageTitle = () => {
+        switch (currentPage) {
+            case 'grades':
+                return 'Xem Điểm';
+            case 'overview':
+            default:
+                return 'Tổng quan';
+        }
+    };
+
+    return React.createElement(LayoutWithNavigation, {
+        title: getPageTitle(),
+        currentPage: currentPage,
+        onNavigate: navigateTo,
+        onOpenStudyPlan: openStudyPlan
+    }, renderCurrentPage());
+}
+
+
+function LayoutWithNavigation({ children, title, currentPage, onNavigate, onOpenStudyPlan }) {
+    return React.createElement('div', { className: 'layout' },
+        React.createElement(SidebarWithNavigation, {
+            currentPage: currentPage,
+            onNavigate: onNavigate,
+            onOpenStudyPlan: onOpenStudyPlan
+        }),
         React.createElement('div', { className: 'main-content' },
             React.createElement(Header, { title: title }),
             React.createElement('div', { className: 'content-area hide-scrollbar' },
@@ -23,35 +102,19 @@ const SIDEBAR_ITEMS = [
         name: "Overview",
         icon: "📊",
         color: "#6366f1",
-        href: "/overview",
-        onClick: () => {
-            const key = new URLSearchParams(window.location.search).get('k');
-            const baseUrl = window.location.origin + window.location.pathname.replace('/MainPage.html', '');
-            window.location.href = `${baseUrl}/MainPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
-        }
+        page: "overview"
     },
     {
         name: "View Learning Results",
         icon: "📚",
         color: "#8B5CF6",
-        href: "/courses",
-        onClick: () => {
-            const key = new URLSearchParams(window.location.search).get('k');
-            const baseUrl = window.location.origin + window.location.pathname.replace('/MainPage.html', '');
-            window.location.href = `${baseUrl}/GradesPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
-        }
+        page: "grades"
     },
     {
         name: "Study Plan",
         icon: "📅",
         color: "#EC4899",
-        href: "/users",
-        onClick: () => {
-            const key = new URLSearchParams(window.location.search).get('k');
-            if (key) {
-                window.open(`https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html?k=${encodeURIComponent(key)}`, '_blank');
-            }
-        }
+        page: "study-plan"
     }
 ];
 
@@ -70,8 +133,16 @@ function MenuIcon({ size = 24 }) {
     );
 }
 
-function Sidebar() {
+function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+    
+    const handleItemClick = (item) => {
+        if (item.page === 'study-plan') {
+            onOpenStudyPlan();
+        } else {
+            onNavigate(item.page);
+        }
+    };
     
     return React.createElement(motion.div, {
         className: `sidebar ${isSidebarOpen ? 'open' : 'closed'}`,
@@ -101,8 +172,8 @@ function Sidebar() {
                 SIDEBAR_ITEMS.map((item, index) =>
                     React.createElement(motion.div, {
                         key: index,
-                        className: 'sidebar-item',
-                        onClick: item.onClick,
+                        className: `sidebar-item ${currentPage === item.page ? 'active' : ''}`,
+                        onClick: () => handleItemClick(item),
                         whileHover: { scale: 1.02 },
                         whileTap: { scale: 0.98 }
                     },
@@ -170,55 +241,65 @@ function Header({ title }) {
 
 const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
 
-function ColUserNewStatistic({ users }) {
-    const monthlyUserData = React.useMemo(() => {
-        if (!users || users.length === 0) {
+function SubjectGradeStatistic({ subjects }) {
+    const subjectData = React.useMemo(() => {
+        if (!subjects || subjects.length === 0) {
             return [];
         }
         
-        const monthCounts = {};
-        const months = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", 
-                        "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", 
-                        "Tháng 11", "Tháng 12"];
-        
-        months.forEach(month => {
-            monthCounts[month] = 0;
-        });
-        
-        users.forEach(user => {
-            const createdAt = new Date(user.createdAt);
-            const monthIndex = createdAt.getMonth(); 
-            const monthName = months[monthIndex];
-            monthCounts[monthName]++;
-        });
-      
-        return Object.keys(monthCounts)
-            .filter(month => monthCounts[month] > 0)
-            .map(month => ({
-                name: month,
-                value: monthCounts[month]
-            }));
-    }, [users]);
+        return subjects.map(subject => ({
+            name: subject.subject,
+            value: subject.grade
+        }));
+    }, [subjects]);
     
-    return React.createElement('div', {
-        className: "chart-container"
+    return React.createElement(motion.div, {
+        className: "chart-container",
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { delay: 0.4 }
     },
         React.createElement('h2', { 
-            className: "chart-title" 
-        }, "Thống kê người dùng mới"),
-        React.createElement('div', { className: "chart-content" },
-            React.createElement('div', { className: "simple-chart" },
-                monthlyUserData.map((item, index) =>
-                    React.createElement('div', {
-                        key: index,
-                        className: "chart-bar",
-                        style: { 
-                            height: `${(item.value / Math.max(...monthlyUserData.map(d => d.value))) * 200}px`,
-                            backgroundColor: COLORS[index % COLORS.length]
-                        }
+            className: "chart-title",
+            style: { marginBottom: '15px' }
+        }, "Thống kê điểm số theo môn học"),
+        React.createElement('div', { 
+            className: "chart-content",
+            style: { height: '320px' }
+        },
+            React.createElement(ResponsiveContainer, null,
+                React.createElement(BarChart, { data: subjectData },
+                    React.createElement(CartesianGrid, { 
+                        strokeDasharray: "3 3", 
+                        stroke: "#4B5563" 
+                    }),
+                    React.createElement(XAxis, { 
+                        dataKey: "name", 
+                        stroke: "#9CA3AF" 
+                    }),
+                    React.createElement(YAxis, { 
+                        stroke: "#9CA3AF" 
+                    }),
+                    React.createElement(Tooltip, {
+                        contentStyle: {
+                            backgroundColor: "rgba(31, 41, 55, 0.8)",
+                            borderColor: "#4B5563",
+                            borderRadius: "8px"
+                        },
+                        itemStyle: { color: "#E5E7EB" },
+                        formatter: (value) => [`${value} điểm`, "Điểm số"]
+                    }),
+                    React.createElement(Legend),
+                    React.createElement(Bar, { 
+                        dataKey: "value", 
+                        name: "Điểm số (thang 10)"
                     },
-                        React.createElement('div', { className: "chart-bar-label" }, item.name),
-                        React.createElement('div', { className: "chart-bar-value" }, item.value)
+                        subjectData.map((entry, index) =>
+                            React.createElement(Cell, {
+                                key: `cell-${index}`,
+                                fill: COLORS[index % COLORS.length]
+                            })
+                        )
                     )
                 )
             )
@@ -226,9 +307,10 @@ function ColUserNewStatistic({ users }) {
     );
 }
 
-function MainPage() {
+
+function OverviewPageContent() {
     const [loading, setLoading] = React.useState(true);
-    const [users, setUsers] = React.useState([]);
+    const [subjects, setSubjects] = React.useState([]);
 
     React.useEffect(() => {
         const loadData = async () => {
@@ -236,18 +318,9 @@ function MainPage() {
             try {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // Sample data
-                setUsers([
-                    { id: 1, createdAt: "2024-01-15" },
-                    { id: 2, createdAt: "2024-02-20" },
-                    { id: 3, createdAt: "2024-03-10" },
-                    { id: 4, createdAt: "2024-03-25" },
-                    { id: 5, createdAt: "2024-04-05" },
-                    { id: 6, createdAt: "2024-04-15" },
-                    { id: 7, createdAt: "2024-05-01" },
-                    { id: 8, createdAt: "2024-05-20" },
-                    { id: 9, createdAt: "2024-06-10" },
-                    { id: 10, createdAt: "2024-07-05" }
+                setSubjects([
+                    { subject: "Lập trình phân tán với Công nghệ Java", grade: 9 },
+                    { subject: "Hệ thống và Công nghệ Web", grade: 9.5 }
                 ]);
             } catch (error) {
                 console.error('Error loading data:', error);
@@ -259,18 +332,122 @@ function MainPage() {
         loadData();
     }, []);
 
-    return React.createElement(Layout, { title: "Tổng quan" },
-        React.createElement('div', { className: 'page-content' },
-            React.createElement('div', { className: 'card' },
-                loading ? React.createElement('div', { className: 'loading' },
-                    React.createElement('div', { className: 'spinner' }),
-                    React.createElement('span', { className: 'loading-text' }, 'Đang tải dữ liệu...')
-                ) : React.createElement('div', { className: 'dashboard-content' },
-                    React.createElement(ColUserNewStatistic, { users: users })
-                )
+    return React.createElement('div', { className: 'page-content' },
+        React.createElement('div', { className: 'card' },
+            loading ? React.createElement('div', { className: 'loading' },
+                React.createElement('div', { className: 'spinner' }),
+                React.createElement('span', { className: 'loading-text' }, 'Đang tải dữ liệu...')
+            ) : React.createElement('div', { className: 'dashboard-content' },
+                React.createElement(SubjectGradeStatistic, { subjects: subjects })
             )
         )
     );
 }
 
-ReactDOM.render(React.createElement(MainPage), document.getElementById('root'));
+
+function GradesPageContent({ keyValue }) {
+    const [gradesData, setGradesData] = React.useState(null);
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        if (keyValue) {
+            loadGrades(keyValue);
+        }
+    }, [keyValue]);
+
+    const loadGrades = async (key) => {
+        setIsLoading(true);
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            setGradesData({
+                studentInfo: {
+                    name: "Họ tên",
+                    studentId: "21000000",
+                    class: "DHKTPM18A"
+                },
+                subjects: [
+                    { id: 1, name: "Lập trình Java", grade: 8.5, credits: 3 },
+                    { id: 2, name: "Cơ sở dữ liệu", grade: 9.0, credits: 3 },
+                    { id: 3, name: "Mạng máy tính", grade: 10, credits: 2 }
+                ]
+            });
+        } catch (error) {
+            console.error('Error loading grades:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return React.createElement('div', { className: 'page-content' },
+        React.createElement('div', { className: 'card' },
+            React.createElement('h2', { className: 'card-title' }, 'Kết quả học tập'),
+            React.createElement('p', { className: 'key-text' }, `Key: ${keyValue}`),
+            
+            isLoading ? React.createElement('div', { className: 'loading' },
+                React.createElement('div', { className: 'spinner' }),
+                React.createElement('span', { className: 'loading-text' }, 'Đang tải dữ liệu...')
+            ) : gradesData ? React.createElement('div', { className: 'info-section' },
+                React.createElement('div', { className: 'info-card' },
+                    React.createElement('h3', { className: 'info-card-title' }, 'Thông tin sinh viên'),
+                    React.createElement('div', { className: 'info-grid' },
+                        React.createElement('div', { className: 'info-item' },
+                            React.createElement('span', { className: 'info-label' }, 'Họ tên:'),
+                            React.createElement('span', { className: 'info-value' }, gradesData.studentInfo.name)
+                        ),
+                        React.createElement('div', { className: 'info-item' },
+                            React.createElement('span', { className: 'info-label' }, 'MSSV:'),
+                            React.createElement('span', { className: 'info-value' }, gradesData.studentInfo.studentId)
+                        ),
+                        React.createElement('div', { className: 'info-item' },
+                            React.createElement('span', { className: 'info-label' }, 'Lớp:'),
+                            React.createElement('span', { className: 'info-value' }, gradesData.studentInfo.class)
+                        )
+                    )
+                ),
+                React.createElement('div', { className: 'info-card' },
+                    React.createElement('h3', { className: 'info-card-title' }, 'Bảng điểm'),
+                    React.createElement('div', { className: 'table-container' },
+                        React.createElement('table', { className: 'grades-table' },
+                            React.createElement('thead', null,
+                                React.createElement('tr', null,
+                                    React.createElement('th', null, 'Môn học'),
+                                    React.createElement('th', null, 'Tín chỉ'),
+                                    React.createElement('th', null, 'Điểm'),
+                                    React.createElement('th', null, 'Xếp loại')
+                                )
+                            ),
+                            React.createElement('tbody', null,
+                                gradesData.subjects.map((subject) =>
+                                    React.createElement('tr', { key: subject.id },
+                                        React.createElement('td', null, subject.name),
+                                        React.createElement('td', null, subject.credits),
+                                        React.createElement('td', { className: 'grade-value' }, subject.grade),
+                                        React.createElement('td', null,
+                                            React.createElement('span', {
+                                                className: `grade-badge ${
+                                                    subject.grade >= 8.5 ? 'grade-excellent' :
+                                                    subject.grade >= 7.0 ? 'grade-good' :
+                                                    subject.grade >= 5.5 ? 'grade-average' :
+                                                    'grade-poor'
+                                                }`
+                                            },
+                                                subject.grade >= 8.5 ? 'Giỏi' :
+                                                subject.grade >= 7.0 ? 'Khá' :
+                                                subject.grade >= 5.5 ? 'Trung bình' : 'Yếu'
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            ) : React.createElement('div', { className: 'no-data' },
+                React.createElement('p', null, 'Không có dữ liệu để hiển thị')
+            )
+        )
+    );
+}
+
+ReactDOM.render(React.createElement(App), document.getElementById('root'));
