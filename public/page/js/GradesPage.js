@@ -198,7 +198,7 @@ function GradesPage() {
         React.createElement('div', { className: 'page-content' },
             React.createElement('div', { className: 'card' },
                 React.createElement('h2', { className: 'card-title' }, 'Kết quả học tập'),
-                React.createElement('p', { className: 'key-text' }, `Key: ${key}`),
+                // React.createElement('p', { className: 'key-text' }, `Key: ${key}`),
                 
                 isLoading ? React.createElement('div', { className: 'loading' },
                     React.createElement('div', { className: 'spinner' }),
