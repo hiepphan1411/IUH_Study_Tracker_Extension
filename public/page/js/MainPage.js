@@ -252,7 +252,7 @@ function Header({ title }) {
 
 //OverviewContent Logic (GUI)
 //=============================================================================================================
-const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#10B981", "#F59E0B"];
+const COLORS = ["#6366F1", "#6366F1", "#6366F1", "#6366F1", "#6366F1"];
 
 function SubjectGradeStatistic({ subjects }) {
     const [selectedSemester, setSelectedSemester] = React.useState('all');
@@ -525,6 +525,8 @@ function OverviewPageContent() {
                 React.createElement('div', { className: 'spinner' }),
                 React.createElement('span', { className: 'loading-text' }, 'Đang tải dữ liệu...')
             ) : React.createElement('div', { className: 'dashboard-content' },
+                // React.createElement(StatisticsResultsBySemester, {results: results}),
+
                 React.createElement(SubjectGradeStatistic, { subjects: subjects })
             )
         )
