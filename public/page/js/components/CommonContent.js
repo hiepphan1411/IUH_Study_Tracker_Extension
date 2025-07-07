@@ -1,6 +1,5 @@
 const { motion, AnimatePresence } = window.Motion || {};
 
-// Common Layout Component
 function Layout({ children, title }) {
     return React.createElement('div', { className: 'layout' },
         React.createElement(Sidebar),
@@ -13,7 +12,7 @@ function Layout({ children, title }) {
     );
 }
 
-// Common Layout with Navigation
+// Navigation
 function LayoutWithNavigation({ children, title, currentPage, onNavigate, onOpenStudyPlan }) {
     return React.createElement('div', { className: 'layout' },
         React.createElement(SidebarWithNavigation, {
@@ -30,7 +29,6 @@ function LayoutWithNavigation({ children, title, currentPage, onNavigate, onOpen
     );
 }
 
-// Sidebar Items Configuration
 const SIDEBAR_ITEMS = [
     {
         name: "Overview",
@@ -52,7 +50,6 @@ const SIDEBAR_ITEMS = [
     }
 ];
 
-// Menu Icon Component
 function MenuIcon({ size = 24 }) {
     return React.createElement('svg', {
         width: size,
@@ -68,7 +65,7 @@ function MenuIcon({ size = 24 }) {
     );
 }
 
-// Sidebar with Navigation
+// Sidebar
 function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
     
@@ -78,11 +75,12 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
         } else {
             onNavigate(item.page);
         }
+        setIsSidebarOpen(false);
     };
     
     return React.createElement(motion.div, {
         className: `sidebar ${isSidebarOpen ? 'open' : 'closed'}`,
-        animate: { width: isSidebarOpen ? 250 : 80 },
+        animate: { width: isSidebarOpen ? 225 : 80 },
         transition: { duration: 0.3, ease: "easeInOut" }
     },
         React.createElement('div', { className: 'sidebar-content' },
@@ -207,7 +205,6 @@ function Header({ title }) {
     );
 }
 
-// Export components to global scope
 window.LayoutWithNavigation = LayoutWithNavigation;
 window.Layout = Layout;
 window.Header = Header;

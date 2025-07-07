@@ -17,19 +17,23 @@ const {
 const COLORS = ["#059669", "#8B5CF6", "#059669", "#8B5CF6", "#059669"];
 const PIE_COLORS = ["#6366F1", "#8B5CF6", "#EC4899"];
 
+//Thống kê điểm số theo môn học
 function SubjectGradeStatistic({ subjects }) {
   const [selectedSemester, setSelectedSemester] = React.useState("all");
   const [selectedScale, setSelectedScale] = React.useState("10");
 
   const semesters = React.useMemo(() => {
-    const availableSemesters = [
-      ...new Set(subjects.map((subject) => subject.semester)),
-    ];
+    if (!subjects || subjects.length === 0)
+      return [{ value: "all", label: "Tất cả học kỳ" }];
+
+    const availableSemesters = subjects.map((hocKy) => hocKy.hocKy);
     const semesterOptions = [
       { value: "all", label: "Tất cả học kỳ" },
       ...availableSemesters.map((semester) => ({
         value: semester,
-        label: semester.replace("_", " ").replace("-", "-"),
+        label: semester
+          .replace(/HK(\d+) \((\d{4}) - (\d{4})\)/, "HK$1($2-$3)")
+          .replace(/(\d{4})/g, (match) => match.slice(-2)),
       })),
     ];
     return semesterOptions;
@@ -54,14 +58,41 @@ function SubjectGradeStatistic({ subjects }) {
     let filteredSubjects = subjects;
     if (selectedSemester !== "all") {
       filteredSubjects = subjects.filter(
-        (subject) => subject.semester === selectedSemester
+        (hocKy) => hocKy.hocKy === selectedSemester
       );
     }
 
-    return filteredSubjects.map((subject) => ({
-      name: subject.subject,
-      value: convertGrade(subject.grade, selectedScale),
-    }));
+    const subjectList = [];
+    filteredSubjects.forEach((hocKy) => {
+      hocKy.monHoc.forEach((monHoc) => {
+        const tenMonHoc = monHoc["Tên môn học"];
+        const diemTongKet = monHoc["Điểm tổng kết"];
+        const thangDiem4 = monHoc["Thang điểm 4"];
+
+        if (
+          tenMonHoc &&
+          tenMonHoc.trim() !== "" &&
+          diemTongKet &&
+          diemTongKet.trim() !== ""
+        ) {
+          let grade = 0;
+          if (selectedScale === "10") {
+            grade = parseFloat(diemTongKet.replace(",", "."));
+          } else {
+            grade = thangDiem4
+              ? parseFloat(thangDiem4.replace(",", "."))
+              : convertGrade(parseFloat(diemTongKet.replace(",", ".")), "4");
+          }
+
+          subjectList.push({
+            name: tenMonHoc,
+            value: grade || 0,
+          });
+        }
+      });
+    });
+
+    return subjectList.filter((item) => item.value > 0);
   }, [subjects, selectedSemester, selectedScale]);
 
   const hasData = subjectData.length > 0;
@@ -150,11 +181,11 @@ function SubjectGradeStatistic({ subjects }) {
                 transition: "all 0.3s ease",
               },
             },
-            semesters.map((semester) =>
+            semesters.map((semester, index) =>
               React.createElement(
                 "option",
                 {
-                  key: semester.value,
+                  key: semester.value || `semester-${index}`,
                   value: semester.value,
                 },
                 semester.label
@@ -331,61 +362,78 @@ function SubjectGradeStatistic({ subjects }) {
     )
   );
 }
-
+//Thống kê kết quả theo học kỳ
 function StatisticsResultsBySemester({ results }) {
   const [semesterData, setSemesterData] = React.useState([]);
   const [selectedScale, setSelectedScale] = React.useState("10");
 
-  const convertGrade = (grade, targetScale) => {
-    if (targetScale === "4") {
-      if (grade >= 9) return 4.0;
-      if (grade >= 8.5) return 3.8;
-      if (grade >= 8) return 3.5;
-      if (grade >= 7) return 3;
-      return 0.0;
-    }
-    return grade;
-  };
+  // const convertGrade = (grade, targetScale) => {
+  //   if (targetScale === "4") {
+  //     if (grade >= 9) return 4.0;
+  //     if (grade >= 8.5) return 3.8;
+  //     if (grade >= 8) return 3.5;
+  //     if (grade >= 7) return 3;
+  //     return 0.0;
+  //   }
+  //   return grade;
+  // };
 
   React.useEffect(() => {
     if (!results || !results.length) return;
 
-    const semesterAverages = {};
+    const formattedData = results.map((hocKy) => {
+      const semester = hocKy.hocKy;
 
-    results.forEach((result) => {
-      const semester = result.semester;
-      if (!semesterAverages[semester]) {
-        semesterAverages[semester] = {
-          total: 0,
-          count: 0,
-          name: semester,
-        };
+      const avgRow = hocKy.monHoc.find((mon) =>
+        mon.STT && mon.STT.includes("Điểm trung bình học kỳ hệ")
+      );
+
+      let average = 0;
+
+      if (avgRow) {
+        if (selectedScale === "10") {
+          const match = avgRow.STT.match(/Điểm trung bình học kỳ hệ 10: ([\d,]+)/);
+          if (match) {
+            average = parseFloat(match[1].replace(",", "."));
+          }
+        } else {
+          const match = avgRow["Mã lớp học phần"].match(
+            /Điểm trung bình học kỳ hệ 4: ([\d,]+)/
+          );
+          if (match) {
+            average = parseFloat(match[1].replace(",", "."));
+          }
+        }
       }
 
-      semesterAverages[semester].total += convertGrade(
-        result.grade,
-        selectedScale
-      );
-      semesterAverages[semester].count++;
-    });
+      const shortenedName = semester
+        .replace(/HK(\d+) \((\d{4}) - (\d{4})\)/, "HK$1($2-$3)")
+        .replace(/(\d{4})/g, (match) => match.slice(-2));
 
-    const formattedData = Object.values(semesterAverages).map((semester) => ({
-      name: semester.name
-        .replace("HK1_2022-2023", "HK1(22-23)")
-        .replace("HK2_2022-2023", "HK2(22-23)")
-        .replace("HK1_2023-2024", "HK1(23-24)")
-        .replace("HK2_2023-2024", "HK2(23-24)"),
-      average: parseFloat((semester.total / semester.count).toFixed(2)),
-    }));
+      return {
+        name: shortenedName,
+        fullName: semester,
+        average: average || 0,
+      };
+    }).filter((item) => item.average > 0);
 
     formattedData.sort((a, b) => {
-      const yearA = a.name.includes("22") ? 2022 : 2023;
-      const yearB = b.name.includes("22") ? 2022 : 2023;
-      const semA = a.name.includes("HK1") ? 1 : 2;
-      const semB = b.name.includes("HK1") ? 1 : 2;
+      const extractSemesterInfo = (name) => {
+        const match = name.match(/HK(\d+) \((\d{4}) - (\d{4})\)/);
+        if (match) {
+          return {
+            semester: parseInt(match[1]),
+            year: parseInt(match[2]),
+          };
+        }
+        return { semester: 0, year: 0 };
+      };
 
-      if (yearA !== yearB) return yearA - yearB;
-      return semA - semB;
+      const aInfo = extractSemesterInfo(a.fullName);
+      const bInfo = extractSemesterInfo(b.fullName);
+
+      if (aInfo.year !== bInfo.year) return aInfo.year - bInfo.year;
+      return aInfo.semester - bInfo.semester;
     });
 
     setSemesterData(formattedData);
@@ -527,34 +575,42 @@ function StatisticsResultsBySemester({ results }) {
   );
 }
 
+//Thống kê tổng quan kết quả môn học
 function SubjectResultStatistics({ subjects }) {
   const countSubjectsByGrade = () => {
     if (!subjects || subjects.length === 0) {
       return [];
     }
 
-    const counts = {
-      A: 0,
-      B: 0,
-      C: 0,
-    };
+    const counts = countGradesByLetter(subjects);
 
-    subjects.forEach((subject) => {
-      if (subject.grade >= 8.5) counts.A++;
-      else if (subject.grade >= 7.0) counts.B++;
-      else counts.C++;
-    });
-
-    const data = [
-      { name: "Giỏi (A)", value: counts.A },
-      { name: "Khá (B)", value: counts.B },
-      { name: "Trung bình (C)", value: counts.C },
+    const gradeMapping = [
+      { key: "A+", name: "Xuất sắc (A+)", color: "#059669" },
+      { key: "A", name: "Giỏi (A)", color: "#10b981" },
+      { key: "B+", name: "Khá giỏi (B+)", color: "#34d399" },
+      { key: "B", name: "Khá (B)", color: "#60a5fa" },
+      { key: "C+", name: "Trung bình khá (C+)", color: "#fbbf24" },
+      { key: "C", name: "Trung bình (C)", color: "#f59e0b" },
+      { key: "D+", name: "Trung bình yếu (D+)", color: "#f97316" },
+      { key: "D", name: "Yếu (D)", color: "#ef4444" },
+      { key: "F", name: "Kém (F)", color: "#dc2626" },
     ];
 
-    return data.filter((item) => item.value > 0);
+    const data = gradeMapping
+      .map((grade) => ({
+        name: grade.name,
+        value: counts[grade.key] || 0,
+        color: grade.color,
+        grade: grade.key,
+      }))
+      .filter((item) => item.value > 0);
+
+    return data;
   };
 
   const subjectData = countSubjectsByGrade();
+
+  const totalSubjects = subjectData.reduce((sum, item) => sum + item.value, 0);
 
   return React.createElement(
     motion.div,
@@ -565,9 +621,37 @@ function SubjectResultStatistics({ subjects }) {
       transition: { delay: 0.3 },
     },
     React.createElement(
-      "h2",
-      { className: "card-title" },
-      "Thống kê tổng quan kết quả môn học"
+      "div",
+      {
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+          flexWrap: "wrap",
+          gap: "10px",
+        },
+      },
+      React.createElement(
+        "h2",
+        { className: "card-title", style: { margin: 0 } },
+        "Thống kê tổng quan kết quả môn học"
+      ),
+      totalSubjects > 0 &&
+        React.createElement(
+          "div",
+          {
+            style: {
+              fontSize: "14px",
+              color: "#6b7280",
+              fontWeight: "500",
+              backgroundColor: "#f3f4f6",
+              padding: "8px 12px",
+              borderRadius: "6px",
+            },
+          },
+          `Tổng: ${totalSubjects} môn học`
+        )
     ),
     React.createElement(
       "div",
@@ -592,13 +676,13 @@ function SubjectResultStatistics({ subjects }) {
                   outerRadius: 80,
                   fill: "#8884d8",
                   dataKey: "value",
-                  label: ({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`,
+                  label: ({ name, percent, value }) =>
+                    `${name}: ${value} (${(percent * 100).toFixed(0)}%)`,
                 },
                 subjectData.map((entry, index) =>
                   React.createElement(Cell, {
-                    key: `cell-${index}`,
-                    fill: ["#059669", "#10b981", "#34d399"][index % 3],
+                    key: `cell-${entry.grade}-${index}`,
+                    fill: entry.color,
                   })
                 )
               ),
@@ -610,21 +694,98 @@ function SubjectResultStatistics({ subjects }) {
                   boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
                 },
                 itemStyle: { color: "#374151" },
-                formatter: (value) => [`${value} môn học`, null],
+                formatter: (value, name, props) => [
+                  `${value} môn học (${((value / totalSubjects) * 100).toFixed(
+                    1
+                  )}%)`,
+                  name,
+                ],
               }),
-              React.createElement(Legend)
+              React.createElement(Legend, {
+                verticalAlign: "bottom",
+                height: 36,
+                iconType: "circle",
+                wrapperStyle: {
+                  fontSize: "12px",
+                  color: "#6b7280",
+                },
+              })
             )
           )
         : React.createElement(
             "div",
             {
               className: "no-data-container",
-              style: { height: "100%" },
+              style: {
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#9ca3af",
+                textAlign: "center",
+              },
             },
-            React.createElement("p", null, "Không có dữ liệu để hiển thị")
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontSize: "48px",
+                  marginBottom: "16px",
+                  opacity: 0.5,
+                },
+              },
+              "📊"
+            ),
+            React.createElement(
+              "h3",
+              {
+                style: {
+                  fontSize: "18px",
+                  marginBottom: "8px",
+                  color: "#d1d5db",
+                },
+              },
+              "Không có dữ liệu"
+            ),
+            React.createElement(
+              "p",
+              {
+                style: {
+                  fontSize: "14px",
+                  opacity: 0.8,
+                },
+              },
+              "Chưa có dữ liệu điểm chữ để hiển thị thống kê."
+            )
           )
     )
   );
+}
+function countGradesByLetter(data) {
+  const counts = {};
+
+  data.forEach((hocKy) => {
+    hocKy.monHoc.forEach((monHoc) => {
+      const tenMonHoc = monHoc["Tên môn học"];
+      const diemChu = monHoc["Điểm chữ"];
+
+      if (
+        tenMonHoc &&
+        tenMonHoc.trim() !== "" &&
+        diemChu &&
+        diemChu.trim() !== ""
+      ) {
+        // Tự động tạo key nếu chưa tồn tại
+        if (!counts[diemChu]) {
+          counts[diemChu] = 0;
+        }
+        counts[diemChu]++;
+      }
+    });
+  });
+
+  return counts;
 }
 
 function OverviewPageContent() {
@@ -636,37 +797,41 @@ function OverviewPageContent() {
     const loadData = async () => {
       setLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const result = await new Promise((resolve) => {
+          chrome.storage.local.get(
+            ["diem_json", "diem_timestamp"],
+            function (res) {
+              if (chrome.runtime.lastError) {
+                console.error("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
+                resolve({ diem_json: null });
+                return;
+              }
+              resolve(res);
+            }
+          );
+        });
 
-        const subjectsData = [
-          {
-            subject: "Lập trình phân tán với Công nghệ Java",
-            grade: 9,
-            semester: "HK1_2022-2023",
-          },
-          {
-            subject: "Hệ thống và Công nghệ Web",
-            grade: 9.5,
-            semester: "HK1_2022-2023",
-          },
-          { subject: "Cơ sở dữ liệu", grade: 8.5, semester: "HK2_2022-2023" },
-          { subject: "Mạng máy tính", grade: 7.5, semester: "HK2_2022-2023" },
-          {
-            subject: "Phát triển ứng dụng Web",
-            grade: 8.0,
-            semester: "HK1_2023-2024",
-          },
-          {
-            subject: "Trí tuệ nhân tạo",
-            grade: 9.2,
-            semester: "HK1_2023-2024",
-          },
-        ];
+        const diemJson = result.diem_json;
 
-        setSubjects(subjectsData);
-        setResults(subjectsData);
+        if (diemJson) {
+          const parsedData = JSON.parse(diemJson);
+
+          const transformedSubjects = parsedData;
+
+          // console.log("Result: ", transformedSubjects);
+          // console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
+
+          setSubjects(transformedSubjects);
+          setResults(transformedSubjects);
+        } else {
+          console.warn("Không có dữ liệu điểm được lưu.");
+          setSubjects([]);
+          setResults([]);
+        }
       } catch (error) {
         console.error("Error loading data:", error);
+        setSubjects([]);
+        setResults([]);
       } finally {
         setLoading(false);
       }
