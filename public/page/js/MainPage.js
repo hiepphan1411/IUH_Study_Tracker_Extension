@@ -382,30 +382,12 @@ function GradesPageContent({ keyValue }) {
     return React.createElement('div', { className: 'page-content' },
         React.createElement('div', { className: 'card' },
             React.createElement('h2', { className: 'card-title' }, 'Kết quả học tập'),
-            React.createElement('p', { className: 'key-text' }, `Key: ${keyValue}`),
+            // React.createElement('p', { className: 'key-text' }, `Key: ${keyValue}`),
             
             isLoading ? React.createElement('div', { className: 'loading' },
                 React.createElement('div', { className: 'spinner' }),
                 React.createElement('span', { className: 'loading-text' }, 'Đang tải dữ liệu...')
-            ) : gradesData ? React.createElement('div', { className: 'info-section' },
-                React.createElement('div', { className: 'info-card' },
-                    React.createElement('h3', { className: 'info-card-title' }, 'Thông tin sinh viên'),
-                    React.createElement('div', { className: 'info-grid' },
-                        React.createElement('div', { className: 'info-item' },
-                            React.createElement('span', { className: 'info-label' }, 'Họ tên:'),
-                            React.createElement('span', { className: 'info-value' }, gradesData.studentInfo.name)
-                        ),
-                        React.createElement('div', { className: 'info-item' },
-                            React.createElement('span', { className: 'info-label' }, 'MSSV:'),
-                            React.createElement('span', { className: 'info-value' }, gradesData.studentInfo.studentId)
-                        ),
-                        React.createElement('div', { className: 'info-item' },
-                            React.createElement('span', { className: 'info-label' }, 'Lớp:'),
-                            React.createElement('span', { className: 'info-value' }, gradesData.studentInfo.class)
-                        )
-                    )
-                ),
-                React.createElement('div', { className: 'info-card' },
+            ) : gradesData ? React.createElement('div', { className: 'info-card' },
                     React.createElement('h3', { className: 'info-card-title' }, 'Bảng điểm'),
                     React.createElement('div', { className: 'table-container' },
                         React.createElement('table', { className: 'grades-table' },
@@ -425,16 +407,15 @@ function GradesPageContent({ keyValue }) {
                                         React.createElement('td', { className: 'grade-value' }, subject.grade),
                                         React.createElement('td', null,
                                             React.createElement('span', {
-                                                className: `grade-badge ${
-                                                    subject.grade >= 8.5 ? 'grade-excellent' :
+                                                className: `grade-badge ${subject.grade >= 8.5 ? 'grade-excellent' :
                                                     subject.grade >= 7.0 ? 'grade-good' :
-                                                    subject.grade >= 5.5 ? 'grade-average' :
-                                                    'grade-poor'
-                                                }`
+                                                        subject.grade >= 5.5 ? 'grade-average' :
+                                                            'grade-poor'
+                                                    }`
                                             },
                                                 subject.grade >= 8.5 ? 'Giỏi' :
-                                                subject.grade >= 7.0 ? 'Khá' :
-                                                subject.grade >= 5.5 ? 'Trung bình' : 'Yếu'
+                                                    subject.grade >= 7.0 ? 'Khá' :
+                                                        subject.grade >= 5.5 ? 'Trung bình' : 'Yếu'
                                             )
                                         )
                                     )
@@ -442,10 +423,9 @@ function GradesPageContent({ keyValue }) {
                             )
                         )
                     )
+                ) : React.createElement('div', { className: 'no-data' },
+                    React.createElement('p', null, 'Không có dữ liệu để hiển thị')
                 )
-            ) : React.createElement('div', { className: 'no-data' },
-                React.createElement('p', null, 'Không có dữ liệu để hiển thị')
-            )
         )
     );
 }
