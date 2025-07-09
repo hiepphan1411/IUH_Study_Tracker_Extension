@@ -45,13 +45,12 @@ const SIDEBAR_ITEMS = [
         color: "#EC4899",
         href: "/users",
         onClick: () => {
-            const key = new URLSearchParams(window.location.search).get("k")
-            if (key) {
-                window.open(`https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html?k=${encodeURIComponent(key)}`, "_blank")
-            }
-        },
-    },
-]
+            const key = new URLSearchParams(window.location.search).get('k');
+            const baseUrl = window.location.origin + window.location.pathname.replace('/GradesPage.html', '');
+            window.location.href = `${baseUrl}/StudyPlanPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
+        }
+    }
+];
 
 function MenuIcon({ size = 24 }) {
     return React.createElement(
