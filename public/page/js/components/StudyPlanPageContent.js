@@ -1,6 +1,6 @@
-function StudyPlanPageContent({ keyValue }) {
+function StudyPlanPageContent() {
   const [subjects, setSubjects] = React.useState([]);
-  const [results, setResults] = React.useState([]);
+  const [currentSubj, setCurrentSubj] = React.useState([]);
   const [isLoading, setLoading] = React.useState(false);
   const [summary, setSummnary] = React.useState({
     totalCredits: 0,
@@ -100,10 +100,12 @@ function StudyPlanPageContent({ keyValue }) {
             else ranking = "Yếu";
           }
 
-          const transformedSubjects = parsedData;
+          const currentSubjects = allSubjects.filter(
+            (item) => item["Xếp loại"] === ""
+          );
 
-          setSubjects(transformedSubjects);
-          setResults(transformedSubjects);
+          setCurrentSubj(currentSubjects);
+          setSubjects(allSubjects);
           setSummnary({
             totalCredits: `${totalCredits}/${totalCreditsRequired}`,
             cumulativeGPA: cumulativeGPA,
@@ -115,12 +117,10 @@ function StudyPlanPageContent({ keyValue }) {
         } else {
           console.warn("Không có dữ liệu điểm được lưu.");
           setSubjects([]);
-          setResults([]);
         }
       } catch (error) {
         console.error("Error loading data:", error);
         setSubjects([]);
-        setResults([]);
       } finally {
         setLoading(false);
       }
@@ -135,7 +135,6 @@ function StudyPlanPageContent({ keyValue }) {
       className: "page-content",
       style: {
         color: "#fff",
-        background: "#181f2a",
         minHeight: "100vh",
         padding: 24,
       },
@@ -145,34 +144,31 @@ function StudyPlanPageContent({ keyValue }) {
       {
         className: "card",
         style: {
-          background: "#20293a",
           borderRadius: 10,
           padding: 24,
           marginBottom: 24,
-          border: "1px solid #22304a",
         },
       },
       React.createElement(
         "h2",
         {
+          className: "card-title",
           style: {
-            color: "#60a5fa",
             fontSize: 22,
             fontWeight: 700,
             marginBottom: 16,
-            borderBottom: "2px solid #2563eb",
             paddingBottom: 4,
             display: "inline-block",
           },
         },
-        "Learning progress"
+        "Quá trình học tập"
       ),
       React.createElement(
         "div",
         {
           style: {
-            background: "#181f2a",
             borderRadius: 10,
+            color: "#000000",
             padding: 20,
             border: "1px solid #22304a",
             marginBottom: 24,
@@ -230,23 +226,21 @@ function StudyPlanPageContent({ keyValue }) {
       React.createElement(
         "h2",
         {
+          className: "card-title",
           style: {
-            color: "#60a5fa",
-            fontSize: 20,
+            fontSize: 22,
             fontWeight: 700,
             marginBottom: 12,
-            borderBottom: "2px solid #2563eb",
             paddingBottom: 4,
             display: "inline-block",
           },
         },
-        "List of subjects currently studied"
+        "Danh sách các môn đang học"
       ),
       React.createElement(
         "div",
         {
           style: {
-            background: "#181f2a",
             borderRadius: 10,
             border: "1px solid #22304a",
             overflow: "hidden",
@@ -299,11 +293,11 @@ function StudyPlanPageContent({ keyValue }) {
           React.createElement(
             "tbody",
             null,
-            subjects.map((subj, idx) =>
+            currentSubj.map((subj, idx) =>
               React.createElement(
                 "tr",
                 {
-                  key: subj.id,
+                  key: idx,
                   style: {
                     borderBottom: "1px solid #22304a",
                     background: idx % 2 === 0 ? "#20293a" : "#181f2a",
@@ -319,7 +313,7 @@ function StudyPlanPageContent({ keyValue }) {
                       color: "#60a5fa",
                     },
                   },
-                  idx + 1
+                  subj["STT"]
                 ),
                 React.createElement(
                   "td",
@@ -331,32 +325,26 @@ function StudyPlanPageContent({ keyValue }) {
                       gap: 8,
                     },
                   },
-                  React.createElement("img", {
-                    src: subj.avatar,
-                    alt: subj.author,
-                    style: {
-                      width: 32,
-                      height: 32,
-                      borderRadius: "50%",
-                      marginRight: 8,
-                      border: "2px solid #334155",
-                    },
-                  }),
                   React.createElement(
                     "span",
                     { style: { fontWeight: 600 } },
-                    subj.author
+                    subj["Mã lớp học phần"]
                   )
                 ),
                 React.createElement(
                   "td",
                   { style: { padding: "10px 8px", fontWeight: 500 } },
-                  subj.course
+                  subj["Tên môn học"]
+                ),
+                React.createElement(
+                  "td",
+                  { style: { padding: "10px 8px", fontWeight: 500 } },
+                  subj["Tín chỉ"]
                 ),
                 React.createElement(
                   "td",
                   { style: { padding: "10px 8px", color: "#a5b4fc" } },
-                  subj.type
+                  subj["Điểm tổng kết"]
                 ),
                 React.createElement(
                   "td",
@@ -367,62 +355,12 @@ function StudyPlanPageContent({ keyValue }) {
                       fontWeight: 600,
                     },
                   },
-                  subj.price
+                  subj["Thang điểm 4"]
                 ),
                 React.createElement(
                   "td",
                   { style: { padding: "10px 8px", color: "#a5b4fc" } },
-                  subj.date
-                ),
-                React.createElement(
-                  "td",
-                  { style: { padding: "10px 8px", textAlign: "center" } },
-                  React.createElement(
-                    "span",
-                    {
-                      style: {
-                        cursor: "pointer",
-                        marginRight: 8,
-                        color: "#60a5fa",
-                      },
-                      title: "Edit",
-                    },
-                    React.createElement("svg", {
-                      width: 16,
-                      height: 16,
-                      fill: "none",
-                      stroke: "currentColor",
-                      strokeWidth: 2,
-                      strokeLinecap: "round",
-                      strokeLinejoin: "round",
-                      viewBox: "0 0 24 24",
-                      style: { verticalAlign: "middle" },
-                      children: React.createElement("path", {
-                        d: "M15.232 5.232l3.536 3.536M9 11l6 6M3 17v4h4l12-12a2 2 0 0 0-2.828-2.828L3 17z",
-                      }),
-                    })
-                  ),
-                  React.createElement(
-                    "span",
-                    {
-                      style: { cursor: "pointer", color: "#ef4444" },
-                      title: "Delete",
-                    },
-                    React.createElement("svg", {
-                      width: 16,
-                      height: 16,
-                      fill: "none",
-                      stroke: "currentColor",
-                      strokeWidth: 2,
-                      strokeLinecap: "round",
-                      strokeLinejoin: "round",
-                      viewBox: "0 0 24 24",
-                      style: { verticalAlign: "middle" },
-                      children: React.createElement("path", {
-                        d: "M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2",
-                      }),
-                    })
-                  )
+                  subj["Xếp loại"]
                 )
               )
             )
