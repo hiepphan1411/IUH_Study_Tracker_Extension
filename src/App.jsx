@@ -58,46 +58,50 @@ function App() {
     window.open(scheduleUrl, "_blank");
   };
 
-const handleViewGrades = async () => {
-  if (!validateKey(key)) return;
+  const handleViewGrades = async () => {
+    if (!validateKey(key)) return;
 
-  setIsLoading(true);
+    setIsLoading(true);
 
-  try {
+    try {
+      const messageListener = (message, sender, sendResponse) => {
+        if (message.type === "GRADES_SAVED") {
+          console.log("Nhận được dữ liệu điểm:", message.data);
 
-    const messageListener = (message, sender, sendResponse) => {
-      if (message.type === "GRADES_SAVED") {
-        console.log("Nhận được dữ liệu điểm:", message.data);
-        
-        const mainPageUrl = chrome.runtime.getURL(`page/MainPage.html?k=${encodeURIComponent(key)}`);
-        chrome.tabs.create({ url: mainPageUrl });
-        
-        chrome.tabs.remove(sender.tab.id);
-        
+          const mainPageUrl = chrome.runtime.getURL(
+            `page/MainPage.html?k=${encodeURIComponent(key)}`
+          );
+          chrome.tabs.create({ url: mainPageUrl });
+
+          chrome.tabs.remove(sender.tab.id);
+
+          chrome.runtime.onMessage.removeListener(messageListener);
+          setIsLoading(false);
+        }
+      };
+
+      chrome.runtime.onMessage.addListener(messageListener);
+
+      const gradesUrl = `https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html?k=${encodeURIComponent(
+        key
+      )}`;
+      await chrome.tabs.create({ url: gradesUrl, active: false, pinned: true });
+
+      setTimeout(() => {
         chrome.runtime.onMessage.removeListener(messageListener);
+
+        const mainPageUrl = chrome.runtime.getURL(
+          `page/MainPage.html?k=${encodeURIComponent(key)}`
+        );
+        chrome.tabs.create({ url: mainPageUrl });
+
         setIsLoading(false);
-      }
-    };
-    
-    chrome.runtime.onMessage.addListener(messageListener);
-    
-    const gradesUrl = `https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html?k=${encodeURIComponent(key)}`;
-    await chrome.tabs.create({ url: gradesUrl, active: false, pinned: true });
-    
-    setTimeout(() => {
-      chrome.runtime.onMessage.removeListener(messageListener);
-      
-      const mainPageUrl = chrome.runtime.getURL(`page/MainPage.html?k=${encodeURIComponent(key)}`);
-      chrome.tabs.create({ url: mainPageUrl });
-      
+      }, 20000);
+    } catch (error) {
+      console.error("Lỗi khi mở trang:", error);
       setIsLoading(false);
-    }, 20000);
-    
-  } catch (error) {
-    console.error('Lỗi khi mở trang:', error);
-    setIsLoading(false);
-  }
-};
+    }
+  };
 
   const handleTabClick = (tabId) => {
     if (tabId === "guide") {
@@ -395,6 +399,5 @@ const handleViewGrades = async () => {
     </div>
   );
 }
-
 
 export default App;
