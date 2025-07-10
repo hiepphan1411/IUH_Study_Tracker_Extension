@@ -776,7 +776,6 @@ function countGradesByLetter(data) {
         diemChu &&
         diemChu.trim() !== ""
       ) {
-        // Tự động tạo key nếu chưa tồn tại
         if (!counts[diemChu]) {
           counts[diemChu] = 0;
         }
@@ -818,8 +817,8 @@ function OverviewPageContent() {
 
           const transformedSubjects = parsedData;
 
-          // console.log("Result: ", transformedSubjects);
-          // console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
+          console.log("Result: ", transformedSubjects);
+          console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
 
           setSubjects(transformedSubjects);
           setResults(transformedSubjects);
