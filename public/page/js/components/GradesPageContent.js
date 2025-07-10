@@ -1,4 +1,3 @@
-const { motion, AnimatePresence } = window.Motion || {}
 
 function Layout({ children, title, isScrolled }) {
     return React.createElement(
@@ -14,176 +13,176 @@ function Layout({ children, title, isScrolled }) {
     )
 }
 
-const SIDEBAR_ITEMS = [
-    {
-        name: "Overview",
-        icon: "📊",
-        color: "#6366f1",
-        href: "/overview",
-        onClick: () => {
-            const key = new URLSearchParams(window.location.search).get("k")
-            const baseUrl = window.location.origin + window.location.pathname.replace("/GradesPage.html", "")
-            const keyParam = key ? `?k=${encodeURIComponent(key)}` : ""
-            window.location.href = `${baseUrl}/MainPage.html${keyParam}`
-        },
-    },
-    {
-        name: "View Learning Results",
-        icon: "📚",
-        color: "#8B5CF6",
-        href: "/courses",
-        onClick: () => {
-            const key = new URLSearchParams(window.location.search).get("k")
-            const baseUrl = window.location.origin + window.location.pathname.replace("/GradesPage.html", "")
-            const keyParam = key ? `?k=${encodeURIComponent(key)}` : ""
-            window.location.href = `${baseUrl}/GradesPage.html${keyParam}`
-        },
-    },
-    {
-        name: "Study Plan",
-        icon: "📅",
-        color: "#EC4899",
-        href: "/users",
-        onClick: () => {
-            const key = new URLSearchParams(window.location.search).get('k');
-            const baseUrl = window.location.origin + window.location.pathname.replace('/GradesPage.html', '');
-            window.location.href = `${baseUrl}/StudyPlanPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
-        }
-    }
-];
+// const SIDEBAR_ITEMS = [
+//     {
+//         name: "Overview",
+//         icon: "📊",
+//         color: "#6366f1",
+//         href: "/overview",
+//         onClick: () => {
+//             const key = new URLSearchParams(window.location.search).get("k")
+//             const baseUrl = window.location.origin + window.location.pathname.replace("/GradesPage.html", "")
+//             const keyParam = key ? `?k=${encodeURIComponent(key)}` : ""
+//             window.location.href = `${baseUrl}/MainPage.html${keyParam}`
+//         },
+//     },
+//     {
+//         name: "View Learning Results",
+//         icon: "📚",
+//         color: "#8B5CF6",
+//         href: "/courses",
+//         onClick: () => {
+//             const key = new URLSearchParams(window.location.search).get("k")
+//             const baseUrl = window.location.origin + window.location.pathname.replace("/GradesPage.html", "")
+//             const keyParam = key ? `?k=${encodeURIComponent(key)}` : ""
+//             window.location.href = `${baseUrl}/GradesPage.html${keyParam}`
+//         },
+//     },
+//     {
+//         name: "Study Plan",
+//         icon: "📅",
+//         color: "#EC4899",
+//         href: "/users",
+//         onClick: () => {
+//             const key = new URLSearchParams(window.location.search).get('k');
+//             const baseUrl = window.location.origin + window.location.pathname.replace('/GradesPage.html', '');
+//             window.location.href = `${baseUrl}/StudyPlanPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
+//         }
+//     }
+// ];
 
-function MenuIcon({ size = 24 }) {
-    return React.createElement(
-        "svg",
-        {
-            width: size,
-            height: size,
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: "2",
-        },
-        React.createElement("line", { x1: "3", y1: "6", x2: "21", y2: "6" }),
-        React.createElement("line", { x1: "3", y1: "12", x2: "21", y2: "12" }),
-        React.createElement("line", { x1: "3", y1: "18", x2: "21", y2: "18" }),
-    )
-}
+// function MenuIcon({ size = 24 }) {
+//     return React.createElement(
+//         "svg",
+//         {
+//             width: size,
+//             height: size,
+//             viewBox: "0 0 24 24",
+//             fill: "none",
+//             stroke: "currentColor",
+//             strokeWidth: "2",
+//         },
+//         React.createElement("line", { x1: "3", y1: "6", x2: "21", y2: "6" }),
+//         React.createElement("line", { x1: "3", y1: "12", x2: "21", y2: "12" }),
+//         React.createElement("line", { x1: "3", y1: "18", x2: "21", y2: "18" }),
+//     )
+// }
 
-function Sidebar() {
-    const [isSidebarOpen, setIsSidebarOpen] = React.useState(true)
+// function Sidebar() {
+//     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true)
 
-    return React.createElement(
-        motion.div,
-        {
-            className: `sidebar ${isSidebarOpen ? "open" : "closed"}`,
-            animate: { width: isSidebarOpen ? 220 : 80 },
-        },
-        React.createElement(
-            "div",
-            { className: "sidebar-content" },
-            React.createElement(
-                "div",
-                { className: "sidebar-header" },
-                React.createElement(
-                    motion.button,
-                    {
-                        whileHover: { scale: 1.1 },
-                        whileTap: { scale: 0.9 },
-                        onClick: () => setIsSidebarOpen(!isSidebarOpen),
-                        className: "menu-button",
-                    },
-                    React.createElement(MenuIcon, { size: 24 }),
-                ),
-                React.createElement(
-                    AnimatePresence,
-                    null,
-                    isSidebarOpen &&
-                    React.createElement(
-                        motion.h2,
-                        {
-                            className: "sidebar-title fade-in",
-                            initial: { opacity: 0, width: 0 },
-                            animate: { opacity: 1, width: "auto" },
-                            exit: { opacity: 0, width: 0 },
-                            transition: { duration: 0.2, delay: 0.3 },
-                        },
-                        "IUH Study Tracker",
-                    ),
-                ),
-            ),
-            React.createElement(
-                "nav",
-                { className: "sidebar-nav" },
-                SIDEBAR_ITEMS.map((item) =>
-                    React.createElement(
-                        motion.div,
-                        {
-                            key: item.name,
-                            className: "sidebar-item",
-                            onClick: item.onClick,
-                            whileHover: { scale: 1.02 },
-                            whileTap: { scale: 0.98 },
-                        },
-                        React.createElement(
-                            "span",
-                            {
-                                className: "sidebar-item-icon",
-                                style: { color: item.color },
-                            },
-                            item.icon,
-                        ),
-                        React.createElement(
-                            AnimatePresence,
-                            null,
-                            isSidebarOpen &&
-                            React.createElement(
-                                motion.span,
-                                {
-                                    className: "sidebar-item-text fade-in",
-                                    initial: { opacity: 0, width: 0 },
-                                    animate: { opacity: 1, width: "auto" },
-                                    exit: { opacity: 0, width: 0 },
-                                    transition: { duration: 0.2, delay: 0.3 },
-                                },
-                                item.name,
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-            React.createElement(
-                "div",
-                { className: "sidebar-footer" },
-                React.createElement(
-                    motion.button,
-                    {
-                        onClick: () => window.close(),
-                        className: "back-button",
-                        whileHover: { scale: 1.02 },
-                        whileTap: { scale: 0.98 },
-                    },
-                    React.createElement("span", { className: "back-button-icon" }, "←"),
-                    React.createElement(
-                        AnimatePresence,
-                        null,
-                        isSidebarOpen &&
-                        React.createElement(
-                            motion.span,
-                            {
-                                className: "back-button-text fade-in",
-                                initial: { opacity: 0, width: 0 },
-                                animate: { opacity: 1, width: "auto" },
-                                exit: { opacity: 0, width: 0 },
-                                transition: { duration: 0.2, delay: 0.3 },
-                            },
-                            "Quay lại Extension",
-                        ),
-                    ),
-                ),
-            ),
-        ),
-    )
-}
+//     return React.createElement(
+//         motion.div,
+//         {
+//             className: `sidebar ${isSidebarOpen ? "open" : "closed"}`,
+//             animate: { width: isSidebarOpen ? 220 : 80 },
+//         },
+//         React.createElement(
+//             "div",
+//             { className: "sidebar-content" },
+//             React.createElement(
+//                 "div",
+//                 { className: "sidebar-header" },
+//                 React.createElement(
+//                     motion.button,
+//                     {
+//                         whileHover: { scale: 1.1 },
+//                         whileTap: { scale: 0.9 },
+//                         onClick: () => setIsSidebarOpen(!isSidebarOpen),
+//                         className: "menu-button",
+//                     },
+//                     React.createElement(MenuIcon, { size: 24 }),
+//                 ),
+//                 React.createElement(
+//                     AnimatePresence,
+//                     null,
+//                     isSidebarOpen &&
+//                     React.createElement(
+//                         motion.h2,
+//                         {
+//                             className: "sidebar-title fade-in",
+//                             initial: { opacity: 0, width: 0 },
+//                             animate: { opacity: 1, width: "auto" },
+//                             exit: { opacity: 0, width: 0 },
+//                             transition: { duration: 0.2, delay: 0.3 },
+//                         },
+//                         "IUH Study Tracker",
+//                     ),
+//                 ),
+//             ),
+//             React.createElement(
+//                 "nav",
+//                 { className: "sidebar-nav" },
+//                 SIDEBAR_ITEMS.map((item) =>
+//                     React.createElement(
+//                         motion.div,
+//                         {
+//                             key: item.name,
+//                             className: "sidebar-item",
+//                             onClick: item.onClick,
+//                             whileHover: { scale: 1.02 },
+//                             whileTap: { scale: 0.98 },
+//                         },
+//                         React.createElement(
+//                             "span",
+//                             {
+//                                 className: "sidebar-item-icon",
+//                                 style: { color: item.color },
+//                             },
+//                             item.icon,
+//                         ),
+//                         React.createElement(
+//                             AnimatePresence,
+//                             null,
+//                             isSidebarOpen &&
+//                             React.createElement(
+//                                 motion.span,
+//                                 {
+//                                     className: "sidebar-item-text fade-in",
+//                                     initial: { opacity: 0, width: 0 },
+//                                     animate: { opacity: 1, width: "auto" },
+//                                     exit: { opacity: 0, width: 0 },
+//                                     transition: { duration: 0.2, delay: 0.3 },
+//                                 },
+//                                 item.name,
+//                             ),
+//                         ),
+//                     ),
+//                 ),
+//             ),
+//             React.createElement(
+//                 "div",
+//                 { className: "sidebar-footer" },
+//                 React.createElement(
+//                     motion.button,
+//                     {
+//                         onClick: () => window.close(),
+//                         className: "back-button",
+//                         whileHover: { scale: 1.02 },
+//                         whileTap: { scale: 0.98 },
+//                     },
+//                     React.createElement("span", { className: "back-button-icon" }, "←"),
+//                     React.createElement(
+//                         AnimatePresence,
+//                         null,
+//                         isSidebarOpen &&
+//                         React.createElement(
+//                             motion.span,
+//                             {
+//                                 className: "back-button-text fade-in",
+//                                 initial: { opacity: 0, width: 0 },
+//                                 animate: { opacity: 1, width: "auto" },
+//                                 exit: { opacity: 0, width: 0 },
+//                                 transition: { duration: 0.2, delay: 0.3 },
+//                             },
+//                             "Quay lại Extension",
+//                         ),
+//                     ),
+//                 ),
+//             ),
+//         ),
+//     )
+// }
 
 function Header({ title }) {
     return React.createElement(

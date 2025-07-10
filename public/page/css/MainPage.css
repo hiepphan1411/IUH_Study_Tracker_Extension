@@ -363,3 +363,144 @@ body {
         transform: translateY(0);
     }
 }
+
+.chart-container select {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background-color: #ffffff;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.chart-container select:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.chart-container select:hover {
+    border-color: #059669;
+    background-color: #f0fdf4;
+}
+
+.chart-container select option {
+    padding: 8px 12px;
+    background-color: #ffffff;
+    color: #374151;
+}
+
+.chart-container select option:hover {
+    background-color: #f0fdf4;
+}
+
+.chart-container label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+.chart-container button {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(6, 95, 70, 0.2);
+}
+
+.chart-container button:hover {
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(6, 95, 70, 0.3);
+}
+
+
+.chart-container .no-data-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #6b7280;
+    text-align: center;
+}
+
+.chart-container .no-data-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.chart-container .no-data-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+.chart-container .no-data-text {
+    font-size: 14px;
+    opacity: 0.8;
+    color: #6b7280;
+}
+
+@media (max-width: 1200px) {
+    .dashboard-item {
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar.open {
+        width: 250px;
+        position: fixed;
+        height: 100vh;
+        z-index: 1000;
+    }
+    
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .header {
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .content-area {
+        padding: 0;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-row {
+        flex-direction: column;
+    }
+    
+    .dashboard-item {
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
+    .chart-container {
+        padding: 16px;
+    }
+    
+    .chart-title {
+        font-size: 18px;
+    }
+}

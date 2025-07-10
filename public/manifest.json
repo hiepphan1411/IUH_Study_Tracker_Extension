@@ -7,7 +7,12 @@
     "default_popup": "index.html"
   },
   "permissions": [
-    "tabs"
+    "tabs",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://sv.iuh.edu.vn/*"
   ],
   "content_scripts": [
     {
@@ -23,7 +28,11 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "grades.html"
+        "grades.html",
+        "page/MainPage.html",
+        "page/css/MainPage.css",
+        "page/js/MainPage.js",
+        "page/js/components/*.js"
       ],
       "matches": [
         "<all_urls>"

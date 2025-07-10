@@ -100,8 +100,23 @@
       result.push(currentSemester);
     }
 
-    localStorage.setItem("diem_json", JSON.stringify(result, null, 2));
-    console.log("Đã lưu dữ liệu điểm vào localStorage với key diem_json");
+    if (result.length > 0) {
+      chrome.storage.local.set(
+        {
+          diem_json: JSON.stringify(result, null, 2),
+          diem_timestamp: Date.now(),
+        },
+        function () {
+          chrome.runtime.sendMessage({
+            type: "GRADES_SAVED",
+            data: result,
+          });
+          console.log(result);
+        }
+      );
+
+      return true;
+    }
   }
 
   window.addEventListener("load", () => {

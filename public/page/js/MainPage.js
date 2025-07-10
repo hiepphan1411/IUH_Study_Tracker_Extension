@@ -1,77 +1,81 @@
-const { motion, AnimatePresence } = window.Motion || {};
-const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell } = window.Recharts || {};
+function App() { 
+  const [currentPage, setCurrentPage] = React.useState("overview");
+  const [key, setKey] = React.useState("");
 
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const keyParam = urlParams.get("k");
+    if (keyParam) {
+      setKey(keyParam);
+    }
 
-function Layout({ children, title }) {
-    return React.createElement('div', { className: 'layout' },
-        React.createElement(Sidebar),
-        React.createElement('div', { className: 'main-content' },
-            React.createElement(Header, { title: title }),
-            React.createElement('div', { className: 'content-area hide-scrollbar' },
-                children
-            )
-        )
-    );
-}
+    const path = window.location.pathname;
+    if (path.includes("GradesPage.html")) {
+      setCurrentPage("grades");
+    } else if (path.includes("StudyPlan.html")) {
+      setCurrentPage("study-plan");
+    } else {
+      setCurrentPage("overview");
+    }
+  }, []);
 
-function App() {
-    const [currentPage, setCurrentPage] = React.useState('overview');
-    const [key, setKey] = React.useState('');
+  const navigateTo = (page) => {
+    setCurrentPage(page);
 
-    React.useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const keyParam = urlParams.get('k');
-        if (keyParam) {
-            setKey(keyParam);
-        }
-        
-        const path = window.location.pathname;
-        if (path.includes('GradesPage.html')) {
-            setCurrentPage('grades');
-        } else {
-            setCurrentPage('overview');
-        }
-    }, []);
+    const baseUrl =
+      window.location.origin +
+      window.location.pathname
+        .replace("/GradesPage.html", "")
+        .replace("/MainPage.html", "")
+        .replace("/StudyPlanPage.html", "");
+    let newUrl = `${baseUrl}/MainPage.html${
+      key ? `?k=${encodeURIComponent(key)}` : ""
+    }`;
+    if (page === "grades") {
+      newUrl = `${baseUrl}/GradesPage.html${
+        key ? `?k=${encodeURIComponent(key)}` : ""
+      }`;
+    } else if (page === "study-plan") {
+      newUrl = `${baseUrl}/StudyPlanPage.html${
+        key ? `?k=${encodeURIComponent(key)}` : ""
+      }`;
+    }
 
-    const navigateTo = (page) => {
-        setCurrentPage(page);
-        
-        const baseUrl = window.location.origin + window.location.pathname.replace('/GradesPage.html', '').replace('/MainPage.html', '');
-        const newUrl = page === 'grades' ? 
-            `${baseUrl}/GradesPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}` :
-            `${baseUrl}/MainPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
-        
-        window.history.pushState({}, '', newUrl);
-    };
+    window.history.pushState({}, "", newUrl);
+  };
 
-    const openStudyPlan = () => {
-        const baseUrl = window.location.origin + window.location.pathname.replace('/MainPage.html', '');
-        window.location.href = `${baseUrl}/StudyPlanPage.html${key ? `?k=${encodeURIComponent(key)}` : ''}`;
-    };
+  const openStudyPlan = () => {
+    const baseUrl =
+      window.location.origin +
+      window.location.pathname.replace("/MainPage.html", "");
+    window.location.href = `${baseUrl}/StudyPlanPage.html${
+      key ? `?k=${encodeURIComponent(key)}` : ""
+    }`;
+  };
 
-    const renderCurrentPage = () => {
-        switch (currentPage) {
-            case 'grades':
-                return React.createElement(GradesPageContent, { keyValue: key });
-            case 'study-plan':
-                return React.createElement(StudyPlanPageContent, {keyValue: key});
-            case 'overview':
-            default:
-                return React.createElement(OverviewPageContent);
-        }
-    };
+  const renderCurrentPage = () => {
+    switch (currentPage) {
+      case "grades":
+        return React.createElement(GradesPageContent, { keyValue: key });
+      case "study-plan":
+        return React.createElement(StudyPlanPageContent, { keyValue: key });
+      case "overview":
+      default:
+        return React.createElement(OverviewPageContent, { keyValue: key });
+    }
+  };
 
-    const getPageTitle = () => {
-        switch (currentPage) {
-            case 'grades':
-                return 'Xem Điểm';
-            case 'study-plan':
-                return 'Kế hoạch học tập';
-            case 'overview':
-            default:
-                return 'Tổng quan';
-        }
-    };
+  const getPageTitle = () => {
+    switch (currentPage) {
+      case "grades":
+        return "Xem Điểm";
+      case "study-plan":
+        return "Kế hoạch học tập";
+      case "overview":
+      default:
+        return "Tổng quan";
+    }
+  };
 
     return React.createElement(LayoutWithNavigation, {
         title: getPageTitle(),
@@ -99,26 +103,26 @@ function LayoutWithNavigation({ children, title, currentPage, onNavigate, onOpen
     );
 }
 
-const SIDEBAR_ITEMS = [
-    {
-        name: "Overview",
-        icon: "📊",
-        color: "#6366f1",
-        page: "overview"
-    },
-    {
-        name: "View Learning Results",
-        icon: "📚",
-        color: "#6366f1", //#8B5CF6
-        page: "grades"
-    },
-    {
-        name: "Study Plan",
-        icon: "📅",
-        color: "#6366f1", //#EC4899
-        page: "study-plan"
-    }
-];
+// const SIDEBAR_ITEMS = [
+//     {
+//         name: "Overview",
+//         icon: "📊",
+//         color: "#6366f1",
+//         page: "overview"
+//     },
+//     {
+//         name: "View Learning Results",
+//         icon: "📚",
+//         color: "#6366f1", //#8B5CF6
+//         page: "grades"
+//     },
+//     {
+//         name: "Study Plan",
+//         icon: "📅",
+//         color: "#6366f1", //#EC4899
+//         page: "study-plan"
+//     }
+// ];
 
 function MenuIcon({ size = 24 }) {
     return React.createElement('svg', {
@@ -252,7 +256,7 @@ function Header({ title }) {
 
 //OverviewContent Logic (GUI)
 //=============================================================================================================
-const COLORS = ["#6366F1", "#6366F1", "#6366F1", "#6366F1", "#6366F1"];
+// const COLORS = ["#6366F1", "#6366F1", "#6366F1", "#6366F1", "#6366F1"];
 
 function SubjectGradeStatistic({ subjects }) {
     const [selectedSemester, setSelectedSemester] = React.useState('all');
