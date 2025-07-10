@@ -1,0 +1,773 @@
+/* GradesPage.css - Styles specific to the Grades/Điểm page */
+
+/* Base styles inherited from main layout */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+  background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+  color: #1f2937;
+  min-height: 100vh;
+}
+
+/* Layout components shared with MainPage */
+.layout {
+  display: flex;
+  height: 100vh;
+  overflow: auto;
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+  position: relative;
+}
+
+.layout::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(5, 150, 105, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sidebar {
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  backdrop-filter: blur(20px);
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+  border-radius: 0px 0px 10px 0px;
+  box-shadow: 0 25px 50px -12px rgba(6, 95, 70, 0.3);
+}
+
+.sidebar.open {
+  width: 200px;
+}
+
+.sidebar.closed {
+  width: 80px;
+}
+
+.sidebar-content {
+  height: 100%;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.menu-button {
+  padding: 6px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  align-items: center;
+}
+
+.menu-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-nav {
+  margin-top: 16px;
+  flex-grow: 1;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  margin-bottom: 8px;
+  cursor: pointer;
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.sidebar-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-item-icon {
+  font-size: 20px;
+  min-width: 20px;
+  color: #ffffff;
+}
+
+.sidebar-item-text {
+  margin-left: 16px;
+  white-space: nowrap;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+}
+
+.back-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.back-button-icon {
+  font-size: 20px;
+  min-width: 20px;
+}
+
+.back-button-text {
+  margin-left: 16px;
+  white-space: nowrap;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+.header {
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+  padding: 10px;
+  border-radius: 0 0 12px 12px;
+  margin: 0 12px 0 0;
+  box-shadow: 0 10px 25px rgba(6, 95, 70, 0.15);
+  width: 100%;
+  position: relative;
+  z-index: 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-icon svg {
+  width: 28px;
+  height: 28px;
+  color: white;
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.content-area {
+  flex: 1;
+  overflow: auto;
+  padding: 0px;
+  position: relative;
+  z-index: 10;
+  margin: 10px; /* Negative margin to allow overlap */
+}
+
+.content-area.scrolled .iuh-grades-table {
+  height: calc(100vh - 20px);
+  margin-top: 0;
+}
+
+.page-content {
+  padding: 0px;
+  height: 50%;
+  position: relative;
+  z-index: 10;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 12px;
+  padding: 0px;
+  margin: 0px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  height: 90%;
+  overflow: hidden;
+  position: relative;
+  z-index: 100;
+}
+
+.card:hover {
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #000000;
+  background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(16, 185, 129, 0.2);
+  border-top: 3px solid #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  margin-left: 16px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.no-data {
+  text-align: center;
+  padding: 48px 0;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =================== IUH GRADES TABLE STYLES =================== */
+/* Enhanced Version with Sticky Headers & Columns */
+
+.iuh-grades-table {
+  overflow: auto;
+  max-width: 100%;
+  height: calc(100vh - 20px); /* Reduced height when header is hidden */
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(5, 150, 105, 0.15);
+  background: white;
+  border: 2px solid #d1fae5;
+  position: relative;
+  margin: 0;
+  transition: height 0.3s ease;
+}
+
+.grades-table-iuh {
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  font-size: 0.85rem;
+  width: 100%;
+  position: relative;
+}
+
+.grades-table-iuh th {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 8px;
+  border: 1px solid #047857;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Sticky columns for horizontal scroll */
+.grades-table-iuh .stt-col,
+.grades-table-iuh .stt {
+  position: sticky;
+  left: 0;
+  z-index: 101;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-right: 2px solid #047857;
+}
+
+.grades-table-iuh .malhp-col,
+.grades-table-iuh .ma-lhp {
+  position: sticky;
+  left: 50px;
+  z-index: 101;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-right: 2px solid #047857;
+}
+
+.grades-table-iuh .tenlhp-col,
+.grades-table-iuh .ten-mon {
+  position: sticky;
+  left: 170px;
+  z-index: 101;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-right: 2px solid #047857;
+}
+
+/* Override background for data cells in sticky columns */
+.grades-table-iuh tbody .stt {
+  background: #f8fafc !important;
+  color: #374151;
+  font-weight: 600;
+}
+
+.grades-table-iuh tbody .ma-lhp {
+  background: #f8fafc !important;
+  color: #374151;
+  font-weight: 500;
+}
+
+.grades-table-iuh tbody .ten-mon {
+  background: #f8fafc !important;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* Hover effect for sticky columns */
+.grades-table-iuh .subject-row:hover .stt,
+.grades-table-iuh .subject-row:hover .ma-lhp,
+.grades-table-iuh .subject-row:hover .ten-mon {
+  background: #ecfdf5 !important;
+}
+
+.grades-table-iuh td {
+  padding: 10px 8px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.grades-table-iuh .subject-row:hover td {
+  background: #f0fdf4;
+}
+
+.grades-table-iuh .semester-header td {
+  color: #065f46;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 15px;
+  border: none !important;
+  text-align: left;
+  letter-spacing: 1px;
+  position: sticky;
+  top: 72px; /* Adjusted to be below the table header */
+  z-index: 99;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: white !important;
+  backdrop-filter: blur(10px);
+}
+
+/* Header grouping styles */
+.header-row-1 th {
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%);
+}
+
+.header-row-2 th {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+}
+
+.header-row-3 th {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+}
+
+.thuongxuyen-col {
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;
+}
+
+.thuchanh-col {
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;
+}
+
+.lt-heso1 {
+  background: linear-gradient(135deg, #065f46 0%, #059669 100%) !important;
+}
+
+/* Column width controls - Updated for sticky positioning */
+.stt-col,
+.stt {
+  width: 50px;
+  min-width: 50px;
+  max-width: 50px;
+}
+
+.malhp-col,
+.ma-lhp {
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+  font-size: 0.75rem;
+}
+
+.tenlhp-col,
+.ten-mon {
+  width: 250px;
+  min-width: 250px;
+  max-width: 250px;
+  white-space: normal;
+  word-wrap: break-word;
+  text-align: left !important;
+  padding-left: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.stc-col,
+.tin-chi {
+  width: 60px;
+  min-width: 60px;
+}
+.giuaky-col,
+.diem-giua-ky {
+  width: 60px;
+  min-width: 60px;
+}
+.cuoiky-col,
+.diem-cuoi-ky {
+  width: 60px;
+  min-width: 60px;
+}
+.tongket-col,
+.diem-tong-ket {
+  width: 70px;
+  min-width: 70px;
+  font-weight: 600;
+}
+.diemtinchi-col,
+.diem-tin-chi-4 {
+  width: 60px;
+  min-width: 60px;
+}
+.diemchu-col,
+.diem-chu {
+  width: 60px;
+  min-width: 60px;
+}
+.xeploai-col {
+  width: 80px;
+  min-width: 80px;
+}
+.ghichu-col,
+.ghi-chu {
+  width: 80px;
+  min-width: 80px;
+}
+
+/* Điểm thường xuyên và thực hành columns */
+.hs-1,
+.hs-2,
+.hs-3,
+.hs-4,
+.th-1,
+.th-2,
+.th-3,
+.th-4,
+.diem-hs1-1,
+.diem-hs1-2,
+.diem-hs1-3,
+.diem-hs1-4,
+.diem-th-1,
+.diem-th-2,
+.diem-th-3,
+.diem-th-4 {
+  width: 45px;
+  min-width: 45px;
+  font-size: 0.8rem;
+}
+
+/* Grade badges */
+.grades-table-iuh .grade-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.grades-table-iuh .grade-excellent {
+  background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+  color: white;
+}
+
+.grades-table-iuh .grade-good {
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+  color: white;
+}
+
+.grades-table-iuh .grade-average {
+  background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+  color: white;
+}
+
+.grades-table-iuh .grade-poor {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  color: white;
+}
+
+/* Enhanced Scrollbar - Both Horizontal and Vertical */
+/* .iuh-grades-table::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+.iuh-grades-table::-webkit-scrollbar-track {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+}
+
+.iuh-grades-table::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    border-radius: 6px;
+    border: 2px solid #f1f5f9;
+    transition: all 0.3s ease;
+}
+
+.iuh-grades-table::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #047857 0%, #059669 100%);
+}
+
+.iuh-grades-table::-webkit-scrollbar-corner {
+    background: #f1f5f9;
+} */
+
+/* Responsive improvements */
+@media (max-width: 500px) {
+  .grades-table-iuh {
+    font-size: 0.8rem;
+  }
+
+  .grades-table-iuh th,
+  .grades-table-iuh td {
+    padding: 6px 4px;
+  }
+
+  .ten-mon {
+    font-size: 0.8rem;
+  }
+}
+
+/* =================== SEMESTER SUMMARY STYLES =================== */
+/* 2 Column Layout */
+
+.semester-summary-row {
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%) !important;
+  border-top: 3px solid #059669 !important;
+}
+
+.semester-summary-cell {
+  padding: 10px !important;
+  background: transparent;
+  border: none !important;
+}
+
+.semester-summary {
+  background: white;
+  border-radius: 16px;
+  padding: 10px;
+  box-shadow: 0 8px 25px rgba(5, 150, 105, 0.1);
+  border: 2px solid #d1fae5;
+  position: relative;
+  overflow: hidden;
+}
+
+.semester-summary::before {
+  content: "";
+  position: absolute;
+  background: linear-gradient(90deg, #059669 0%, #10b981 50%, #34d399 100%);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.summary-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: left;
+  padding: 5px 5px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.summary-item:hover {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+  border-left-color: #10b981;
+}
+
+.summary-label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.summary-value {
+  font-weight: 700;
+  color: #059669;
+  font-size: 1rem;
+  text-align: right;
+}
+
+.summary-value.classification {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3);
+}
+
+/* Responsive design for summary */
+@media (max-width: 500px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .summary-item {
+    padding: 5px 5px;
+  }
+
+  .summary-label {
+    font-size: 0.8rem;
+  }
+
+  .summary-value {
+    font-size: 0.9rem;
+  }
+
+  .semester-summary-cell {
+    padding: 5px !important;
+  }
+
+  .semester-summary {
+    padding: 5px;
+  }
+}
+
+/* Enhanced table scrolling */
+.table-scroll-wrapper {
+  overflow-x: auto;
+  overflow-y: visible;
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.table-scroll-wrapper::-webkit-scrollbar {
+  height: 10px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 5px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-radius: 5px;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+}
