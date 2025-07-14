@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const { motion, AnimatePresence } = window.Motion || {}
 
 function Layout({ children, title, isScrolled }) {
@@ -76,7 +77,8 @@ function Sidebar() {
         motion.div,
         {
             className: `sidebar ${isSidebarOpen ? "open" : "closed"}`,
-            animate: { width: isSidebarOpen ? 220 : 80 },
+            animate: { width: isSidebarOpen ? 225 : 80 },
+            transition: { duration: 0.3, ease: "easeInOut" }
         },
         React.createElement(
             "div",

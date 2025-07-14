@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const { motion, AnimatePresence } = window.Motion || {};
 
 function Layout({ children, title }) {
@@ -80,8 +81,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
     
     return React.createElement(motion.div, {
         className: `sidebar ${isSidebarOpen ? 'open' : 'closed'}`,
-        animate: { width: isSidebarOpen ? 225 : 80 },
-        transition: { duration: 0.3, ease: "easeInOut" }
+        animate: { width: isSidebarOpen ? 225 : 80 }
     },
         React.createElement('div', { className: 'sidebar-content' },
             React.createElement('div', { className: 'sidebar-header' },
