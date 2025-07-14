@@ -1,3 +1,4 @@
+/* eslint-disable */
 import "./App.css";
 import { useState, useEffect } from "react";
 import { guideTemplate } from "./templates/guideTemplate";
@@ -45,17 +46,24 @@ function App() {
   };
 
   const handleViewSchedule = async () => {
-    if (!validateKey(key)) return;
+      if (!validateKey(key)) return;
 
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
+      setIsLoading(true);
 
-    //Xử lý xem lịch học tại đây
-    const scheduleUrl = `https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html?k=${encodeURIComponent(
-      key
-    )}`;
-    window.open(scheduleUrl, "_blank");
+      const scheduleUrl = `page/MainSchedulePage.html?k=${encodeURIComponent(
+          key,
+      )}`;
+      const newWindow = window.open(scheduleUrl, '_blank');
+      if (
+          !newWindow ||
+          newWindow.closed ||
+          typeof newWindow.closed === 'undefined'
+      ) {
+          alert(
+              'Trình duyệt đã chặn cửa sổ bật lên. Vui lòng cho phép để xem lịch.',
+          );
+      }
+      setIsLoading(false);
   };
 
   const handleViewGrades = async () => {
