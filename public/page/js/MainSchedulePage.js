@@ -111,7 +111,6 @@ function App() {
                 classCode: 'C01',
                 lesson: '1-2',
             },
-
             {
                 id: 2,
                 subject: 'Thi Vật Lý',
@@ -121,20 +120,39 @@ function App() {
                 endTime: '15:30',
                 room: 'B202',
             },
-
+            {
+                id: 8,
+                subject: 'Thi Vật Lý',
+                supervisor: 'Nguyễn Văn B,Trần Thị C',
+                date: '14/07/2025',
+                startTime: '09:10',
+                endTime: '11:40',
+                room: 'B202',
+            },
             {
                 id: 3,
                 subject: 'Lập Trình Java',
                 supervisor: 'Lê Thị D',
                 date: '16/07/2025',
-                startTime: '18:30',
-                endTime: '20:10',
+                startTime: '18:00',
+                endTime: '19:40',
                 room: 'C303',
                 className: 'IT202',
                 classCode: 'C02',
                 lesson: '13-14',
             },
-
+            {
+                id: 10,
+                subject: 'Kỹ Thuật Phần Mềm',
+                supervisor: 'Nguyễn Thị K',
+                date: '16/07/2025',
+                startTime: '19:40',
+                endTime: '21:30',
+                room: 'G707',
+                className: 'SE301',
+                classCode: 'C04',
+                lesson: '5-6',
+            },
             {
                 id: 4,
                 subject: 'Thi Hóa Học',
@@ -144,36 +162,45 @@ function App() {
                 endTime: '10:10',
                 room: 'D404',
             },
-
             {
                 id: 5,
                 subject: 'Cơ Sở Dữ Liệu',
                 supervisor: 'Trần Văn G',
                 date: '18/07/2025',
-                startTime: '14:20',
-                endTime: '16:00',
+                startTime: '12:30',
+                endTime: '15:00',
                 room: 'E505',
                 className: 'DB101',
                 classCode: 'C03',
                 lesson: '8-9',
             },
-
+            {
+                id: 9,
+                subject: 'Lập Trình Java',
+                supervisor: 'Lê Thị D',
+                date: '18/07/2025',
+                startTime: '15:10',
+                endTime: '17:40',
+                room: 'C303',
+                className: 'IT202',
+                classCode: 'C02',
+                lesson: '13-14',
+            },
             {
                 id: 6,
                 subject: 'Thi Tiếng Anh',
                 supervisor: 'Hoàng Văn H,Lê Thị I',
                 date: '19/07/2025',
-                startTime: '19:20',
+                startTime: '19:30',
                 endTime: '21:00',
                 room: 'F606',
             },
-
             {
                 id: 7,
                 subject: 'Kỹ Thuật Phần Mềm',
                 supervisor: 'Nguyễn Thị K',
                 date: '20/07/2025',
-                startTime: '09:50',
+                startTime: '10:00',
                 endTime: '11:30',
                 room: 'G707',
                 className: 'SE301',
@@ -182,7 +209,6 @@ function App() {
             },
         ];
 
-        // Process sample data
         try {
             console.log('Sample scheduleData:', sampleData);
             const splitData = splitSchedule(sampleData);
@@ -199,18 +225,26 @@ function App() {
     };
 
     const getPageTitle = () => {
-        return currentPage === 'exam-schedule' ? 'Lịch Thi' : 'Lịch Học';
+        if (currentPage === 'exam-schedule') return 'Lịch Thi';
+        if (currentPage === 'all-schedule') return 'Tất Cả';
+        return 'Lịch Học';
     };
 
     const renderCurrentPage = () => {
-        return currentPage === 'exam-schedule'
-            ? React.createElement(ExamSchedulePageContent, {
-                  data: scheduleData.exams,
-                  keyValue: key,
-              })
-            : React.createElement(SchedulePageContent, {
-                  data: scheduleData.classes,
-              });
+        if (currentPage === 'exam-schedule') {
+            return React.createElement(ExamSchedulePageContent, {
+                data: scheduleData.exams,
+                keyValue: key,
+            });
+        } else if (currentPage === 'all-schedule') {
+            return React.createElement(AllSchedulePageContent, {
+                data: [...scheduleData.classes, ...scheduleData.exams],
+            });
+        } else {
+            return React.createElement(SchedulePageContent, {
+                data: scheduleData.classes,
+            });
+        }
     };
 
     return React.createElement(
@@ -260,6 +294,7 @@ function LayoutWithNavigation(props) {
 const SIDEBAR_ITEMS = [
     { name: 'Lịch Học', icon: '📅', color: '#EC4899', page: 'schedule' },
     { name: 'Lịch Thi', icon: '📝', color: '#F59E0B', page: 'exam-schedule' },
+    { name: 'Tất Cả', icon: '📚', color: '#10B981', page: 'all-schedule' },
 ];
 
 function MenuIcon(props) {
@@ -595,7 +630,9 @@ function TimeSlotCell(props) {
                   React.createElement(Item, {
                       key: item.id || Math.random(),
                       item: item,
-                      isExam: props.isExam,
+                      isExam:
+                          typeof item.supervisor === 'string' &&
+                          item.supervisor.includes(','),
                   }),
               )
             : null,
@@ -677,7 +714,7 @@ function ScheduleTable(props) {
 
 function SchedulePageContent(props) {
     const currentDate = new Date('2025-07-14');
-    const initialWeek = getWeekNumber(currentDate); // Week 28 for July 14, 2025
+    const initialWeek = getWeekNumber(currentDate);
     const [currentWeek, setCurrentWeek] = React.useState(initialWeek);
     const [currentYear, setCurrentYear] = React.useState(2025);
 
@@ -810,6 +847,76 @@ function ExamSchedulePageContent(props) {
                       'div',
                       { className: 'no-data' },
                       'Không có dữ liệu lịch thi hoặc dữ liệu không hợp lệ.',
+                  ),
+        ),
+    );
+}
+
+function AllSchedulePageContent(props) {
+    const currentDate = new Date('2025-07-14');
+    const initialWeek = getWeekNumber(currentDate); // Week 28 for July 14, 2025
+    const [currentWeek, setCurrentWeek] = React.useState(initialWeek);
+    const [currentYear, setCurrentYear] = React.useState(2025);
+
+    const handleWeekChange = (direction) => {
+        let newWeek = currentWeek;
+        let newYear = currentYear;
+        if (direction === 'next') {
+            newWeek += 1;
+            if (newWeek > 52) {
+                newWeek = 1;
+                newYear += 1;
+            }
+        } else {
+            newWeek -= 1;
+            if (newWeek < 1) {
+                newWeek = 52;
+                newYear -= 1;
+            }
+        }
+        setCurrentWeek(newWeek);
+        setCurrentYear(newYear);
+    };
+
+    const currentMonth =
+        new Date(
+            getWeekDates(currentWeek, currentYear)
+                .days[0].date.split('/')
+                .reverse()
+                .join('-'),
+        ).getMonth() + 1;
+
+    return React.createElement(
+        'div',
+        { className: 'page-content' },
+        React.createElement(
+            'div',
+            { className: 'schedule-container' },
+            React.createElement(WeekNavigation, {
+                currentWeek: currentWeek,
+                currentMonth: currentMonth,
+                currentYear: currentYear,
+                onWeekChange: handleWeekChange,
+            }),
+            props.data.length > 0
+                ? React.createElement(
+                      motion.div,
+                      {
+                          initial: { opacity: 0, y: 20 },
+                          animate: { opacity: 1, y: 0 },
+                          transition: { duration: 0.3 },
+                      },
+                      React.createElement(ScheduleTable, {
+                          data: props.data,
+                          currentWeek: currentWeek,
+                          currentYear: currentYear,
+                          isExam: false,
+                      }),
+                  )
+                : React.createElement(
+                      'div',
+                      { className: 'no-data' },
+                      'Không có dữ liệu lịch học/thi hoặc dữ liệu không hợp lệ.',
                   ),
         ),
     );
