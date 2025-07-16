@@ -25,7 +25,7 @@ function App() {
     const baseUrl =
       window.location.origin +
       window.location.pathname
-        .replace("/GradesPage.html", "")
+        .replace("/GradesPage.html", "") 
         .replace("/MainPage.html", "")
         .replace("/StudyPlanPage.html", "");
     let newUrl = `${baseUrl}/MainPage.html${
