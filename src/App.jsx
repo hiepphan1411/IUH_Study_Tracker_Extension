@@ -1,3 +1,4 @@
+/* eslint-disable */
 import "./App.css";
 import { useState, useEffect } from "react";
 import { guideTemplate } from "./templates/guideTemplate";
@@ -45,17 +46,24 @@ function App() {
   };
 
   const handleViewSchedule = async () => {
-    if (!validateKey(key)) return;
+      if (!validateKey(key)) return;
 
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsLoading(false);
+      setIsLoading(true);
 
-    //Xử lý xem lịch học tại đây
-    const scheduleUrl = `https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html?k=${encodeURIComponent(
-      key
-    )}`;
-    window.open(scheduleUrl, "_blank");
+      const scheduleUrl = `page/MainSchedulePage.html?k=${encodeURIComponent(
+          key,
+      )}`;
+      const newWindow = window.open(scheduleUrl, '_blank');
+      if (
+          !newWindow ||
+          newWindow.closed ||
+          typeof newWindow.closed === 'undefined'
+      ) {
+          alert(
+              'Trình duyệt đã chặn cửa sổ bật lên. Vui lòng cho phép để xem lịch.',
+          );
+      }
+      setIsLoading(false);
   };
 
 const handleViewGrades = async () => {
@@ -63,41 +71,47 @@ const handleViewGrades = async () => {
 
   setIsLoading(true);
 
-  try {
+    try {
+      const messageListener = (message, sender, sendResponse) => {
+        if (message.type === "GRADES_SAVED") {
+          const mainPageUrl = chrome.runtime.getURL(
+            `page/MainPage.html?k=${encodeURIComponent(key)}`
+          );
+          chrome.tabs.create({ url: mainPageUrl });
 
-    const messageListener = (message, sender, sendResponse) => {
-      if (message.type === "GRADES_SAVED") {
-        console.log("Nhận được dữ liệu điểm:", message.data);
-        
-        const mainPageUrl = chrome.runtime.getURL(`page/MainPage.html?k=${encodeURIComponent(key)}`);
-        chrome.tabs.create({ url: mainPageUrl });
-        
-        chrome.tabs.remove(sender.tab.id);
-        
+          chrome.tabs.remove(sender.tab.id);
+
+          chrome.runtime.onMessage.removeListener(messageListener);
+          setIsLoading(false);
+        }
+      };
+
+      chrome.runtime.onMessage.addListener(messageListener);
+
+      const gradesUrl = `https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html?k=${encodeURIComponent(
+        key
+      )}`;
+      await chrome.tabs.create({ url: gradesUrl, active: false, pinned: true });
+
+      setTimeout(() => {
         chrome.runtime.onMessage.removeListener(messageListener);
+        if (tabId) {
+          chrome.tabs.remove(tabId).catch((error) => {
+            console.log("Tab đã được đóng hoặc không tồn tại:", error);
+          });
+        }
+        const mainPageUrl = chrome.runtime.getURL(
+          `page/MainPage.html?k=${encodeURIComponent(key)}`
+        );
+        chrome.tabs.create({ url: mainPageUrl });
+
         setIsLoading(false);
-      }
-    };
-    
-    chrome.runtime.onMessage.addListener(messageListener);
-    
-    const gradesUrl = `https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html?k=${encodeURIComponent(key)}`;
-    await chrome.tabs.create({ url: gradesUrl, active: false, pinned: true });
-    
-    setTimeout(() => {
-      chrome.runtime.onMessage.removeListener(messageListener);
-      
-      const mainPageUrl = chrome.runtime.getURL(`page/MainPage.html?k=${encodeURIComponent(key)}`);
-      chrome.tabs.create({ url: mainPageUrl });
-      
+      }, 15000);
+    } catch (error) {
+      console.error("Lỗi khi mở trang:", error);
       setIsLoading(false);
-    }, 20000);
-    
-  } catch (error) {
-    console.error('Lỗi khi mở trang:', error);
-    setIsLoading(false);
-  }
-};
+    }
+  };
 
   const handleTabClick = (tabId) => {
     if (tabId === "guide") {
@@ -395,6 +409,5 @@ const handleViewGrades = async () => {
     </div>
   );
 }
-
 
 export default App;

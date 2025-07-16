@@ -111,8 +111,8 @@
             type: "GRADES_SAVED",
             data: result,
           });
-          console.log(result);
         }
+        
       );
 
       return true;
