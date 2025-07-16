@@ -1,81 +1,105 @@
-function App() { 
-  const [currentPage, setCurrentPage] = React.useState("overview");
-  const [key, setKey] = React.useState("");
+// Import motion and AnimatePresence from framer-motion global
+// const { motion, AnimatePresence } = window.Motion || {};
 
-  React.useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const keyParam = urlParams.get("k");
-    if (keyParam) {
-      setKey(keyParam);
-    }
+// Import Recharts components from global
+// const { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell } = window.Recharts || {};
 
-    const path = window.location.pathname;
-    if (path.includes("GradesPage.html")) {
-      setCurrentPage("grades");
-    } else if (path.includes("StudyPlan.html")) {
-      setCurrentPage("study-plan");
-    } else {
-      setCurrentPage("overview");
-    }
-  }, []);
+function App() {
+    const [currentPage, setCurrentPage] = React.useState("overview");
+    const [key, setKey] = React.useState("");
 
-  const navigateTo = (page) => {
-    setCurrentPage(page);
+    React.useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const keyParam = urlParams.get("k");
+        if (keyParam) {
+            setKey(keyParam);
+        }
 
-    const baseUrl =
-      window.location.origin +
-      window.location.pathname
-        .replace("/GradesPage.html", "")
-        .replace("/MainPage.html", "")
-        .replace("/StudyPlanPage.html", "");
-    let newUrl = `${baseUrl}/MainPage.html${
-      key ? `?k=${encodeURIComponent(key)}` : ""
-    }`;
-    if (page === "grades") {
-      newUrl = `${baseUrl}/GradesPage.html${
-        key ? `?k=${encodeURIComponent(key)}` : ""
-      }`;
-    } else if (page === "study-plan") {
-      newUrl = `${baseUrl}/StudyPlanPage.html${
-        key ? `?k=${encodeURIComponent(key)}` : ""
-      }`;
-    }
+        const path = window.location.pathname;
+        if (path.includes("GradesPage.html")) {
+            setCurrentPage("grades");
+        } else if (path.includes("StudyPlan.html")) {
+            setCurrentPage("study-plan");
+        } else {
+            setCurrentPage("overview");
+        }
+    }, []);
 
-    window.history.pushState({}, "", newUrl);
-  };
+    const navigateTo = (page) => {
+        setCurrentPage(page);
+        // Dynamic load CSS for grades page only
+        if (page === "grades") {
+            const existingLink = document.querySelector('link[href*="GradesPage.css"]');
+            if (!existingLink) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'css/GradesPage.css';
+                document.head.appendChild(link);
+            }
+        } else {
+            // Remove grades CSS when not on grades page
+            const existingLink = document.querySelector('link[href*="GradesPage.css"]');
+            if (existingLink) {
+                existingLink.remove();
+            }
+        }
 
-  const openStudyPlan = () => {
-    const baseUrl =
-      window.location.origin +
-      window.location.pathname.replace("/MainPage.html", "");
-    window.location.href = `${baseUrl}/StudyPlanPage.html${
-      key ? `?k=${encodeURIComponent(key)}` : ""
-    }`;
-  };
+        // const baseUrl =
+        //     window.location.origin +
+        //     window.location.pathname
+        //         .replace("/GradesPage.html", "")
+        //         .replace("/MainPage.html", "")
+        //         .replace("/StudyPlanPage.html", "");
+        let newUrl = `${baseUrl}/MainPage.html${key ? `?k=${encodeURIComponent(key)}` : ""
+            }`;
+        if (page === "grades") {
+            newUrl = `${baseUrl}/GradesPage.html${key ? `?k=${encodeURIComponent(key)}` : ""
+                }`;
+        } else if (page === "study-plan") {
+            newUrl = `${baseUrl}/StudyPlanPage.html${key ? `?k=${encodeURIComponent(key)}` : ""
+                }`;
+        }
 
-  const renderCurrentPage = () => {
-    switch (currentPage) {
-      case "grades":
-        return React.createElement(GradesPageContent, { keyValue: key });
-      case "study-plan":
-        return React.createElement(StudyPlanPageContent, { keyValue: key });
-      case "overview":
-      default:
-        return React.createElement(OverviewPageContent, { keyValue: key });
-    }
-  };
+        window.history.pushState({}, "", newUrl);
+        const urlParams = new URLSearchParams();
+        if (key) {
+            urlParams.set('k', key);
+        }
+        urlParams.set('page', page);
 
-  const getPageTitle = () => {
-    switch (currentPage) {
-      case "grades":
-        return "Xem Điểm";
-      case "study-plan":
-        return "Kế hoạch học tập";
-      case "overview":
-      default:
-        return "Tổng quan";
-    }
-  };
+    };
+
+    const openStudyPlan = () => {
+        const baseUrl =
+            window.location.origin +
+            window.location.pathname.replace("/MainPage.html", "");
+        window.location.href = `${baseUrl}/StudyPlanPage.html${key ? `?k=${encodeURIComponent(key)}` : ""
+            }`;
+    };
+
+    const renderCurrentPage = () => {
+        switch (currentPage) {
+            case "grades":
+                return React.createElement(GradesPageContent, { keyValue: key });
+            case "study-plan":
+                return React.createElement(StudyPlanPageContent, { keyValue: key });
+            case "overview":
+            default:
+                return React.createElement(OverviewPageContent, { keyValue: key });
+        }
+    };
+
+    const getPageTitle = () => {
+        switch (currentPage) {
+            case "grades":
+                return "Xem Điểm";
+            case "study-plan":
+                return "Kế hoạch học tập";
+            case "overview":
+            default:
+                return "Tổng quan";
+        }
+    };
 
     return React.createElement(LayoutWithNavigation, {
         title: getPageTitle(),
@@ -103,26 +127,7 @@ function LayoutWithNavigation({ children, title, currentPage, onNavigate, onOpen
     );
 }
 
-// const SIDEBAR_ITEMS = [
-//     {
-//         name: "Overview",
-//         icon: "📊",
-//         color: "#6366f1",
-//         page: "overview"
-//     },
-//     {
-//         name: "View Learning Results",
-//         icon: "📚",
-//         color: "#6366f1", //#8B5CF6
-//         page: "grades"
-//     },
-//     {
-//         name: "Study Plan",
-//         icon: "📅",
-//         color: "#6366f1", //#EC4899
-//         page: "study-plan"
-//     }
-// ];
+// SIDEBAR_ITEMS is already declared in CommonContent.js and available globally
 
 function MenuIcon({ size = 24 }) {
     return React.createElement('svg', {
@@ -141,7 +146,7 @@ function MenuIcon({ size = 24 }) {
 
 function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
-    
+
     const handleItemClick = (item) => {
         if (item.page === 'study-plan') {
             onNavigate(item.page)
@@ -149,7 +154,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
             onNavigate(item.page);
         }
     };
-    
+
     return React.createElement(motion.div, {
         className: `sidebar ${isSidebarOpen ? 'open' : 'closed'}`,
         animate: { width: isSidebarOpen ? 250 : 80 }
@@ -256,12 +261,12 @@ function Header({ title }) {
 
 //OverviewContent Logic (GUI)
 //=============================================================================================================
-// const COLORS = ["#6366F1", "#6366F1", "#6366F1", "#6366F1", "#6366F1"];
+// const COLORS = ["#6366F1", "#8B5CF6", "#EC4899", "#F59E0B", "#10B981"];
 
 function SubjectGradeStatistic({ subjects }) {
     const [selectedSemester, setSelectedSemester] = React.useState('all');
-    const [selectedScale, setSelectedScale] = React.useState('10'); 
-    
+    const [selectedScale, setSelectedScale] = React.useState('10');
+
     const semesters = React.useMemo(() => {
         const availableSemesters = [...new Set(subjects.map(subject => subject.semester))];
         const semesterOptions = [
@@ -273,7 +278,7 @@ function SubjectGradeStatistic({ subjects }) {
         ];
         return semesterOptions;
     }, [subjects]);
-    
+
     const convertGrade = (grade, targetScale) => {
         if (targetScale === '4') {
             if (grade >= 9) return 4.0;
@@ -282,39 +287,39 @@ function SubjectGradeStatistic({ subjects }) {
             if (grade >= 7) return 3;
             return 0.0;
         }
-        return grade; 
+        return grade;
     };
-    
+
     const subjectData = React.useMemo(() => {
         if (!subjects || subjects.length === 0) {
             return [];
         }
-        
+
         let filteredSubjects = subjects;
         if (selectedSemester !== 'all') {
-            filteredSubjects = subjects.filter(subject => 
+            filteredSubjects = subjects.filter(subject =>
                 subject.semester === selectedSemester
             );
         }
-        
+
         return filteredSubjects.map(subject => ({
             name: subject.subject,
             value: convertGrade(subject.grade, selectedScale)
         }));
     }, [subjects, selectedSemester, selectedScale]);
-    
+
     const hasData = subjectData.length > 0;
     const selectedSemesterLabel = semesters.find(s => s.value === selectedSemester)?.label || selectedSemester;
-    
+
     const getYAxisDomain = () => {
         return selectedScale === '4' ? [0, 4] : [0, 10];
     };
-    
+
     const getTooltipFormatter = () => {
         const unit = selectedScale === '4' ? 'điểm (thang 4)' : 'điểm (thang 10)';
         return (value) => [`${value} ${unit}`, "Điểm số"];
     };
-    
+
     return React.createElement(motion.div, {
         className: "chart-container",
         initial: { opacity: 0, y: 20 },
@@ -322,22 +327,22 @@ function SubjectGradeStatistic({ subjects }) {
         transition: { delay: 0.4 }
     },
         React.createElement('div', {
-            style: { 
-                display: 'flex', 
-                justifyContent: 'space-between', 
+            style: {
+                display: 'flex',
+                justifyContent: 'space-between',
                 alignItems: 'center',
                 marginBottom: '20px',
                 flexWrap: 'wrap',
                 gap: '10px'
             }
         },
-            React.createElement('h2', { 
+            React.createElement('h2', {
                 className: "chart-title",
                 style: { margin: 0 }
             }, "Thống kê điểm số theo môn học"),
             React.createElement('div', {
-                style: { 
-                    display: 'flex', 
+                style: {
+                    display: 'flex',
                     gap: '15px',
                     alignItems: 'center'
                 }
@@ -346,8 +351,8 @@ function SubjectGradeStatistic({ subjects }) {
                     style: { display: 'flex', flexDirection: 'column', gap: '5px' }
                 },
                     React.createElement('label', {
-                        style: { 
-                            fontSize: '12px', 
+                        style: {
+                            fontSize: '12px',
                             color: '#9CA3AF',
                             fontWeight: '500'
                         }
@@ -377,8 +382,8 @@ function SubjectGradeStatistic({ subjects }) {
                     style: { display: 'flex', flexDirection: 'column', gap: '5px' }
                 },
                     React.createElement('label', {
-                        style: { 
-                            fontSize: '12px', 
+                        style: {
+                            fontSize: '12px',
                             color: '#9CA3AF',
                             fontWeight: '500'
                         }
@@ -402,21 +407,21 @@ function SubjectGradeStatistic({ subjects }) {
                 )
             )
         ),
-        React.createElement('div', { 
+        React.createElement('div', {
             className: "chart-content",
             style: { height: '320px' }
         },
             hasData ? React.createElement(ResponsiveContainer, null,
                 React.createElement(BarChart, { data: subjectData },
-                    React.createElement(CartesianGrid, { 
-                        strokeDasharray: "3 3", 
-                        stroke: "#4B5563" 
+                    React.createElement(CartesianGrid, {
+                        strokeDasharray: "3 3",
+                        stroke: "#4B5563"
                     }),
-                    React.createElement(XAxis, { 
-                        dataKey: "name", 
-                        stroke: "#9CA3AF" 
+                    React.createElement(XAxis, {
+                        dataKey: "name",
+                        stroke: "#9CA3AF"
                     }),
-                    React.createElement(YAxis, { 
+                    React.createElement(YAxis, {
                         stroke: "#9CA3AF",
                         domain: getYAxisDomain()
                     }),
@@ -430,8 +435,8 @@ function SubjectGradeStatistic({ subjects }) {
                         formatter: getTooltipFormatter()
                     }),
                     React.createElement(Legend),
-                    React.createElement(Bar, { 
-                        dataKey: "value", 
+                    React.createElement(Bar, {
+                        dataKey: "value",
                         name: `Điểm số (thang ${selectedScale})`
                     },
                         subjectData.map((entry, index) =>
@@ -472,8 +477,8 @@ function SubjectGradeStatistic({ subjects }) {
                         fontSize: '14px',
                         opacity: 0.8
                     }
-                }, selectedSemester === 'all' ? 
-                    'Chưa có dữ liệu điểm số nào.' : 
+                }, selectedSemester === 'all' ?
+                    'Chưa có dữ liệu điểm số nào.' :
                     `Không có dữ liệu cho ${selectedSemesterLabel}.`
                 ),
                 selectedSemester !== 'all' && React.createElement('button', {
@@ -504,7 +509,7 @@ function OverviewPageContent() {
             setLoading(true);
             try {
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
+
                 setSubjects([
                     { subject: "Lập trình phân tán với Công nghệ Java", grade: 9, semester: "HK1_2022-2023" },
                     { subject: "Hệ thống và Công nghệ Web", grade: 9.5, semester: "HK1_2022-2023" },
@@ -537,92 +542,6 @@ function OverviewPageContent() {
     );
 }
 
-
-function GradesPageContent({ keyValue }) {
-    const [gradesData, setGradesData] = React.useState(null);
-    const [isLoading, setIsLoading] = React.useState(false);
-
-    React.useEffect(() => {
-        if (keyValue) {
-            loadGrades(keyValue);
-        }
-    }, [keyValue]);
-
-    const loadGrades = async (key) => {
-        setIsLoading(true);
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            setGradesData({
-                studentInfo: {
-                    name: "Họ tên",
-                    studentId: "21000000",
-                    class: "DHKTPM18A"
-                },
-                subjects: [
-                    { id: 1, name: "Lập trình Java", grade: 8.5, credits: 3 },
-                    { id: 2, name: "Cơ sở dữ liệu", grade: 9.0, credits: 3 },
-                    { id: 3, name: "Mạng máy tính", grade: 10, credits: 2 }
-                ]
-            });
-        } catch (error) {
-            console.error('Error loading grades:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    return React.createElement('div', { className: 'page-content' },
-        React.createElement('div', { className: 'card' },
-            React.createElement('h2', { className: 'card-title' }, 'Kết quả học tập'),
-            // React.createElement('p', { className: 'key-text' }, `Key: ${keyValue}`),
-            
-            isLoading ? React.createElement('div', { className: 'loading' },
-                React.createElement('div', { className: 'spinner' }),
-                React.createElement('span', { className: 'loading-text' }, 'Đang tải dữ liệu...')
-            ) : gradesData ? React.createElement('div', { className: 'info-card' },
-                    React.createElement('h3', { className: 'info-card-title' }, 'Bảng điểm'),
-                    React.createElement('div', { className: 'table-container' },
-                        React.createElement('table', { className: 'grades-table' },
-                            React.createElement('thead', null,
-                                React.createElement('tr', null,
-                                    React.createElement('th', null, 'Môn học'),
-                                    React.createElement('th', null, 'Tín chỉ'),
-                                    React.createElement('th', null, 'Điểm'),
-                                    React.createElement('th', null, 'Xếp loại')
-                                )
-                            ),
-                            React.createElement('tbody', null,
-                                gradesData.subjects.map((subject) =>
-                                    React.createElement('tr', { key: subject.id },
-                                        React.createElement('td', null, subject.name),
-                                        React.createElement('td', null, subject.credits),
-                                        React.createElement('td', { className: 'grade-value' }, subject.grade),
-                                        React.createElement('td', null,
-                                            React.createElement('span', {
-                                                className: `grade-badge ${subject.grade >= 8.5 ? 'grade-excellent' :
-                                                    subject.grade >= 7.0 ? 'grade-good' :
-                                                        subject.grade >= 5.5 ? 'grade-average' :
-                                                            'grade-poor'
-                                                    }`
-                                            },
-                                                subject.grade >= 8.5 ? 'Giỏi' :
-                                                    subject.grade >= 7.0 ? 'Khá' :
-                                                        subject.grade >= 5.5 ? 'Trung bình' : 'Yếu'
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                ) : React.createElement('div', { className: 'no-data' },
-                    React.createElement('p', null, 'Không có dữ liệu để hiển thị')
-                )
-        )
-    );
-}
-
 //StudyPlanPageContent Logic (GUI)
 //=============================================================================================================
 function StudyPlanPageContent({ keyValue }) {
@@ -639,7 +558,7 @@ function StudyPlanPageContent({ keyValue }) {
         setIsLoading(true);
         try {
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             setStudyPlanData({
                 semesters: [
                     { id: 1, name: "Học kỳ 1", subjects: [] },
@@ -657,7 +576,7 @@ function StudyPlanPageContent({ keyValue }) {
         React.createElement('div', { className: 'card' },
             React.createElement('h2', { className: 'card-title' }, 'Kế hoạch học tập'),
             React.createElement('p', { className: 'key-text' }, `Key: ${keyValue}`),
-            
+
             isLoading ? React.createElement('div', { className: 'loading' },
                 React.createElement('div', { className: 'spinner' }),
                 React.createElement('span', { className: 'loading-text' }, 'Đang tải dữ liệu...')
@@ -670,5 +589,4 @@ function StudyPlanPageContent({ keyValue }) {
     );
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(React.createElement(App));
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
