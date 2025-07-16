@@ -41,7 +41,13 @@ function App() {
       }`;
     }
 
-    window.history.pushState({}, "", newUrl);
+      // window.history.pushState({}, "", newUrl);
+      //   const urlParams = new URLSearchParams();
+      //   if (key) {
+      //       urlParams.set('k', key);
+      //   }
+      //   urlParams.set('page', page);
+
   };
 
   const openStudyPlan = () => {

@@ -45,7 +45,7 @@ body {
 }
 
 .sidebar.open {
-    width: 200px;
+    width: 250px;
 }
 
 .sidebar.closed {
@@ -100,7 +100,7 @@ body {
 .sidebar-item {
     display: flex;
     align-items: center;
-    padding: 8px;
+    padding: 6px;
     font-size: 14px;
     font-weight: 500;
     border-radius: 16px;
@@ -117,6 +117,7 @@ body {
     background: rgba(255, 255, 255, 0.15);
     transform: translateX(4px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    
 }
 
 .sidebar-item-icon {
@@ -208,7 +209,7 @@ body {
 .header-title {
     font-size: 24px;
     font-weight: 700;
-    color: white;
+    color: rgb(255, 255, 255);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
