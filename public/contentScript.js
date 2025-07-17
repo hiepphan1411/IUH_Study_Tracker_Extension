@@ -202,51 +202,6 @@ function LoadNhieuTuan_JSON(startDateStr, soTuan = 10, loaiLich = 0, callback) {
   loadWithFetch(startDate, soTuan, loaiLich, token, callback);
 }
 
-// function loadWithJQuery(startDate, soTuan, loaiLich, token, callback) {
-//   const promises = [];
-
-//   for (let i = 0; i < soTuan; i++) {
-//     const ngay = new Date(startDate);
-//     ngay.setDate(ngay.getDate() + i * 7);
-//     const promise = jQuery
-//       .ajax({
-//         url: "/SinhVienTraCuu/GetDanhSachLichTheoTuan",
-//         type: "POST",
-//         dataType: "html",
-//         data: {
-//           k: token,
-//           pNgayHienTai: ngay.toISOString(),
-//           pLoaiLich: loaiLich,
-//         },
-//       })
-//       .then((data) => {
-//         window.ketQuaMang.push({
-//           tuan: i + 1,
-//           ngayBatDau: ngay.toISOString(),
-//           duLieu: data,
-//           loaiLich: loaiLich,
-//         });
-//       })
-//       .fail((err) => {
-//         console.log(`jQuery lỗi tuần ${i + 1}:`, err);
-//       });
-
-//     promises.push(promise);
-//   }
-
-//   jQuery.when
-//     .apply(jQuery, promises)
-//     .done(() => {
-//       if (callback) {
-//         callback();
-//       }
-//     })
-//     .fail(() => {
-//       console.error(`Lỗi jQuery`);
-//       if (callback) callback();
-//     });
-// }
-
 function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
   const promises = [];
 
@@ -303,8 +258,6 @@ function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
 }
 
 function parseLichHocFromHTML(htmlString) {
-  console.log(`🔄 Parse HTML, length: ${htmlString.length}`);
-
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlString, "text/html");
 
@@ -368,8 +321,6 @@ function processAndSaveScheduleData() {
     const tatCaTietHoc = window.ketQuaMang.flatMap((tuan) =>
       parseLichHocFromHTML(tuan.duLieu)
     );
-
-    console.log("📊 Tổng số tiết học sau parse:", tatCaTietHoc.length);
 
     const lichHoc = tatCaTietHoc.filter((t) => t.type === "lich_hoc");
     const lichThi = tatCaTietHoc.filter((t) => t.type === "lich_thi");
