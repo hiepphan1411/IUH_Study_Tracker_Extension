@@ -5,11 +5,8 @@
     !window.location.href.toLowerCase().includes("diem") &&
     !document.getElementById("xemDiem")
   ) {
-    console.log("⏭️ Bỏ qua lấy điểm - không phải trang điểm");
     return;
   }
-
-  console.log("📊 Bắt đầu xử lý trang điểm...");
 
   function getTableHeaders(table) {
     const thead = table.querySelector("thead");
@@ -60,15 +57,10 @@
   }
 
   function exportTableToJson() {
-    console.log("📋 Kiểm tra table điểm...");
     const table = document.getElementById("xemDiem");
     if (!table) {
-      console.log("❌ Không tìm thấy table #xemDiem");
       return;
     }
-
-    console.log("✅ Tìm thấy table điểm, bắt đầu export...");
-
     const headers = getTableHeaders(table);
     const bodyRows = Array.from(table.querySelectorAll("tbody tr"));
 
@@ -119,15 +111,12 @@
     }
 
     if (result.length > 0) {
-      console.log("✅ Đã lấy được dữ liệu điểm:", result.length, "học kỳ");
-
       chrome.storage.local.set(
         {
           diem_json: JSON.stringify(result, null, 2),
           diem_timestamp: Date.now(),
         },
         function () {
-          console.log("✅ Đã lưu điểm vào storage");
           chrome.runtime.sendMessage({
             type: "GRADES_SAVED",
             data: result,
@@ -137,12 +126,11 @@
 
       return true;
     } else {
-      console.log("⚠️ Không có dữ liệu điểm để lưu");
+      console.log("Không có dữ liệu điểm để lưu");
     }
   }
 
   window.addEventListener("load", () => {
-    console.log("📋 Window loaded, sẽ export điểm sau 2 giây...");
     setTimeout(exportTableToJson, 2000);
   });
 })();
@@ -331,6 +319,8 @@ function processAndSaveScheduleData() {
       tongSo: tatCaTietHoc.length,
       capNhatLuc: new Date().toISOString(),
     };
+
+    console.log("Dữ liệu đã lấy: ", scheduleData)
 
     chrome.storage.local.set(
       {
