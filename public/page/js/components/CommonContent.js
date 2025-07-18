@@ -181,7 +181,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                             overflow: 'hidden',
                             whiteSpace: 'nowrap'
                         }
-                    }, 'Quay lại')
+                    }, 'Thoát')
                 )
             )
         )
