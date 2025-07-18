@@ -106,10 +106,10 @@ function App() {
     }
   };
 
-  const handleViewGrades = async () => {
-    if (!validateKey(key)) return;
+const handleViewGrades = async () => {
+  if (!validateKey(key)) return;
 
-    setIsLoading(true);
+  setIsLoading(true);
 
     try {
       const messageListener = (message, sender, sendResponse) => {
