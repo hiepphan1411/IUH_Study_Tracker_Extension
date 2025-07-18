@@ -48,6 +48,12 @@ const SIDEBAR_ITEMS = [
         icon: "📅",
         color: "#ffffff",
         page: "study-plan"
+    },
+    {
+        name: "About Us",
+        icon: "ℹ️",
+        color: "#ffffff",
+        page: "about"
     }
 ];
 
