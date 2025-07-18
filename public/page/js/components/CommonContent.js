@@ -76,7 +76,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
         } else {
             onNavigate(item.page);
         }
-        setIsSidebarOpen(false);
+        // setIsSidebarOpen(false);
     };
 
     return React.createElement(motion.div, {

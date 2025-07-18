@@ -182,7 +182,6 @@ function loadScheduleData() {
   }
 }
 
-
 // function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
 //   const promises = [];
 
@@ -246,7 +245,9 @@ function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
     const ngay = new Date(baseDate.getTime() + i * 7 * 24 * 60 * 60 * 1000);
     const ngayISO = ngay.toISOString();
 
-    console.log(`Fetch request tuần ${i + 1}, ngày: ${ngay.toLocaleDateString()}`);
+    console.log(
+      `Fetch request tuần ${i + 1}, ngày: ${ngay.toLocaleDateString()}`
+    );
 
     const formData = new FormData();
     formData.append("k", token);
@@ -254,7 +255,7 @@ function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
     formData.append("pLoaiLich", loaiLich.toString());
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); 
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     const promise = fetch("/SinhVienTraCuu/GetDanhSachLichTheoTuan", {
       method: "POST",
@@ -283,7 +284,7 @@ function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
         if (window.DEBUG_MODE) {
           console.log(window.ketQuaMang);
         }
-        
+
         return result;
       })
       .catch((err) => {
@@ -297,11 +298,13 @@ function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
   Promise.allSettled(promises)
     .then((results) => {
       const successfulResults = results
-        .filter(result => result.status === 'fulfilled' && result.value !== null)
-        .map(result => result.value);
-      
+        .filter(
+          (result) => result.status === "fulfilled" && result.value !== null
+        )
+        .map((result) => result.value);
+
       console.log(`Hoàn thành ${successfulResults.length}/${soTuan} requests`);
-      
+
       if (callback) {
         callback(successfulResults);
       }
@@ -870,3 +873,1652 @@ function processAndSaveScheduleData() {
 //         $('#boxes .content').html('<b>' + message + '</b>');
 //     }
 // </script>
+
+//Lấy chương tình khung trong trang sv.iuh
+// ...existing code...
+
+(function () {
+  if (!window.location.href.includes("chuong-trinh-khung.html")) {
+    return;
+  }
+
+  function parseCurriculumData() {
+    const table = document.querySelector("#viewChuongTrinhKhung table");
+    if (!table) {
+      return null;
+    }
+
+    const result = [];
+    const tbody = table.querySelectorAll("tbody");
+
+    tbody.forEach((body) => {
+      const semesterHeader = body.querySelector(".row-head:first-child");
+      if (!semesterHeader) return;
+
+      const semesterText = semesterHeader
+        .querySelector("td")
+        ?.textContent?.trim();
+      if (!semesterText) return;
+
+      const semester = {
+        hocKy: semesterText,
+        monHoc: [],
+      };
+
+      const subjectRows = body.querySelectorAll("tr:not(.row-head)");
+
+      subjectRows.forEach((row) => {
+        const cells = row.querySelectorAll("td");
+        if (cells.length < 10) return;
+
+        const stt = cells[0]?.textContent?.trim();
+        if (!stt || isNaN(parseInt(stt))) return;
+
+        const tenMonElement = cells[1]?.querySelector("div");
+        const tenMon = tenMonElement?.textContent?.trim().replace(/\s+/g, " ");
+        if (!tenMon) return;
+
+        const maHocPhan = cells[2]?.querySelector("div")?.textContent?.trim();
+
+        const soTC = cells[4]?.querySelector("div")?.textContent?.trim();
+
+        const soTLT = cells[5]?.querySelector("div")?.textContent?.trim();
+
+        const soTTH = cells[6]?.querySelector("div")?.textContent?.trim();
+
+        const nhomTC = cells[7]?.querySelector("div")?.textContent?.trim();
+
+        const soTCBB = cells[8]?.querySelector("div")?.textContent?.trim();
+
+        let trangThai = "Chưa học";
+        const statusCell = cells[9]?.querySelector("div");
+        if (statusCell) {
+          const hasCheck = statusCell.querySelector(".check");
+          if (hasCheck) {
+            trangThai = "Đạt";
+          } else {
+            trangThai = "Chưa học";
+          }
+        }
+
+        const monHoc = {
+          tenMon: tenMon || "",
+          maHocPhan: maHocPhan || "",
+          soTC: soTC || "0",
+          soTLT: soTLT || "0",
+          soTTH: soTTH || "0",
+          nhomTC: nhomTC || "0",
+          soTCBB: soTCBB || "",
+          trangThai: trangThai,
+        };
+
+        semester.monHoc.push(monHoc);
+      });
+
+      if (semester.monHoc.length > 0) {
+        result.push(semester);
+      }
+    });
+
+    return result;
+  }
+
+  function saveCurriculumData() {
+    try {
+      const curriculumData = parseCurriculumData();
+
+      if (!curriculumData || curriculumData.length === 0) {
+        return;
+      }
+
+      chrome.storage.local.set(
+        {
+          curriculum_json: JSON.stringify(curriculumData, null, 2),
+          curriculum_timestamp: Date.now(),
+        },
+        function () {
+          if (chrome.runtime.lastError) {
+            console.log(
+              "Lỗi lưu dữ liệu chương trình khung:",
+              chrome.runtime.lastError
+            );
+            return;
+          }
+
+          //   chrome.runtime.sendMessage(
+          //     {
+          //       type: "CURRICULUM_SAVED",
+          //       data: curriculumData,
+          //     },
+          //     (response) => {
+          //       if (chrome.runtime.lastError) {
+          //         console.log("Lỗi gửi message:", chrome.runtime.lastError.message);
+          //       } else {
+          //         console.log("Đã lưu và gửi dữ liệu chương trình khung thành công");
+          //       }
+          //     }
+          //   );
+        }
+      );
+
+      return true;
+    } catch (error) {
+      console.error("Lỗi trong saveCurriculumData:", error);
+      return false;
+    }
+  }
+
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      saveCurriculumData();
+    }, 2000);
+  });
+
+  if (document.readyState === "complete") {
+    setTimeout(() => {
+      saveCurriculumData();
+    }, 1000);
+  }
+})();
+
+//Data sample
+{
+  /* <div class="col-md-10 col-xs-12">
+    <div class="box-df">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="caption">
+                    <span class="caption-subject bold" lang="ctk-pagetitle">Chương tr&#236;nh khung</span>
+                </div>
+                <div class="actions">
+                    
+                    <a href="javascript:;" class="btn btn-action" id="btn_InCongNo" onclick="PrintElem($('#id-chuong-trinh-khung'))" lang="ctk-btnIn">
+                        <i class="fa fa-print" aria-hidden="true"></i>
+                        In
+                    </a>
+                    <a href="javascript:;" class="btn btn-action" id="OpenAccordionAll">
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                    </a>
+                    <a href="javascript:;" class="btn btn-action" id="full-table">
+                        <span class="glyphicon glyphicon-resize-full" aria-hidden="true"></span>
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="clearfix"></div>
+                <div class="table-responsive">
+                    <div id="viewChuongTrinhKhung">
+                        <table class="table-custom table table-bordered text-center no-footer dtr-inline" width="100%" role="grid">
+                            <thead>
+                                <tr role="row">
+                                    <th class="sorting_disabled">STT</th>
+                                    
+                                    <th class="sorting_disabled" width="20%" lang="ctk-tenmhhp">Tên môn học/Học phần</th>
+                                    <th class="sorting_disabled" lang="ctk-mahp">Mã Học phần</th>
+                                        <th class="sorting_disabled tooltip" langid="ctk-mhghichu-title_1" title="<b>Học phần</b>: học trước (a), tiên quyết (b), song hành (c)">Học phần</th>
+
+                                    <th class="sorting_disabled" lang="ctk-stc">Số TC</th>
+
+                                        <th class="sorting_disabled" lang="ctk-sotietlt">Số tiết LT</th>
+                                        <th class="sorting_disabled" lang="ctk-sotietth">Số tiết TH</th>
+
+
+
+                                    <th class="sorting_disabled" lang="ctk-nhomtuchon">Nhóm <br /> tự chọn</th>
+                                    <th class="sorting_disabled" lang="ctk-sotcnhombatbuoc">Số TC bắt buộc <br /> của nhóm</th>
+                                    <th class="sorting_disabled" lang="ctk-pass">Đạt</th>
+                                                                    </tr>
+                            </thead>
+                                        <tbody>
+                                                <tr role="row" class="row-head row-head-hover" data-toggle="collapse" data-target=".tr-row-1">
+                                                    <td colspan="4" class="text-center"><span lang="ctk-hocky">Học kỳ</span> 1</td>
+                                                    <td class="text-center"><span class="">11</span></td>
+                                                    <td colspan="5"></td>
+                                                </tr>
+                                                    <tr role="row" class="row-head tr-row-1 collapse ">
+                                                        <td colspan="4" class="text-left">
+                                                            <div class="tr-row-1 collapse " lang="ctk-hpbatbuoc">Học phần bắt buộc</div>
+                                                        </td>
+                                                        <td class="text-center"><span class="tr-row-1 collapse ">11</span></td>
+                                                        <td colspan="5"></td>
+                                                    </tr>
+                                                        <tr class="tr-row-1 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">1</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-1 collapse ">
+                                                                    Nhập m&#244;n Tin học 
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4203002009</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">2</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">30</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-1 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-1 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">2</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-1 collapse ">
+                                                                    Kỹ năng l&#224;m việc nh&#243;m
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4203003192</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">2</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">30</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-1 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-1 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">3</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-1 collapse ">
+                                                                    Gi&#225;o dục Quốc ph&#242;ng v&#224; An ninh 1
+                                                                        <span style="color:red;font-weight:bold"> *</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4203003242</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">60</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-1 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-1 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-1 collapse ">
+                                                                    To&#225;n cao cấp 1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4203003259</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">2</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">30</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-1 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-1 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">5</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-1 collapse ">
+                                                                    Gi&#225;o dục thể chất 1
+                                                                        <span style="color:red;font-weight:bold"> *</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4203003307</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">2</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">0</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">60</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-1 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-1 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">6</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-1 collapse ">
+                                                                    Nhập m&#244;n Lập tr&#236;nh
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4203003848</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">2</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">0</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">60</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-1 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-1 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">7</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-1 collapse ">
+                                                                    Triết học M&#225;c - L&#234;nin
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4203014164</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-1 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-1 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">8</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-1 collapse ">
+                                                                    Chứng chỉ Tiếng Anh
+                                                                        <span style="color:red;font-weight:bold"> *</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">4203015216</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">0</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">0</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-1 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-1 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                <tr>
+                                                    <td colspan="10" style="padding:2px !important"></td>
+                                                </tr>
+
+                                        </tbody>
+                                        <tbody>
+                                                <tr role="row" class="row-head row-head-hover" data-toggle="collapse" data-target=".tr-row-2">
+                                                    <td colspan="4" class="text-center"><span lang="ctk-hocky">Học kỳ</span> 2</td>
+                                                    <td class="text-center"><span class="">12</span></td>
+                                                    <td colspan="5"></td>
+                                                </tr>
+                                                    <tr role="row" class="row-head tr-row-2 collapse ">
+                                                        <td colspan="4" class="text-left">
+                                                            <div class="tr-row-2 collapse " lang="ctk-hpbatbuoc">Học phần bắt buộc</div>
+                                                        </td>
+                                                        <td class="text-center"><span class="tr-row-2 collapse ">9</span></td>
+                                                        <td colspan="5"></td>
+                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">1</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    Kỹ thuật lập tr&#236;nh
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203000941</div>
+                                                            </td>
+                                                                <td>
+                                                                        <div class="tr-row-2 collapse ">
+                                                                            <div class="tooltip" langid="ctk-hoctruoc-title_1" title="Học phần học trước">003848<span class="cl-red">(a)</span></div>
+                                                                        </div>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">30</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">30</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-2 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">2</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    Hệ thống M&#225;y t&#237;nh
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203002137</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">30</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-2 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">3</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    Gi&#225;o dục thể chất 2
+                                                                        <span style="color:red;font-weight:bold"> *</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203003306</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">2</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">0</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">60</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-2 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    Gi&#225;o dục quốc ph&#242;ng v&#224; an ninh 2
+                                                                        <span style="color:red;font-weight:bold"> *</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203003354</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">30</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">60</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-2 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">5</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    Kinh tế ch&#237;nh trị M&#225;c - L&#234;nin
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203014165</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">2</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">30</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-2 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">6</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    Tiếng Anh 1
+                                                                        <span style="color:red;font-weight:bold"> *</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203015253</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-2 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                    <tr role="row" class="row-head tr-row-2 collapse ">
+                                                        <td colspan="4" class="text-left">
+                                                            <div class="tr-row-2 collapse " lang="ctk-hptuchon">Học phần tự chọn</div>
+                                                        </td>
+                                                        <td class="text-center"><span class="tr-row-2 collapse ">3</span></td>
+                                                        <td colspan="5"></td>
+                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">7</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    To&#225;n ứng dụng
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203003193</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">8</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    H&#224;m phức v&#224; ph&#233;p biến đổi Laplace
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203003240</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">9</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    Phương ph&#225;p t&#237;nh
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203003320</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-2 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">10</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    Vật l&#253; đại cương
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203003345</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-2 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">11</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-2 collapse ">
+                                                                    Logic học
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">4203003395</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-2 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-2 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                <tr>
+                                                    <td colspan="10" style="padding:2px !important"></td>
+                                                </tr>
+
+                                        </tbody>
+                                        <tbody>
+                                                <tr role="row" class="row-head row-head-hover" data-toggle="collapse" data-target=".tr-row-3">
+                                                    <td colspan="4" class="text-center"><span lang="ctk-hocky">Học kỳ</span> 3</td>
+                                                    <td class="text-center"><span class="">19</span></td>
+                                                    <td colspan="5"></td>
+                                                </tr>
+                                                    <tr role="row" class="row-head tr-row-3 collapse ">
+                                                        <td colspan="4" class="text-left">
+                                                            <div class="tr-row-3 collapse " lang="ctk-hpbatbuoc">Học phần bắt buộc</div>
+                                                        </td>
+                                                        <td class="text-center"><span class="tr-row-3 collapse ">16</span></td>
+                                                        <td colspan="5"></td>
+                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">1</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    Cấu tr&#250;c rời rạc
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203000901</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">2</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    Cấu tr&#250;c dữ liệu v&#224; giải thuật
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203000942</div>
+                                                            </td>
+                                                                <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="tooltip" langid="ctk-hoctruoc-title_2" title="Học phần học trước">003848<span class="cl-red">(a)</span></div>
+                                                                        </div>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">30</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    Hệ cơ sở dữ liệu
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203001146</div>
+                                                            </td>
+                                                                <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="tooltip" langid="ctk-hoctruoc-title_3" title="Học phần học trước">002009<span class="cl-red">(a)</span></div>
+                                                                        </div>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">30</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    To&#225;n cao cấp 2
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203003288</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">2</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">30</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">5</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    Lập tr&#236;nh hướng đối tượng
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203003591</div>
+                                                            </td>
+                                                                <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="tooltip" langid="ctk-hoctruoc-title_5" title="Học phần học trước">003848<span class="cl-red">(a)</span></div>
+                                                                        </div>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">30</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">30</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">6</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    Tiếng Anh 2
+                                                                        <span style="color:red;font-weight:bold"> *</span>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203015254</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    0
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                    <tr role="row" class="row-head tr-row-3 collapse ">
+                                                        <td colspan="4" class="text-left">
+                                                            <div class="tr-row-3 collapse " lang="ctk-hptuchon">Học phần tự chọn</div>
+                                                        </td>
+                                                        <td class="text-center"><span class="tr-row-3 collapse ">3</span></td>
+                                                        <td colspan="5"></td>
+                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">7</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    Địa l&#253; kinh tế
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203001103</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">8</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    Kỹ năng x&#226;y dựng kế hoạch
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203003197</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  colorSTLichHoc">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">9</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    M&#244;i trường v&#224; con người
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203003206</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                        <div class="tr-row-3 collapse ">
+                                                                            <div class="check"></div>
+                                                                        </div>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">10</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    C&#244;ng nghệ th&#244;ng tin trong chuyển đổi số
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203015296</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">11</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    Ứng dụng h&#243;a học trong C&#244;ng nghiệp
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203015299</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                        <tr class="tr-row-3 collapse  ">
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">12</div>
+                                                            </td>
+                                                            
+                                                            <td class="text-left">
+                                                                <div class="tr-row-3 collapse ">
+                                                                    Ứng dụng 5S v&#224; Kaizen trong sản xuất
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">4203015300</div>
+                                                            </td>
+                                                                <td>
+
+
+                                                                </td>
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">3</div>
+                                                            </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">45</div>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="tr-row-3 collapse ">0</div>
+                                                                </td>
+
+
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    1
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <div class="tr-row-3 collapse ">
+                                                                    3
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                            </td>
+                                                                                                                    </tr>
+                                                <tr>
+                                                    <td colspan="10" style="padding:2px !important"></td>
+                                                </tr>
+
+                                        </tbody> */
+}
