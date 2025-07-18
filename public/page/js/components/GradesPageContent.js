@@ -767,7 +767,7 @@ function GradesPageContent({ keyValue }) {
 
         // Update visual styling for low scores
         const numValue = validation.value;
-        if (numValue !== null && numValue !== undefined && numValue >= 0 && numValue <= 5) {
+        if ((numValue !== null && numValue !== undefined && numValue >= 0 && numValue <= 5) || numValue === 0) {
             e.target.style.color = '#dc2626';
             e.target.style.fontWeight = 'bold';
             e.target.classList.add('low-score');
@@ -818,7 +818,7 @@ function GradesPageContent({ keyValue }) {
             displayValue = '0,0';
         }
 
-        const isLowScore = numericValue !== null && numericValue !== undefined && numericValue >= 0 && numericValue <= 5;
+        const isLowScore = (numericValue !== null && numericValue !== undefined && numericValue >= 0 && numericValue <= 5) || value === 0;
 
         return React.createElement('td', {
             className: `${isLowScore ? 'low-score' : ''} ${isDisabled ? 'disabled-cell' : ''}`,
@@ -854,7 +854,7 @@ function GradesPageContent({ keyValue }) {
                     const currentValue = e.target.textContent.trim();
                     if (currentValue !== '') {
                         const numValue = parseFloat(currentValue.replace(',', '.'));
-                        if (!isNaN(numValue) && numValue >= 0 && numValue <= 5) {
+                        if ((!isNaN(numValue) && numValue >= 0 && numValue <= 5) || numValue === 0) {
                             e.target.style.color = '#dc2626';
                             e.target.style.fontWeight = 'bold';
                             e.target.classList.add('low-score');
@@ -991,7 +991,7 @@ function GradesPageContent({ keyValue }) {
                                     createEditableCell(subject.diemCuoiKy, 'ck', semIndex, subIndex),
                                     React.createElement('td', {
                                         className: `td-tong-ket ${getGradeClass(subject.diemTongKet)}`,
-                                        style: subject.diemTongKet !== null && subject.diemTongKet !== undefined && subject.diemTongKet >= 0 && subject.diemTongKet <= 5 ? { color: '#dc2626', fontWeight: 'bold' } : {}
+                                        style: (subject.diemTongKet !== null && subject.diemTongKet !== undefined && subject.diemTongKet >= 0 && subject.diemTongKet <= 5) || subject.diemTongKet === 0 ? { color: '#dc2626', fontWeight: 'bold' } : {}
                                     }, subject.diemTongKet !== null && subject.diemTongKet !== undefined ?
                                         (typeof subject.diemTongKet === 'string' ? subject.diemTongKet : subject.diemTongKet.toFixed(1).replace('.', ',')) : ''),
                                     React.createElement('td', { className: 'td-thang-diem-4' },
