@@ -34,19 +34,19 @@ const SIDEBAR_ITEMS = [
     {
         name: "Overview",
         icon: "📊",
-        color: "#6366f1",
+        color: "#ffffff",
         page: "overview"
     },
     {
         name: "View Learning Results",
         icon: "📚",
-        color: "#6366f1",
+        color: "#ffffff",
         page: "grades"
     },
     {
         name: "Study Plan",
         icon: "📅",
-        color: "#6366f1",
+        color: "#ffffff",
         page: "study-plan"
     }
 ];
@@ -69,7 +69,7 @@ function MenuIcon({ size = 24 }) {
 // Sidebar
 function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
-    
+
     const handleItemClick = (item) => {
         if (item.page === 'study-plan') {
             onNavigate(item.page)
@@ -78,7 +78,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
         }
         setIsSidebarOpen(false);
     };
-    
+
     return React.createElement(motion.div, {
         className: `sidebar ${isSidebarOpen ? 'open' : 'closed'}`,
         animate: { width: isSidebarOpen ? 225 : 80 }
@@ -96,20 +96,21 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                 isSidebarOpen && React.createElement(motion.h2, {
                     className: "sidebar-title fade-in",
                     initial: { opacity: 0, width: 0 },
-                    animate: { 
-                        opacity: isSidebarOpen ? 1 : 0, 
+                    animate: {
+                        opacity: isSidebarOpen ? 1 : 0,
                         width: isSidebarOpen ? "auto" : 0
                     },
-                    transition: { 
+                    transition: {
                         duration: 0.3,
                         ease: "easeInOut"
                     },
-                    style: { 
+                    style: {
                         overflow: 'hidden',
                         whiteSpace: 'nowrap'
                     }
                 }, "IUH Study Tracker")
             ),
+
             React.createElement('nav', { className: 'sidebar-nav' },
                 SIDEBAR_ITEMS.map((item, index) =>
                     React.createElement(motion.div, {
@@ -131,15 +132,15 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                         isSidebarOpen && React.createElement(motion.span, {
                             className: 'sidebar-item-text fade-in',
                             initial: { opacity: 0, width: 0 },
-                            animate: { 
-                                opacity: isSidebarOpen ? 1 : 0, 
+                            animate: {
+                                opacity: isSidebarOpen ? 1 : 0,
                                 width: isSidebarOpen ? "auto" : 0
                             },
-                            transition: { 
+                            transition: {
                                 duration: 0.3,
                                 ease: "easeInOut"
                             },
-                            style: { 
+                            style: {
                                 overflow: 'hidden',
                                 whiteSpace: 'nowrap',
                                 ...(currentPage === item.page ? {
@@ -162,15 +163,15 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                     isSidebarOpen && React.createElement(motion.span, {
                         className: 'back-button-text fade-in',
                         initial: { opacity: 0, width: 0 },
-                        animate: { 
-                            opacity: isSidebarOpen ? 1 : 0, 
+                        animate: {
+                            opacity: isSidebarOpen ? 1 : 0,
                             width: isSidebarOpen ? "auto" : 0
                         },
-                        transition: { 
+                        transition: {
                             duration: 0.3,
                             ease: "easeInOut"
                         },
-                        style: { 
+                        style: {
                             overflow: 'hidden',
                             whiteSpace: 'nowrap'
                         }
