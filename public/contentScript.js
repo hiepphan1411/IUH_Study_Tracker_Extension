@@ -1,4 +1,3 @@
-
 //Lấy điểm
 (function () {
   if (
@@ -146,7 +145,6 @@ if (window.location.href.includes("lich-hoc-theo-tuan.html")) {
     return conditions;
   }
 
-
   let loadAttempts = 0;
   const maxLoadAttempts = 8;
 
@@ -158,8 +156,7 @@ if (window.location.href.includes("lich-hoc-theo-tuan.html")) {
       return;
     }
   }
-
-  setTimeout(attemptLoadSchedule, 3000);
+  setTimeout(attemptLoadSchedule, 1000);
 }
 
 function loadScheduleData() {
@@ -169,8 +166,15 @@ function loadScheduleData() {
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("k");
 
-    LoadNhieuTuan_JSON(startDate.toISOString(), 4, 0, () => {
+    if (!token) {
+      console.log("Không tìm thấy token");
+      return;
+    }
+
+    loadWithFetch(startDate.toISOString(), 4, 0, token, () => {
       processAndSaveScheduleData();
     });
   } catch (error) {
@@ -178,33 +182,79 @@ function loadScheduleData() {
   }
 }
 
-function LoadNhieuTuan_JSON(startDateStr, soTuan = 10, loaiLich = 0, callback) {
-  const startDate = new Date(startDateStr);
-  const urlParams = new URLSearchParams(window.location.search);
-  const token = urlParams.get("k");
 
-  if (!token) {
-    if (callback) callback();
-    return;
-  }
-  loadWithFetch(startDate, soTuan, loaiLich, token, callback);
-}
+// function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
+//   const promises = [];
+
+//   for (let i = 0; i < soTuan; i++) {
+//     const ngay = new Date(startDate);
+//     ngay.setDate(ngay.getDate() + i * 7);
+
+//     console.log(
+//       `Fetch request tuần ${i + 1}, ngày: ${ngay.toLocaleDateString()}`
+//     );
+
+//     const formData = new FormData();
+//     formData.append("k", token);
+//     formData.append("pNgayHienTai", ngay.toISOString());
+//     formData.append("pLoaiLich", loaiLich.toString());
+
+//     const promise = fetch("/SinhVienTraCuu/GetDanhSachLichTheoTuan", {
+//       method: "POST",
+//       body: formData,
+//       headers: {
+//         "X-Requested-With": "XMLHttpRequest",
+//       },
+//     })
+//       .then((response) => {
+//         if (!response.ok) {
+//           throw new Error(`HTTP error! status: ${response.status}`);
+//         }
+//         return response.text();
+//       })
+//       .then((data) => {
+//         window.ketQuaMang.push({
+//           tuan: i + 1,
+//           ngayBatDau: ngay.toISOString(),
+//           duLieu: data,
+//           loaiLich: loaiLich,
+//         });
+//         console.log(window.ketQuaMang);
+//       })
+//       .catch((err) => {
+//         console.log(`Fetch lỗi tuần ${i + 1}:`, err);
+//       });
+
+//     promises.push(promise);
+//   }
+//   Promise.all(promises)
+//     .then(() => {
+//       if (callback) {
+//         callback();
+//       }
+//     })
+//     .catch((error) => {
+//       if (callback) callback();
+//     });
+// }
 
 function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
   const promises = [];
+  const baseDate = new Date(startDate);
 
   for (let i = 0; i < soTuan; i++) {
-    const ngay = new Date(startDate);
-    ngay.setDate(ngay.getDate() + i * 7);
+    const ngay = new Date(baseDate.getTime() + i * 7 * 24 * 60 * 60 * 1000);
+    const ngayISO = ngay.toISOString();
 
-    console.log(
-      `Fetch request tuần ${i + 1}, ngày: ${ngay.toLocaleDateString()}`
-    );
+    console.log(`Fetch request tuần ${i + 1}, ngày: ${ngay.toLocaleDateString()}`);
 
     const formData = new FormData();
     formData.append("k", token);
-    formData.append("pNgayHienTai", ngay.toISOString());
+    formData.append("pNgayHienTai", ngayISO);
     formData.append("pLoaiLich", loaiLich.toString());
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); 
 
     const promise = fetch("/SinhVienTraCuu/GetDanhSachLichTheoTuan", {
       method: "POST",
@@ -212,40 +262,57 @@ function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
       headers: {
         "X-Requested-With": "XMLHttpRequest",
       },
+      signal: controller.signal,
+      keepalive: true,
     })
       .then((response) => {
+        clearTimeout(timeoutId);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.text();
       })
       .then((data) => {
-        window.ketQuaMang.push({
+        const result = {
           tuan: i + 1,
-          ngayBatDau: ngay.toISOString(),
+          ngayBatDau: ngayISO,
           duLieu: data,
           loaiLich: loaiLich,
-        });
+        };
+        window.ketQuaMang.push(result);
+        if (window.DEBUG_MODE) {
+          console.log(window.ketQuaMang);
+        }
+        
+        return result;
       })
       .catch((err) => {
-        console.log(`Fetch lỗi tuần ${i + 1}:`, err);
+        clearTimeout(timeoutId);
+        return null;
       });
 
     promises.push(promise);
   }
 
-  Promise.all(promises)
-    .then(() => {
+  Promise.allSettled(promises)
+    .then((results) => {
+      const successfulResults = results
+        .filter(result => result.status === 'fulfilled' && result.value !== null)
+        .map(result => result.value);
+      
+      console.log(`Hoàn thành ${successfulResults.length}/${soTuan} requests`);
+      
       if (callback) {
-        callback();
+        callback(successfulResults);
       }
     })
     .catch((error) => {
-      if (callback) callback();
+      console.error("Lỗi rồi:)", error);
+      if (callback) callback([]);
     });
 }
-
 function parseLichHocFromHTML(htmlString) {
+  console.log("Chạy!");
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlString, "text/html");
 
@@ -258,7 +325,7 @@ function parseLichHocFromHTML(htmlString) {
     const cells = row.querySelectorAll("td");
 
     cells.forEach((cell, colIndex) => {
-      if (colIndex === 0) return; 
+      if (colIndex === 0) return;
 
       const buoiHocList = cell.querySelectorAll(".content");
       buoiHocList.forEach((buoiHoc) => {
@@ -297,6 +364,7 @@ function parseLichHocFromHTML(htmlString) {
       });
     });
   });
+  console.log("Chạy xongg!");
   return ketQua;
 }
 
@@ -320,7 +388,7 @@ function processAndSaveScheduleData() {
       capNhatLuc: new Date().toISOString(),
     };
 
-    console.log("Dữ liệu đã lấy: ", scheduleData)
+    console.log("Dữ liệu đã lấy: ", scheduleData);
 
     chrome.storage.local.set(
       {
@@ -340,10 +408,7 @@ function processAndSaveScheduleData() {
           },
           (response) => {
             if (chrome.runtime.lastError) {
-              console.log(
-                "Lỗi",
-                chrome.runtime.lastError.message
-              );
+              console.log("Lỗi", chrome.runtime.lastError.message);
             } else {
               console.log("Đã gửi message");
             }
