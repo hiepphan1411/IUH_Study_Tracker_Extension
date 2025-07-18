@@ -46,24 +46,64 @@ function App() {
   };
 
   const handleViewSchedule = async () => {
-      if (!validateKey(key)) return;
+    if (!validateKey(key)) return;
 
-      setIsLoading(true);
+    setIsLoading(true);
+    let createdTabId = null; 
 
-      const scheduleUrl = `page/MainSchedulePage.html?k=${encodeURIComponent(
-          key,
-      )}`;
-      const newWindow = window.open(scheduleUrl, '_blank');
-      if (
-          !newWindow ||
-          newWindow.closed ||
-          typeof newWindow.closed === 'undefined'
-      ) {
-          alert(
-              'Trình duyệt đã chặn cửa sổ bật lên. Vui lòng cho phép để xem lịch.',
+    try {
+      const messageListener = (message, sender, sendResponse) => {
+        if (message.type === "SCHEDULE_SAVED") {
+          const schedulePageUrl = chrome.runtime.getURL(
+            `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
           );
+          chrome.tabs.create({ url: schedulePageUrl });
+
+          if (sender.tab?.id) {
+            chrome.tabs.remove(sender.tab.id);
+          }
+
+          chrome.runtime.onMessage.removeListener(messageListener);
+          setIsLoading(false);
+        }
+      };
+
+      chrome.runtime.onMessage.addListener(messageListener);
+
+      const scheduleUrl = `https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html?k=${encodeURIComponent(
+        key
+      )}`;
+
+      const createdTab = await chrome.tabs.create({
+        url: scheduleUrl,
+        active: false,
+        pinned: true,
+      });
+
+      createdTabId = createdTab.id;
+
+      setTimeout(() => {
+        chrome.runtime.onMessage.removeListener(messageListener);
+
+        if (createdTabId) {
+          chrome.tabs.remove(createdTabId).catch((error) => {
+            console.log("Tab đã được đóng hoặc không tồn tại:", error);
+          });
+        }
+
+        const schedulePageUrl = chrome.runtime.getURL(
+          `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
+        );
+        chrome.tabs.create({ url: schedulePageUrl });
+        setIsLoading(false);
+      }, 20000);
+    } catch (error) {
+      if (createdTabId) {
+        chrome.tabs.remove(createdTabId).catch(() => {});
       }
+
       setIsLoading(false);
+    }
   };
 
 const handleViewGrades = async () => {

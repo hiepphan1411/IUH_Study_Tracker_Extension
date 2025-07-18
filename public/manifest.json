@@ -17,7 +17,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html*"
+        "https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html*",
+        "https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html*"
       ],
       "js": [
         "contentScript.js"
@@ -30,9 +31,12 @@
       "resources": [
         "grades.html",
         "page/MainPage.html",
-        "page/css/MainPage.css",
-        "page/js/MainPage.js",
-        "page/js/components/*.js"
+        "page/MainSchedulePage.html",
+        "page/css/*.css",
+        "page/js/*.js",
+        "page/js/components/*.js",
+        "static/js/*.js",
+        "static/css/*.css"
       ],
       "matches": [
         "<all_urls>"

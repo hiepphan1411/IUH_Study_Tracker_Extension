@@ -818,8 +818,8 @@ function OverviewPageContent() {
 
           const transformedSubjects = parsedData;
 
-          console.log("Result: ", transformedSubjects);
-          console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
+          // console.log("Result: ", transformedSubjects);
+          // console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
 
           setSubjects(transformedSubjects);
           setResults(transformedSubjects);
