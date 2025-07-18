@@ -382,41 +382,45 @@ function StatisticsResultsBySemester({ results }) {
   React.useEffect(() => {
     if (!results || !results.length) return;
 
-    const formattedData = results.map((hocKy) => {
-      const semester = hocKy.hocKy;
+    const formattedData = results
+      .map((hocKy) => {
+        const semester = hocKy.hocKy;
 
-      const avgRow = hocKy.monHoc.find((mon) =>
-        mon.STT && mon.STT.includes("Điểm trung bình học kỳ hệ")
-      );
+        const avgRow = hocKy.monHoc.find(
+          (mon) => mon.STT && mon.STT.includes("Điểm trung bình học kỳ hệ")
+        );
 
-      let average = 0;
+        let average = 0;
 
-      if (avgRow) {
-        if (selectedScale === "10") {
-          const match = avgRow.STT.match(/Điểm trung bình học kỳ hệ 10: ([\d,]+)/);
-          if (match) {
-            average = parseFloat(match[1].replace(",", "."));
-          }
-        } else {
-          const match = avgRow["Mã lớp học phần"].match(
-            /Điểm trung bình học kỳ hệ 4: ([\d,]+)/
-          );
-          if (match) {
-            average = parseFloat(match[1].replace(",", "."));
+        if (avgRow) {
+          if (selectedScale === "10") {
+            const match = avgRow.STT.match(
+              /Điểm trung bình học kỳ hệ 10: ([\d,]+)/
+            );
+            if (match) {
+              average = parseFloat(match[1].replace(",", "."));
+            }
+          } else {
+            const match = avgRow["Mã lớp học phần"].match(
+              /Điểm trung bình học kỳ hệ 4: ([\d,]+)/
+            );
+            if (match) {
+              average = parseFloat(match[1].replace(",", "."));
+            }
           }
         }
-      }
 
-      const shortenedName = semester
-        .replace(/HK(\d+) \((\d{4}) - (\d{4})\)/, "HK$1($2-$3)")
-        .replace(/(\d{4})/g, (match) => match.slice(-2));
+        const shortenedName = semester
+          .replace(/HK(\d+) \((\d{4}) - (\d{4})\)/, "HK$1($2-$3)")
+          .replace(/(\d{4})/g, (match) => match.slice(-2));
 
-      return {
-        name: shortenedName,
-        fullName: semester,
-        average: average || 0,
-      };
-    }).filter((item) => item.average > 0);
+        return {
+          name: shortenedName,
+          fullName: semester,
+          average: average || 0,
+        };
+      })
+      .filter((item) => item.average > 0);
 
     formattedData.sort((a, b) => {
       const extractSemesterInfo = (name) => {
@@ -810,6 +814,27 @@ function OverviewPageContent() {
             }
           );
         });
+        //Test lấy chương trình khung
+        chrome.storage.local.get(
+          ["curriculum_json", "curriculum_timestamp"],
+          function (result) {
+            if (chrome.runtime.lastError) {
+              console.error("Lỗi lấy dữ liệu:", chrome.runtime.lastError);
+              return;
+            }
+
+            if (result.curriculum_json) {
+              const curriculumData = JSON.parse(result.curriculum_json);
+              const timestamp = result.curriculum_timestamp;
+
+              console.log("DỮ LIỆU CHƯƠNG TRÌNH KHUNG");
+              console.log(curriculumData);
+
+            } else {
+              console.log("Không có dữ liệu chương trình khung trong storage");
+            }
+          }
+        );
 
         const diemJson = result.diem_json;
 

@@ -48,6 +48,12 @@ const SIDEBAR_ITEMS = [
         icon: "📅",
         color: "#ffffff",
         page: "study-plan"
+    },
+    {
+        name: "About Us",
+        icon: "ℹ️",
+        color: "#ffffff",
+        page: "about"
     }
 ];
 
@@ -76,7 +82,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
         } else {
             onNavigate(item.page);
         }
-        setIsSidebarOpen(false);
+        // setIsSidebarOpen(false);
     };
 
     return React.createElement(motion.div, {
@@ -175,7 +181,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                             overflow: 'hidden',
                             whiteSpace: 'nowrap'
                         }
-                    }, 'Quay lại')
+                    }, 'Thoát')
                 )
             )
         )
