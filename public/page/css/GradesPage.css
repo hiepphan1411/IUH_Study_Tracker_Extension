@@ -241,8 +241,8 @@ body {
 }
 
 .td-ten-mon {
-  text-align: left;
-  padding-left: 8px;
+  text-align: left !important;
+  padding-left: 5px !important;
   font-weight: 500;
   color: #111827;
   max-width: 180px;
@@ -280,23 +280,25 @@ body {
 }
 
 .td-tong-ket.excellent {
-  background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-  color: #15803d;
+ background: white;
+  color: #000000;
 }
 
 .td-tong-ket.good {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  color: #1d4ed8;
+  background: white;
+  color: #000000;
 }
 
 .td-tong-ket.average {
-  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
-  color: #d97706;
+  background: white;
+  color: #000000;
 }
 
 .td-tong-ket.poor {
-  background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
-  color: #be185d;
+  /* background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+  color: #be185d; */
+  background: white;
+  color: #000000;
 }
 
 .td-thang-diem-4 {
@@ -374,6 +376,72 @@ td[contenteditable="true"]:focus {
   font-size: 13px;
   color: #374151;
   font-weight: 600;
+}
+
+/* Semester Summary Table */
+.semester-summary-table {
+  margin-top: 20px;
+  margin-bottom: 30px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-size: 13px;
+}
+
+.summary-row {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.summary-row:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.summary-row:hover {
+  background-color: #f3f4f6;
+}
+
+.summary-label {
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #374151;
+  border-right: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+.summary-label:last-child {
+  border-right: none;
+}
+
+/* Styling cho các loại thông tin khác nhau */
+.summary-row:nth-child(1) .summary-label {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.summary-row:nth-child(2) .summary-label {
+    background-color: #ffffff;
+  color: #000000;
+}
+
+.summary-row:nth-child(3) .summary-label {
+    background-color: #ffffff;
+  color: #000000;
+}
+
+.summary-row:nth-child(4) .summary-label {
+    background-color: #ffffff;
+  color: #000000;
+}
+
+.summary-row:nth-child(5) .summary-label {
+    background-color: #ffffff;
+  color: #000000;
 }
 
 /* Loading and States */
@@ -514,5 +582,13 @@ td[contenteditable="true"]:focus {
   
   .summary-item {
     font-size: 12px;
+  }
+  
+  .summary-table {
+    font-size: 11px;
+  }
+  
+  .summary-label {
+    padding: 8px 12px;
   }
 }
