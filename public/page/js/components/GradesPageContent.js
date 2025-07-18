@@ -19,6 +19,22 @@ function GradesPageContent({ keyValue }) {
         loadGradesFromStorage();
     }, [keyValue]);
 
+    // Hàm kiểm tra môn đặc biệt (chỉ có một cột điểm tổng kết)
+    const isSpecialSubject = (subjectName) => {
+        const specialSubjects = [
+            'thực tập doanh nghiệp',
+            'khóa luận tốt nghiệp',
+            'đồ án tốt nghiệp',
+            'thực tập tốt nghiệp',
+            'luận văn tốt nghiệp',
+            'thực tập chuyên ngành',
+            'đồ án chuyên ngành'
+        ];
+        return specialSubjects.some(special =>
+            subjectName.toLowerCase().includes(special.toLowerCase())
+        );
+    };
+
     const loadGradesFromStorage = async () => {
         setIsLoading(true);
         setError(null);
@@ -181,6 +197,22 @@ function GradesPageContent({ keyValue }) {
                             xepLoai: "Khá",
                             ghiChu: "",
                             dat: "✓"
+                        },
+                        {
+                            stt: 8,
+                            maLhp: "420301416500",
+                            name: "Thực tập doanh nghiệp",
+                            credits: 4,
+                            diemGiuaKy: null,
+                            thuongXuyen: [null, null, null, null],
+                            thucHanh: [null, null, null, null],
+                            diemCuoiKy: 8.50,
+                            diemTongKet: 8.50,
+                            thangDiem4: 3.50,
+                            diemChu: "B+",
+                            xepLoai: "Khá",
+                            ghiChu: "",
+                            dat: "✓"
                         }
                     ]
                 }
@@ -327,7 +359,7 @@ function GradesPageContent({ keyValue }) {
     const convertScore4ToClassificationHK = (score) => {
         // Làm tròn điểm để tránh lỗi floating point
         score = Math.round(score * 10) / 10;
-        
+
         if (score >= 3.6) return 'Xuất sắc';
         if (score >= 3.2) return 'Giỏi';
         if (score >= 2.5) return 'Khá';
@@ -339,6 +371,7 @@ function GradesPageContent({ keyValue }) {
     const handleScoreChange = (semesterIndex, subjectIndex, field, value) => {
         const newGradesData = { ...gradesData };
         const subject = newGradesData.semesters[semesterIndex].subjects[subjectIndex];
+        const isSpecial = isSpecialSubject(subject.name);
 
         // Validate điểm
         if (value !== '' && (isNaN(value) || value < 0 || value > 10)) {
@@ -362,43 +395,64 @@ function GradesPageContent({ keyValue }) {
             subject[field] = parsedValue;
         }
 
-        // Tính lại điểm tổng kết
-        const dsDiemTK = subject.thuongXuyen.filter(score => score !== null && score !== 0);
-        const dsDiemTH = subject.thucHanh.filter(score => score !== null && score !== 0);
-        const giuaKy = subject.diemGiuaKy || 0;
-        const cuoiKy = subject.diemCuoiKy || 0;
+        // Xử lý tính điểm cho môn đặc biệt
+        if (isSpecial) {
+            // Với môn đặc biệt, chỉ cần có điểm tổng kết (từ cột cuối kỳ)
+            if (field === 'diemCuoiKy' && parsedValue !== null && parsedValue > 0) {
+                subject.diemTongKet = parsedValue;
+                subject.thangDiem4 = convertScore10To4(parsedValue);
+                subject.diemChu = convertScore4ToChar(subject.thangDiem4);
+                subject.xepLoai = convertScore4ToClassification(subject.thangDiem4);
+                subject.ghiChu = subject.thangDiem4 !== 0 ? '' : 'Học lại';
+                subject.dat = subject.thangDiem4 !== 0 ? "✓" : "";
+            } else if (field === 'diemCuoiKy' && (parsedValue === null || parsedValue === 0)) {
+                // Nếu xóa điểm cuối kỳ, reset tất cả
+                subject.diemTongKet = null;
+                subject.thangDiem4 = 0;
+                subject.diemChu = '';
+                subject.xepLoai = '';
+                subject.ghiChu = '';
+                subject.dat = '';
+            }
+        } else {
+            // Logic tính điểm bình thường cho các môn khác
+            const dsDiemTK = subject.thuongXuyen.filter(score => score !== null && score !== 0);
+            const dsDiemTH = subject.thucHanh.filter(score => score !== null && score !== 0);
+            const giuaKy = subject.diemGiuaKy || 0;
+            const cuoiKy = subject.diemCuoiKy || 0;
 
-        // Kiểm tra điều kiện đặc biệt
-        if (giuaKy === 0) {
-            subject.diemTongKet = null;
-            subject.thangDiem4 = 0;
-            subject.diemChu = 'F';
-            subject.xepLoai = 'Kém';
-            subject.ghiChu = 'Cấm thi';
-            subject.dat = '';
-        } else if (cuoiKy < 3 && cuoiKy !== 0) {
-            subject.diemTongKet = null;
-            subject.thangDiem4 = 0;
-            subject.diemChu = 'F';
-            subject.xepLoai = 'Kém';
-            subject.ghiChu = 'CK < 3';
-            subject.dat = '';
-        } else if (dsDiemTK.length >= 2 && giuaKy > 0 && cuoiKy > 0) {
-            const scoreData = {
-                dsDiemTK: subject.thuongXuyen.map(s => s || 0),
-                dsDiemTH: subject.thucHanh.map(s => s || 0),
-                giuaKy: giuaKy,
-                cuoiKy: cuoiKy,
-                tinChi: subject.credits
-            };
+            // Kiểm tra điều kiện đặc biệt
+            if (giuaKy === 0) {
+                subject.diemTongKet = null;
+                subject.thangDiem4 = 0;
+                subject.diemChu = 'F';
+                subject.xepLoai = 'Kém';
+                subject.ghiChu = 'Cấm thi';
+                subject.dat = '';
+            } else if (cuoiKy < 3 && cuoiKy !== 0) {
+                subject.diemTongKet = null;
+                subject.thangDiem4 = 0;
+                subject.diemChu = 'F';
+                subject.xepLoai = 'Kém';
+                subject.ghiChu = 'CK < 3';
+                subject.dat = '';
+            } else if (dsDiemTK.length >= 2 && giuaKy > 0 && cuoiKy > 0) {
+                const scoreData = {
+                    dsDiemTK: subject.thuongXuyen.map(s => s || 0),
+                    dsDiemTH: subject.thucHanh.map(s => s || 0),
+                    giuaKy: giuaKy,
+                    cuoiKy: cuoiKy,
+                    tinChi: subject.credits
+                };
 
-            const result = calculateScore(scoreData);
-            subject.diemTongKet = result.diemTongKet;
-            subject.thangDiem4 = result.diemTongKet4;
-            subject.diemChu = result.diemChu;
-            subject.xepLoai = result.xepLoai;
-            subject.ghiChu = result.ghiChu;
-            subject.dat = result.isDat ? "✓" : "";
+                const result = calculateScore(scoreData);
+                subject.diemTongKet = result.diemTongKet;
+                subject.thangDiem4 = result.diemTongKet4;
+                subject.diemChu = result.diemChu;
+                subject.xepLoai = result.xepLoai;
+                subject.ghiChu = result.ghiChu;
+                subject.dat = result.isDat ? "✓" : "";
+            }
         }
 
         // Tính lại thống kê học kỳ cho kỳ hiện tại và tất cả các kỳ sau
@@ -617,6 +671,12 @@ function GradesPageContent({ keyValue }) {
 
     // Hàm tạo ô input có thể chỉnh sửa với logic màu đỏ cho điểm ≤ 5
     const createEditableCell = (value, scoreType, semesterIndex, subjectIndex) => {
+        const subject = gradesData.semesters[semesterIndex].subjects[subjectIndex];
+        const isSpecial = isSpecialSubject(subject.name);
+
+        // Với môn đặc biệt, chỉ cho phép nhập cột cuối kỳ
+        const isDisabled = isSpecial && scoreType !== 'ck';
+
         // Parse value để hiển thị đúng format với 1 chữ số thập phân
         const numericValue = parseScore(value);
         let displayValue = '';
@@ -632,43 +692,52 @@ function GradesPageContent({ keyValue }) {
         const isLowScore = numericValue !== null && numericValue <= 5 && numericValue > 0;
 
         return React.createElement('td', {
-            className: isLowScore ? 'low-score' : '',
-            contentEditable: true,
+            className: `${isLowScore ? 'low-score' : ''} ${isDisabled ? 'disabled-cell' : ''}`,
+            contentEditable: !isDisabled,
             suppressContentEditableWarning: true,
             style: {
                 outline: 'none',
-                color: isLowScore ? '#dc2626' : 'inherit',
-                fontWeight: isLowScore ? 'bold' : 'normal'
+                color: isDisabled ? '#9ca3af' : (isLowScore ? '#dc2626' : 'inherit'),
+                fontWeight: isLowScore ? 'bold' : 'normal',
+                backgroundColor: isDisabled ? '#f9fafb' : 'inherit',
+                cursor: isDisabled ? 'not-allowed' : 'text'
             },
-            onBlur: (e) => updateScore(e, scoreType, semesterIndex, subjectIndex),
+            onBlur: (e) => {
+                if (!isDisabled) {
+                    updateScore(e, scoreType, semesterIndex, subjectIndex);
+                }
+            },
             onKeyPress: (e) => {
-                if (e.key === 'Enter') {
+                if (!isDisabled && e.key === 'Enter') {
                     e.preventDefault();
                     e.target.blur();
                 }
             },
             onKeyUp: (e) => {
-                // Chỉ cho nhập số, dấu phẩy và dấu chấm
-                const regex = /^[0-9.,]*$/;
-                if (!regex.test(e.target.textContent)) {
-                    e.target.textContent = e.target.textContent.replace(/[^0-9.,]/g, '');
-                }
+                if (!isDisabled) {
+                    // Chỉ cho nhập số, dấu phẩy và dấu chấm
+                    const regex = /^[0-9.,]*$/;
+                    if (!regex.test(e.target.textContent)) {
+                        e.target.textContent = e.target.textContent.replace(/[^0-9.,]/g, '');
+                    }
 
-                // Cập nhật màu real-time khi nhập
-                const currentValue = e.target.textContent.trim();
-                if (currentValue !== '') {
-                    const numValue = parseFloat(currentValue.replace(',', '.'));
-                    if (!isNaN(numValue) && numValue <= 5 && numValue > 0) {
-                        e.target.style.color = '#dc2626';
-                        e.target.style.fontWeight = 'bold';
-                        e.target.classList.add('low-score');
-                    } else {
-                        e.target.style.color = 'inherit';
-                        e.target.style.fontWeight = 'normal';
-                        e.target.classList.remove('low-score');
+                    // Cập nhật màu real-time khi nhập
+                    const currentValue = e.target.textContent.trim();
+                    if (currentValue !== '') {
+                        const numValue = parseFloat(currentValue.replace(',', '.'));
+                        if (!isNaN(numValue) && numValue <= 5 && numValue > 0) {
+                            e.target.style.color = '#dc2626';
+                            e.target.style.fontWeight = 'bold';
+                            e.target.classList.add('low-score');
+                        } else {
+                            e.target.style.color = 'inherit';
+                            e.target.style.fontWeight = 'normal';
+                            e.target.classList.remove('low-score');
+                        }
                     }
                 }
-            }
+            },
+            title: isDisabled ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' : ''
         }, displayValue);
     };
 
