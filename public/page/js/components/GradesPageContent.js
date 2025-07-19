@@ -1253,7 +1253,7 @@ function GradesPageContent({ keyValue }) {
                                 React.createElement('th', { rowSpan: 3, className: 'col-loai-mon' }, 'Loại môn'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-giua-ky' }, 'Giữa kỳ'),
                                 React.createElement('th', { colSpan: 4, className: 'col-thuong-xuyen' }, 'Thường xuyên'),
-                                React.createElement('th', { colSpan: 5, className: 'col-thuc-hanh' }, 'Thực hành'),
+                                React.createElement('th', { colSpan: 5, rowSpan:2, className: 'col-thuc-hanh' }, 'Thực hành'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-cuoi-ky' }, 'Cuối kỳ'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-tong-ket' }, 'Điểm tổng kết'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-thang-diem-4' }, 'Thang điểm 4'),
@@ -1265,18 +1265,19 @@ function GradesPageContent({ keyValue }) {
                             // Header row 2
                             React.createElement('tr', { className: 'header-row-2' },
                                 React.createElement('th', { colSpan: 4, className: 'sub-header' }, 'LT Hệ số 1'),
-                                React.createElement('th', { className: 'th-col' }, '1'),
-                                React.createElement('th', { className: 'th-col' }, '2'),
-                                React.createElement('th', { className: 'th-col' }, '3'),
-                                React.createElement('th', { className: 'th-col' }, '4'),
-                                React.createElement('th', { className: 'th-col' }, '5')
+                                // React.createElement('th', { colSpan: 5, className: 'sub-header' }, 'Thực hành')
                             ),
                             // Header row 3
                             React.createElement('tr', { className: 'header-row-3' },
                                 React.createElement('th', { className: 'tx-col' }, '1'),
                                 React.createElement('th', { className: 'tx-col' }, '2'),
                                 React.createElement('th', { className: 'tx-col' }, '3'),
-                                React.createElement('th', { className: 'tx-col' }, '4')
+                                React.createElement('th', { className: 'tx-col' }, '4'),
+                                React.createElement('th', { className: 'th-col' }, '1'),
+                                React.createElement('th', { className: 'th-col' }, '2'),
+                                React.createElement('th', { className: 'th-col' }, '3'),
+                                React.createElement('th', { className: 'th-col' }, '4'),
+                                React.createElement('th', { className: 'th-col' }, '5')
                             )
                         ),
 
