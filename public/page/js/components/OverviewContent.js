@@ -247,119 +247,119 @@ function SubjectGradeStatistic({ subjects }) {
       },
       hasData
         ? React.createElement(
-            ResponsiveContainer,
+          ResponsiveContainer,
+          {
+            width: "98%",
+            height: "100%",
+            minWidth: 0,
+          },
+          React.createElement(
+            BarChart,
             {
-              width: "98%",
-              height: "100%",
-              minWidth: 0,
+              data: subjectData,
+              margin: { top: 20, right: 30, left: 20, bottom: 60 },
             },
-            React.createElement(
-              BarChart,
-              {
-                data: subjectData,
-                margin: { top: 20, right: 30, left: 20, bottom: 60 },
+            React.createElement(CartesianGrid, {
+              strokeDasharray: "3 3",
+              stroke: "#4B5563",
+            }),
+            React.createElement(XAxis, {
+              dataKey: "name",
+              stroke: "#9CA3AF",
+              fontSize: 12,
+              angle: -45,
+              textAnchor: "end",
+              height: 80,
+              interval: 0,
+            }),
+            React.createElement(YAxis, {
+              stroke: "#9CA3AF",
+              domain: getYAxisDomain(),
+              fontSize: 12,
+            }),
+            React.createElement(Tooltip, {
+              contentStyle: {
+                backgroundColor: "rgba(31, 41, 55, 0.8)",
+                borderColor: "#4B5563",
+                borderRadius: "8px",
               },
-              React.createElement(CartesianGrid, {
-                strokeDasharray: "3 3",
-                stroke: "#4B5563",
-              }),
-              React.createElement(XAxis, {
-                dataKey: "name",
-                stroke: "#9CA3AF",
-                fontSize: 12,
-                angle: -45,
-                textAnchor: "end",
-                height: 80,
-                interval: 0,
-              }),
-              React.createElement(YAxis, {
-                stroke: "#9CA3AF",
-                domain: getYAxisDomain(),
-                fontSize: 12,
-              }),
-              React.createElement(Tooltip, {
-                contentStyle: {
-                  backgroundColor: "rgba(31, 41, 55, 0.8)",
-                  borderColor: "#4B5563",
-                  borderRadius: "8px",
-                },
-                itemStyle: { color: "#E5E7EB" },
-                formatter: getTooltipFormatter(),
-              }),
-              React.createElement(Legend),
-              React.createElement(Bar, {
-                dataKey: "value",
-                name: `Điểm số (thang ${selectedScale})`,
-                fill: "#059669",
-              })
-            )
+              itemStyle: { color: "#E5E7EB" },
+              formatter: getTooltipFormatter(),
+            }),
+            React.createElement(Legend),
+            React.createElement(Bar, {
+              dataKey: "value",
+              name: `Điểm số (thang ${selectedScale})`,
+              fill: "#059669",
+            })
           )
+        )
         : React.createElement(
+          "div",
+          {
+            style: {
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              color: "#9CA3AF",
+              textAlign: "center",
+            },
+          },
+          React.createElement(
             "div",
             {
               style: {
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
-                color: "#9CA3AF",
-                textAlign: "center",
+                fontSize: "48px",
+                marginBottom: "16px",
+                opacity: 0.5,
               },
             },
-            React.createElement(
-              "div",
-              {
-                style: {
-                  fontSize: "48px",
-                  marginBottom: "16px",
-                  opacity: 0.5,
-                },
+            "📊"
+          ),
+          React.createElement(
+            "h3",
+            {
+              style: {
+                fontSize: "18px",
+                marginBottom: "8px",
+                color: "#D1D5DB",
               },
-              "📊"
-            ),
-            React.createElement(
-              "h3",
-              {
-                style: {
-                  fontSize: "18px",
-                  marginBottom: "8px",
-                  color: "#D1D5DB",
-                },
+            },
+            "Không có dữ liệu"
+          ),
+          React.createElement(
+            "p",
+            {
+              style: {
+                fontSize: "14px",
+                opacity: 0.8,
               },
-              "Không có dữ liệu"
-            ),
-            React.createElement(
-              "p",
-              {
-                style: {
-                  fontSize: "14px",
-                  opacity: 0.8,
-                },
+            },
+            selectedSemester === "all"
+              ? "Chưa có dữ liệu điểm số nào."
+              : `Không có dữ liệu cho ${selectedSemesterLabel}.`
+          ),
+          selectedSemester !== "all" &&
+          React.createElement(
+            "button",
+            {
+              onClick: () => setSelectedSemester("all"),
+              style: {
+                marginTop: "12px",
+                padding: "8px 16px",
+                backgroundColor: "#6366F1",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "14px",
               },
-              selectedSemester === "all"
-                ? "Chưa có dữ liệu điểm số nào."
-                : `Không có dữ liệu cho ${selectedSemesterLabel}.`
-            ),
-            selectedSemester !== "all" &&
-              React.createElement(
-                "button",
-                {
-                  onClick: () => setSelectedSemester("all"),
-                  style: {
-                    marginTop: "12px",
-                    padding: "8px 16px",
-                    backgroundColor: "#6366F1",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                  },
-                },
-                "Xem tất cả học kỳ"
-              )
+            },
+            "Xem tất cả học kỳ"
           )
+        )
     )
   );
 }
@@ -530,52 +530,52 @@ function StatisticsResultsBySemester({ results }) {
       },
       semesterData.length > 0
         ? React.createElement(
-            ResponsiveContainer,
-            { width: "100%", height: "100%" },
-            React.createElement(
-              LineChart,
-              { data: semesterData },
-              React.createElement(CartesianGrid, {
-                strokeDasharray: "3 3",
-                stroke: "#e5e7eb",
-              }),
-              React.createElement(XAxis, {
-                dataKey: "name",
-                stroke: "#6b7280",
-              }),
-              React.createElement(YAxis, {
-                stroke: "#6b7280",
-                domain: getYAxisDomain(),
-              }),
-              React.createElement(Tooltip, {
-                contentStyle: {
-                  backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  borderColor: "#d1d5db",
-                  borderRadius: "8px",
-                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-                },
-                itemStyle: { color: "#374151" },
-                formatter: getTooltipFormatter(),
-              }),
-              React.createElement(Line, {
-                type: "monotone",
-                dataKey: "average",
-                stroke: "#059669",
-                strokeWidth: 3,
-                dot: { fill: "#059669", strokeWidth: 2, r: 6 },
-                activeDot: { r: 8, strokeWidth: 2 },
-                name: `Điểm trung bình (thang ${selectedScale})`,
-              })
-            )
+          ResponsiveContainer,
+          { width: "100%", height: "100%" },
+          React.createElement(
+            LineChart,
+            { data: semesterData },
+            React.createElement(CartesianGrid, {
+              strokeDasharray: "3 3",
+              stroke: "#e5e7eb",
+            }),
+            React.createElement(XAxis, {
+              dataKey: "name",
+              stroke: "#6b7280",
+            }),
+            React.createElement(YAxis, {
+              stroke: "#6b7280",
+              domain: getYAxisDomain(),
+            }),
+            React.createElement(Tooltip, {
+              contentStyle: {
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                borderColor: "#d1d5db",
+                borderRadius: "8px",
+                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+              },
+              itemStyle: { color: "#374151" },
+              formatter: getTooltipFormatter(),
+            }),
+            React.createElement(Line, {
+              type: "monotone",
+              dataKey: "average",
+              stroke: "#059669",
+              strokeWidth: 3,
+              dot: { fill: "#059669", strokeWidth: 2, r: 6 },
+              activeDot: { r: 8, strokeWidth: 2 },
+              name: `Điểm trung bình (thang ${selectedScale})`,
+            })
           )
+        )
         : React.createElement(
-            "div",
-            {
-              className: "no-data-container",
-              style: { height: "100%" },
-            },
-            React.createElement("p", null, "Không có dữ liệu để hiển thị")
-          )
+          "div",
+          {
+            className: "no-data-container",
+            style: { height: "100%" },
+          },
+          React.createElement("p", null, "Không có dữ liệu để hiển thị")
+        )
     )
   );
 }
@@ -643,20 +643,20 @@ function SubjectResultStatistics({ subjects }) {
         "Thống kê tổng quan kết quả môn học"
       ),
       totalSubjects > 0 &&
-        React.createElement(
-          "div",
-          {
-            style: {
-              fontSize: "14px",
-              color: "#6b7280",
-              fontWeight: "500",
-              backgroundColor: "#f3f4f6",
-              padding: "8px 12px",
-              borderRadius: "6px",
-            },
+      React.createElement(
+        "div",
+        {
+          style: {
+            fontSize: "14px",
+            color: "#6b7280",
+            fontWeight: "500",
+            backgroundColor: "#f3f4f6",
+            padding: "8px 12px",
+            borderRadius: "6px",
           },
-          `Tổng: ${totalSubjects} môn học`
-        )
+        },
+        `Tổng: ${totalSubjects} môn học`
+      )
     ),
     React.createElement(
       "div",
@@ -666,104 +666,104 @@ function SubjectResultStatistics({ subjects }) {
       },
       subjectData.length > 0
         ? React.createElement(
-            ResponsiveContainer,
-            { width: "100%", height: "100%" },
+          ResponsiveContainer,
+          { width: "100%", height: "100%" },
+          React.createElement(
+            PieChart,
+            null,
             React.createElement(
-              PieChart,
-              null,
-              React.createElement(
-                Pie,
-                {
-                  data: subjectData,
-                  cx: "50%",
-                  cy: "50%",
-                  labelLine: false,
-                  outerRadius: 80,
-                  fill: "#8884d8",
-                  dataKey: "value",
-                  label: ({ name, percent, value }) =>
-                    `${name}: ${value} (${(percent * 100).toFixed(0)}%)`,
-                },
-                subjectData.map((entry, index) =>
-                  React.createElement(Cell, {
-                    key: `cell-${entry.grade}-${index}`,
-                    fill: entry.color,
-                  })
-                )
-              ),
-              React.createElement(Tooltip, {
-                contentStyle: {
-                  backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  borderColor: "#d1d5db",
-                  borderRadius: "8px",
-                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-                },
-                itemStyle: { color: "#374151" },
-                formatter: (value, name, props) => [
-                  `${value} môn học (${((value / totalSubjects) * 100).toFixed(
-                    1
-                  )}%)`,
-                  name,
-                ],
-              }),
-              React.createElement(Legend, {
-                verticalAlign: "bottom",
-                height: 36,
-                iconType: "circle",
-                wrapperStyle: {
-                  fontSize: "12px",
-                  color: "#6b7280",
-                },
-              })
-            )
+              Pie,
+              {
+                data: subjectData,
+                cx: "50%",
+                cy: "50%",
+                labelLine: false,
+                outerRadius: 80,
+                fill: "#8884d8",
+                dataKey: "value",
+                label: ({ name, percent, value }) =>
+                  `${name}: ${value} (${(percent * 100).toFixed(0)}%)`,
+              },
+              subjectData.map((entry, index) =>
+                React.createElement(Cell, {
+                  key: `cell-${entry.grade}-${index}`,
+                  fill: entry.color,
+                })
+              )
+            ),
+            React.createElement(Tooltip, {
+              contentStyle: {
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                borderColor: "#d1d5db",
+                borderRadius: "8px",
+                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+              },
+              itemStyle: { color: "#374151" },
+              formatter: (value, name, props) => [
+                `${value} môn học (${((value / totalSubjects) * 100).toFixed(
+                  1
+                )}%)`,
+                name,
+              ],
+            }),
+            React.createElement(Legend, {
+              verticalAlign: "bottom",
+              height: 36,
+              iconType: "circle",
+              wrapperStyle: {
+                fontSize: "12px",
+                color: "#6b7280",
+              },
+            })
           )
+        )
         : React.createElement(
+          "div",
+          {
+            className: "no-data-container",
+            style: {
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#9ca3af",
+              textAlign: "center",
+            },
+          },
+          React.createElement(
             "div",
             {
-              className: "no-data-container",
               style: {
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#9ca3af",
-                textAlign: "center",
+                fontSize: "48px",
+                marginBottom: "16px",
+                opacity: 0.5,
               },
             },
-            React.createElement(
-              "div",
-              {
-                style: {
-                  fontSize: "48px",
-                  marginBottom: "16px",
-                  opacity: 0.5,
-                },
+            "📊"
+          ),
+          React.createElement(
+            "h3",
+            {
+              style: {
+                fontSize: "18px",
+                marginBottom: "8px",
+                color: "#d1d5db",
               },
-              "📊"
-            ),
-            React.createElement(
-              "h3",
-              {
-                style: {
-                  fontSize: "18px",
-                  marginBottom: "8px",
-                  color: "#d1d5db",
-                },
+            },
+            "Không có dữ liệu"
+          ),
+          React.createElement(
+            "p",
+            {
+              style: {
+                fontSize: "14px",
+                opacity: 0.8,
               },
-              "Không có dữ liệu"
-            ),
-            React.createElement(
-              "p",
-              {
-                style: {
-                  fontSize: "14px",
-                  opacity: 0.8,
-                },
-              },
-              "Chưa có dữ liệu điểm chữ để hiển thị thống kê."
-            )
+            },
+            "Chưa có dữ liệu điểm chữ để hiển thị thống kê."
           )
+        )
     )
   );
 }
@@ -796,6 +796,7 @@ function OverviewPageContent() {
   const [loading, setLoading] = React.useState(true);
   const [subjects, setSubjects] = React.useState([]);
   const [results, setResults] = React.useState([]);
+  const [curriculumData, setCurriculumData] = React.useState(null);
 
   React.useEffect(() => {
     const loadData = async () => {
@@ -814,22 +815,60 @@ function OverviewPageContent() {
             }
           );
         });
-        //Test lấy chương trình khung
+        //Lấy chương trình khung và lưu vào state
         chrome.storage.local.get(
           ["curriculum_json", "curriculum_timestamp"],
           function (result) {
             if (chrome.runtime.lastError) {
-              console.error("Lỗi lấy dữ liệu:", chrome.runtime.lastError);
+              console.error("Lỗi lấy dữ liệu chương trình khung:", chrome.runtime.lastError);
               return;
             }
 
             if (result.curriculum_json) {
-              const curriculumData = JSON.parse(result.curriculum_json);
-              const timestamp = result.curriculum_timestamp;
+              try {
+                const curriculumDataParsed = JSON.parse(result.curriculum_json);
+                const timestamp = result.curriculum_timestamp;
 
-              console.log("DỮ LIỆU CHƯƠNG TRÌNH KHUNG");
-              console.log(curriculumData);
+                console.log("DỮ LIỆU CHƯƠNG TRÌNH KHUNG LOADED");
+                console.log(curriculumDataParsed);
 
+                // Lưu vào state
+                setCurriculumData(curriculumDataParsed);
+
+                // Export để các component khác sử dụng
+                window.curriculumData = curriculumDataParsed;
+
+                // Export hàm helper để lấy thông tin môn học
+                window.getCurriculumInfo = (subjectName) => {
+                  if (!curriculumDataParsed || !Array.isArray(curriculumDataParsed)) {
+                    return { soTLT: null, soTTH: null };
+                  }
+
+                  const found = curriculumDataParsed.find(row => {
+                    if (Array.isArray(row) && row.length >= 3) {
+                      const curriculumSubjectName = row[2]; // Tên môn học ở vị trí thứ 3
+                      if (curriculumSubjectName) {
+                        return curriculumSubjectName.toLowerCase().trim() === subjectName.toLowerCase().trim();
+                      }
+                    }
+                    return false;
+                  });
+
+                  if (found && Array.isArray(found) && found.length >= 6) {
+                    // Giả định: [STT, Mã HP, Tên môn, Số TC, soTLT, soTTH, ...]
+                    const soTLT = parseInt(found[4]) || null;
+                    const soTTH = parseInt(found[5]) || null;
+                    return { soTLT, soTTH };
+                  }
+
+                  return { soTLT: null, soTTH: null };
+                };
+
+                console.log("Curriculum data đã được export sang window.curriculumData và window.getCurriculumInfo");
+
+              } catch (error) {
+                console.error("Lỗi parse curriculum data:", error);
+              }
             } else {
               console.log("Không có dữ liệu chương trình khung trong storage");
             }
@@ -870,63 +909,60 @@ function OverviewPageContent() {
     { className: "page-content" },
     loading
       ? React.createElement(
-          "div",
-          { className: "loading" },
-          React.createElement("div", { className: "spinner" }),
-          React.createElement(
-            "span",
-            { className: "loading-text" },
-            "Đang tải dữ liệu..."
-          )
+        "div",
+        { className: "loading" },
+        React.createElement("div", { className: "spinner" }),
+        React.createElement(
+          "span",
+          { className: "loading-text" },
+          "Đang tải dữ liệu..."
         )
+      )
       : React.createElement(
+        "div",
+        { className: "dashboard-grid" },
+        React.createElement(
           "div",
-          { className: "dashboard-grid" },
+          {
+            className: "dashboard-row",
+            style: {
+              display: "flex",
+              gap: "20px",
+              marginBottom: "20px",
+              flexWrap: "wrap",
+            },
+          },
           React.createElement(
             "div",
             {
-              className: "dashboard-row",
-              style: {
-                display: "flex",
-                gap: "20px",
-                marginBottom: "20px",
-                flexWrap: "wrap",
-              },
+              className: "card dashboard-item",
+              style: { flex: "1", minWidth: "400px" },
             },
-            React.createElement(
-              "div",
-              {
-                className: "card dashboard-item",
-                style: { flex: "1", minWidth: "400px" },
-              },
-              React.createElement(StatisticsResultsBySemester, {
-                results: results,
-              })
-            ),
-            React.createElement(
-              "div",
-              {
-                className: "card dashboard-item",
-                style: { flex: "1", minWidth: "400px" },
-              },
-              React.createElement(SubjectResultStatistics, {
-                subjects: subjects,
-              })
-            )
+            React.createElement(StatisticsResultsBySemester, {
+              results: results,
+            })
           ),
           React.createElement(
             "div",
-            { className: "card" },
-            React.createElement(SubjectGradeStatistic, { subjects: subjects })
+            {
+              className: "card dashboard-item",
+              style: { flex: "1", minWidth: "400px" },
+            },
+            React.createElement(SubjectResultStatistics, {
+              subjects: subjects,
+            })
           )
+        ),
+        React.createElement(
+          "div",
+          { className: "card" },
+          React.createElement(SubjectGradeStatistic, { subjects: subjects })
         )
+      )
   );
 }
 
 window.SubjectGradeStatistic = SubjectGradeStatistic;
-window.StatisticsResultsBySemester = StatisticsResultsBySemester;
-window.SubjectResultStatistics = SubjectResultStatistics;
-window.OverviewPageContent = OverviewPageContent;
 window.StatisticsResultsBySemester = StatisticsResultsBySemester;
 window.SubjectResultStatistics = SubjectResultStatistics;
 window.OverviewPageContent = OverviewPageContent;

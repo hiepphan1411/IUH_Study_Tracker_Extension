@@ -4,6 +4,8 @@ function GradesPageContent({ keyValue }) {
     const [gradesData, setGradesData] = React.useState(null);
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
+    const [subjectTypes, setSubjectTypes] = React.useState({}); // Lưu trữ loại môn học đã chọn
+    const [openDropdowns, setOpenDropdowns] = React.useState({}); // Lưu trữ trạng thái mở/đóng của các dropdown
 
     // Danh sách môn bỏ qua khi tính GPA
     const listSubjectIgnoresCalcScore = [
@@ -18,6 +20,20 @@ function GradesPageContent({ keyValue }) {
     React.useEffect(() => {
         loadGradesFromStorage();
     }, [keyValue]);
+
+    // Close all dropdowns when clicking outside
+    React.useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!event.target.closest('.custom-dropdown')) {
+                setOpenDropdowns({});
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     // Hàm làm tròn điểm theo quy tắc IUH
     const roundScoreIUH = (score) => {
@@ -80,6 +96,170 @@ function GradesPageContent({ keyValue }) {
         ];
         return specialSubjects.some(special =>
             subjectName.toLowerCase().includes(special.toLowerCase())
+        );
+    };
+
+    // Hàm xử lý thay đổi loại môn học
+    const handleSubjectTypeChange = (semesterIndex, subjectIndex, newType) => {
+        const key = `${semesterIndex}-${subjectIndex}`;
+        setSubjectTypes(prev => ({
+            ...prev,
+            [key]: newType
+        }));
+
+        // Có thể thêm logic tính lại điểm dựa trên loại môn học mới
+        console.log(`Changed subject type for ${key} to ${newType}`);
+    };
+
+    // Hàm lấy loại môn học hiện tại
+    const getCurrentSubjectType = (semesterIndex, subjectIndex) => {
+        const key = `${semesterIndex}-${subjectIndex}`;
+        return subjectTypes[key] || 'LT'; // Mặc định là Lý thuyết
+    };
+
+    // Component tạo selection button cho loại môn học
+    const createSubjectTypeSelector = (semesterIndex, subjectIndex) => {
+        const currentType = getCurrentSubjectType(semesterIndex, subjectIndex);
+        const dropdownKey = `${semesterIndex}-${subjectIndex}`;
+        const isOpen = openDropdowns[dropdownKey] || false;
+
+        const options = [
+            { value: 'LT', label: 'Lý thuyết', title: 'Môn lý thuyết (soTLT > 0, soTTH = 0)' },
+            { value: 'TH', label: 'Thực hành', title: 'Môn thực hành (soTLT = 0, soTTH > 0)' },
+            { value: 'TICH_HOP', label: 'Tích hợp', title: 'Môn tích hợp (soTLT > 0, soTTH > 0)' }
+        ];
+
+        const currentOption = options.find(opt => opt.value === currentType);
+
+        const handleToggleDropdown = () => {
+            setOpenDropdowns(prev => ({
+                ...prev,
+                [dropdownKey]: !prev[dropdownKey]
+            }));
+        };
+
+        const handleOptionClick = (value) => {
+            handleSubjectTypeChange(semesterIndex, subjectIndex, value);
+            setOpenDropdowns(prev => ({
+                ...prev,
+                [dropdownKey]: false
+            }));
+        };
+
+        return React.createElement('td', {
+            className: 'td-subject-type',
+            style: { textAlign: 'center', padding: '8px', position: 'relative' }
+        },
+            React.createElement('div', {
+                className: 'custom-dropdown',
+                style: {
+                    position: 'relative',
+                    display: 'inline-block',
+                    minWidth: '105px',
+                    maxWidth: '125px'
+                }
+            },
+                // Custom dropdown button
+                React.createElement('div', {
+                    onClick: handleToggleDropdown,
+                    style: {
+                        padding: '6px 28px 6px 12px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        outline: 'none',
+                        backgroundColor: isOpen ? '#e2e8f0' : '#f8fafc',
+                        color: '#1e293b',
+                        fontSize: '13px',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        boxShadow: isOpen ? '0 4px 6px rgba(0, 0, 0, 0.1)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.2s ease',
+                        userSelect: 'none',
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                    },
+                    title: currentOption?.title || 'Chọn loại môn học',
+                    onMouseEnter: (e) => {
+                        if (!isOpen) {
+                            e.target.style.backgroundColor = '#e2e8f0';
+                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                        }
+                    },
+                    onMouseLeave: (e) => {
+                        if (!isOpen) {
+                            e.target.style.backgroundColor = '#f8fafc';
+                            e.target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+                        }
+                    }
+                },
+                    React.createElement('span', null, currentOption?.label || 'Lý thuyết'),
+                    React.createElement('svg', {
+                        style: {
+                            width: '16px',
+                            height: '16px',
+                            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s ease',
+                            position: 'absolute',
+                            right: '8px'
+                        },
+                        fill: 'none',
+                        viewBox: '0 0 20 20'
+                    },
+                        React.createElement('path', {
+                            stroke: '#6b7280',
+                            strokeLinecap: 'round',
+                            strokeLinejoin: 'round',
+                            strokeWidth: '1.5',
+                            d: 'm6 8 4 4 4-4'
+                        })
+                    )
+                ),
+                // Custom dropdown menu
+                isOpen && React.createElement('div', {
+                    style: {
+                        position: 'absolute',
+                        top: '100%',
+                        left: '0',
+                        right: '0',
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '4px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        zIndex: 1000,
+                        overflow: 'hidden',
+                        marginTop: '1px'
+                    }
+                },
+                    options.map((option, index) =>
+                        React.createElement('div', {
+                            key: option.value,
+                            onClick: () => handleOptionClick(option.value),
+                            style: {
+                                padding: '8px 10px',
+                                fontSize: '13px',
+                                fontWeight: '500',
+                                cursor: 'pointer',
+                                backgroundColor: option.value === currentType ? '#eff6ff' : '#ffffff',
+                                color: option.value === currentType ? '#1d4ed8' : '#374151',
+                                transition: 'all 0.1s ease'
+                            },
+                            title: option.title,
+                            onMouseEnter: (e) => {
+                                if (option.value !== currentType) {
+                                    e.target.style.backgroundColor = '#f9fafb';
+                                }
+                            },
+                            onMouseLeave: (e) => {
+                                if (option.value !== currentType) {
+                                    e.target.style.backgroundColor = '#ffffff';
+                                }
+                            }
+                        }, option.label)
+                    )
+                )
+            )
         );
     };
 
@@ -353,22 +533,69 @@ function GradesPageContent({ keyValue }) {
     };
 
     // Hàm tính điểm từ CalculateScore.js
-    const calculateScore = (score) => {
+    const calculateScore = (score, semesterIndex, subjectIndex) => {
         const { dsDiemTK, dsDiemTH, giuaKy, cuoiKy, tinChi } = score;
+
+        // Lấy loại môn được chọn thủ công hoặc tự động
+        const subjectType = getCurrentSubjectType(semesterIndex, subjectIndex);
+
         let diemTongKet = 0;
         const slDiemLTKhacKhong = dsDiemTK.filter((score) => score !== 0).length;
         const slDiemTHKhacKhong = dsDiemTH.filter((score) => score !== 0).length;
-        if (dsDiemTH.filter((score) => score !== 0).length === 0) {
-            diemTongKet =
-                ((dsDiemTK.reduce((prev, curr) => prev + curr, 0) / slDiemLTKhacKhong) * 20 + giuaKy * 30 + cuoiKy * 50) / 100;
+
+        // Debug log để kiểm tra
+        console.log(`Subject type: ${subjectType}, slDiemLTKhacKhong: ${slDiemLTKhacKhong}, slDiemTHKhacKhong: ${slDiemTHKhacKhong}`);
+        console.log(`dsDiemTK:`, dsDiemTK);
+        console.log(`dsDiemTH:`, dsDiemTH);
+
+        if (subjectType === 'TH') {
+            // Môn thực hành - tính trung bình cộng của các điểm thực hành đã nhập
+            const validScores = dsDiemTH.filter(score => score !== null && score !== undefined && score !== 0);
+            if (validScores.length > 0) {
+                diemTongKet = validScores.reduce((sum, score) => sum + score, 0) / validScores.length;
+                console.log(`Practical subject calculation: ${diemTongKet} from scores:`, validScores);
+            } else {
+                // Nếu chưa có điểm thực hành nào, trả về null để không hiển thị kết quả
+                console.log('No practical scores available');
+                return {
+                    diemTongKet: null,
+                    diemTongKet4: null,
+                    diemChu: '',
+                    xepLoai: '',
+                    ghiChu: '',
+                    isDat: false,
+                };
+            }
+        } else if (subjectType === 'LT') {
+            // Môn lý thuyết - chỉ dùng công thức lý thuyết
+            if (slDiemLTKhacKhong > 0) {
+                diemTongKet = ((dsDiemTK.reduce((prev, curr) => prev + curr, 0) / slDiemLTKhacKhong) * 20 + giuaKy * 30 + cuoiKy * 50) / 100;
+            } else {
+                // Nếu chưa có điểm thường xuyên, chỉ tính giữa kỳ và cuối kỳ
+                diemTongKet = (giuaKy * 30 + cuoiKy * 70) / 100;
+            }
+        } else if (subjectType === 'TICH_HOP') {
+            // Môn tích hợp - kết hợp lý thuyết và thực hành
+            const diemTongKetLT = slDiemLTKhacKhong > 0 ?
+                ((dsDiemTK.reduce((prev, curr) => prev + curr, 0) / slDiemLTKhacKhong) * 20 + giuaKy * 30 + cuoiKy * 50) / 100 :
+                (giuaKy * 30 + cuoiKy * 70) / 100;
+
+            const validThucHanhScores = dsDiemTH.filter(score => score !== null && score !== undefined && score !== 0);
+
+            if (validThucHanhScores.length > 0) {
+                const diemTongKetTH = validThucHanhScores.reduce((sum, score) => sum + score, 0) / validThucHanhScores.length;
+                tinChi === 3
+                    ? (diemTongKet = (diemTongKetLT * 2 + diemTongKetTH) / 3)
+                    : (diemTongKet = (diemTongKetLT * 3 + diemTongKetTH) / 4);
+            } else {
+                // Nếu chưa có điểm thực hành, chỉ tính phần lý thuyết
+                diemTongKet = diemTongKetLT;
+            }
         } else {
-            const diemTongKetLT =
-                ((dsDiemTK.reduce((prev, curr) => prev + curr, 0) / slDiemLTKhacKhong) * 20 + giuaKy * 30 + cuoiKy * 50) / 100;
-            const diemTongKetTH = dsDiemTH.reduce((prev, curr) => prev + curr, 0) / slDiemTHKhacKhong;
-            tinChi === 3
-                ? (diemTongKet = (diemTongKetLT * 2 + diemTongKetTH) / 3)
-                : (diemTongKet = (diemTongKetLT * 3 + diemTongKetTH) / 4);
+            // Môn đặc biệt - chỉ dùng điểm cuối kỳ
+            diemTongKet = cuoiKy;
         }
+
         const diemTongKet4 = convertScore10To4(diemTongKet);
         return {
             diemTongKet: diemTongKet,
@@ -498,51 +725,84 @@ function GradesPageContent({ keyValue }) {
             const giuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined ? subject.diemGiuaKy : null;
             const cuoiKy = subject.diemCuoiKy !== null && subject.diemCuoiKy !== undefined ? subject.diemCuoiKy : null;
 
-            // Kiểm tra điều kiện đặc biệt
-            if (giuaKy === null || giuaKy === undefined) {
-                // Chưa có điểm giữa kỳ
-                subject.diemTongKet = null;
-                subject.thangDiem4 = null;
-                subject.diemChu = '';
-                subject.xepLoai = '';
-                subject.ghiChu = '';
-                subject.dat = '';
-            } else if (giuaKy === 0) {
-                // Điểm giữa kỳ = 0 (cấm thi)
-                subject.diemTongKet = null;
-                subject.thangDiem4 = 0;
-                subject.diemChu = 'F';
-                subject.xepLoai = 'Kém';
-                subject.ghiChu = 'Cấm thi';
-                subject.dat = '';
-            } else if (cuoiKy !== null && cuoiKy < 3) {
-                // Điểm cuối kỳ < 3 - không đạt
-                subject.diemTongKet = null;
-                subject.thangDiem4 = 0;
-                subject.diemChu = 'F';
-                subject.xepLoai = 'Kém';
-                if (cuoiKy === 0) {
-                    subject.ghiChu = 'CK = 0';
-                } else {
-                    subject.ghiChu = 'CK < 3';
-                }
-                subject.dat = '';
-            } else if (dsDiemTK.length >= 2 && giuaKy !== null && cuoiKy !== null) {
-                const scoreData = {
-                    dsDiemTK: subject.thuongXuyen.map(s => s !== null && s !== undefined ? s : 0),
-                    dsDiemTH: subject.thucHanh.map(s => s !== null && s !== undefined ? s : 0),
-                    giuaKy: giuaKy,
-                    cuoiKy: cuoiKy,
-                    tinChi: subject.credits
-                };
+            // Lấy loại môn học hiện tại
+            const currentSubjectType = getCurrentSubjectType(semesterIndex, subjectIndex);
 
-                const result = calculateScore(scoreData);
-                subject.diemTongKet = result.diemTongKet;
-                subject.thangDiem4 = result.diemTongKet4;
-                subject.diemChu = result.diemChu;
-                subject.xepLoai = result.xepLoai;
-                subject.ghiChu = result.ghiChu;
-                subject.dat = result.isDat ? "✓" : "";
+            // Kiểm tra điều kiện tính điểm dựa trên loại môn
+            if (currentSubjectType === 'TH') {
+                // Môn thực hành - chỉ cần có ít nhất 1 điểm thực hành
+                if (dsDiemTH.length > 0) {
+                    const scoreData = {
+                        dsDiemTK: subject.thuongXuyen.map(s => s !== null && s !== undefined ? s : 0),
+                        dsDiemTH: subject.thucHanh.map(s => s !== null && s !== undefined ? s : 0),
+                        giuaKy: giuaKy || 0,
+                        cuoiKy: cuoiKy || 0,
+                        tinChi: subject.credits
+                    };
+
+                    const result = calculateScore(scoreData, semesterIndex, subjectIndex);
+                    subject.diemTongKet = result.diemTongKet;
+                    subject.thangDiem4 = result.diemTongKet4;
+                    subject.diemChu = result.diemChu;
+                    subject.xepLoai = result.xepLoai;
+                    subject.ghiChu = result.ghiChu;
+                    subject.dat = result.isDat ? "✓" : "";
+                } else {
+                    // Chưa có điểm thực hành
+                    subject.diemTongKet = null;
+                    subject.thangDiem4 = null;
+                    subject.diemChu = '';
+                    subject.xepLoai = '';
+                    subject.ghiChu = '';
+                    subject.dat = '';
+                }
+            } else {
+                // Môn lý thuyết và môn tích hợp - cần điểm giữa kỳ và cuối kỳ
+                if (giuaKy === null || giuaKy === undefined) {
+                    // Chưa có điểm giữa kỳ
+                    subject.diemTongKet = null;
+                    subject.thangDiem4 = null;
+                    subject.diemChu = '';
+                    subject.xepLoai = '';
+                    subject.ghiChu = '';
+                    subject.dat = '';
+                } else if (giuaKy === 0) {
+                    // Điểm giữa kỳ = 0 (cấm thi)
+                    subject.diemTongKet = null;
+                    subject.thangDiem4 = 0;
+                    subject.diemChu = 'F';
+                    subject.xepLoai = 'Kém';
+                    subject.ghiChu = 'Cấm thi';
+                    subject.dat = '';
+                } else if (cuoiKy !== null && cuoiKy < 3) {
+                    // Điểm cuối kỳ < 3 - không đạt
+                    subject.diemTongKet = null;
+                    subject.thangDiem4 = 0;
+                    subject.diemChu = 'F';
+                    subject.xepLoai = 'Kém';
+                    if (cuoiKy === 0) {
+                        subject.ghiChu = 'CK = 0';
+                    } else {
+                        subject.ghiChu = 'CK < 3';
+                    }
+                    subject.dat = '';
+                } else if (dsDiemTK.length >= 2 && giuaKy !== null && cuoiKy !== null) {
+                    const scoreData = {
+                        dsDiemTK: subject.thuongXuyen.map(s => s !== null && s !== undefined ? s : 0),
+                        dsDiemTH: subject.thucHanh.map(s => s !== null && s !== undefined ? s : 0),
+                        giuaKy: giuaKy,
+                        cuoiKy: cuoiKy,
+                        tinChi: subject.credits
+                    };
+
+                    const result = calculateScore(scoreData, semesterIndex, subjectIndex);
+                    subject.diemTongKet = result.diemTongKet;
+                    subject.thangDiem4 = result.diemTongKet4;
+                    subject.diemChu = result.diemChu;
+                    subject.xepLoai = result.xepLoai;
+                    subject.ghiChu = result.ghiChu;
+                    subject.dat = result.isDat ? "✓" : "";
+                }
             }
         }
 
@@ -645,7 +905,7 @@ function GradesPageContent({ keyValue }) {
     };
 
     // Function to calculate final grade for a subject
-    const calculateFinalGrade = (subject) => {
+    const calculateFinalGrade = (subject, semesterIndex, subjectIndex) => {
         const thuongXuyen = subject.thuongXuyen.filter(score => score !== null && score !== undefined);
         const thucHanh = subject.thucHanh.filter(score => score !== null && score !== undefined);
         const giuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined ? subject.diemGiuaKy : null;
@@ -661,23 +921,48 @@ function GradesPageContent({ keyValue }) {
             };
         }
 
+        // Xác định loại môn từ selection thủ công hoặc tự động
+        const subjectType = getCurrentSubjectType(semesterIndex, subjectIndex);
+
         let diemTongKet = 0;
         const diemThuongXuyen = thuongXuyen.length > 0 ?
             thuongXuyen.reduce((sum, score) => sum + (score || 0), 0) / thuongXuyen.length : 0;
 
-        if (thucHanh.length === 0) {
-            // Môn lý thuyết
+        if (subjectType === 'TH') {
+            // Môn thực hành - tính trung bình cộng của các điểm thực hành đã nhập
+            const validScores = thucHanh.filter(score => score !== null && score !== undefined);
+            if (validScores.length > 0) {
+                diemTongKet = validScores.reduce((sum, score) => sum + score, 0) / validScores.length;
+            } else {
+                return {
+                    diemHe10: null,
+                    diemHe4: null,
+                    diemChu: '',
+                    xepLoai: ''
+                };
+            }
+        } else if (subjectType === 'LT') {
+            // Môn lý thuyết - chỉ dùng công thức lý thuyết
             diemTongKet = (diemThuongXuyen * 0.2 + giuaKy * 0.3 + cuoiKy * 0.5);
-        } else {
-            // Môn có thực hành
-            const diemThucHanh = thucHanh.reduce((sum, score) => sum + (score || 0), 0) / thucHanh.length;
+        } else if (subjectType === 'TICH_HOP') {
+            // Môn tích hợp - kết hợp lý thuyết và thực hành
+            const validThucHanhScores = thucHanh.filter(score => score !== null && score !== undefined);
             const diemLT = (diemThuongXuyen * 0.2 + giuaKy * 0.3 + cuoiKy * 0.5);
 
-            if (tinChi === 3) {
-                diemTongKet = (diemLT * 2 + diemThucHanh) / 3;
+            if (validThucHanhScores.length > 0) {
+                const diemThucHanh = validThucHanhScores.reduce((sum, score) => sum + score, 0) / validThucHanhScores.length;
+                if (tinChi === 3) {
+                    diemTongKet = (diemLT * 2 + diemThucHanh) / 3;
+                } else {
+                    diemTongKet = (diemLT * 3 + diemThucHanh) / 4;
+                }
             } else {
-                diemTongKet = (diemLT * 3 + diemThucHanh) / 4;
+                // Nếu chưa có điểm thực hành, chỉ tính phần lý thuyết
+                diemTongKet = diemLT;
             }
+        } else {
+            // Môn đặc biệt - chỉ dùng điểm cuối kỳ
+            diemTongKet = cuoiKy;
         }
 
         const diemHe4 = convertScore10To4(diemTongKet);
@@ -797,9 +1082,28 @@ function GradesPageContent({ keyValue }) {
     const createEditableCell = (value, scoreType, semesterIndex, subjectIndex) => {
         const subject = gradesData.semesters[semesterIndex].subjects[subjectIndex];
         const isSpecial = isSpecialSubject(subject.name);
+        const selectedType = getCurrentSubjectType(semesterIndex, subjectIndex);
 
-        // Với môn đặc biệt, chỉ cho phép nhập cột cuối kỳ
-        const isDisabled = isSpecial && scoreType !== 'ck';
+        // Xác định cột nào bị vô hiệu hóa dựa trên loại môn đã chọn
+        const isThucHanhColumn = ['th1', 'th2', 'th3', 'th4', 'th5'].includes(scoreType);
+        const isLyThuyetColumn = ['gk', 'tx1', 'tx2', 'tx3', 'tx4'].includes(scoreType);
+
+        let isDisabled = false;
+
+        if (isSpecial) {
+            // Môn đặc biệt: chỉ cho phép nhập cột cuối kỳ
+            isDisabled = scoreType !== 'ck';
+        } else if (selectedType === 'LT') {
+            // Môn lý thuyết: cho phép Giữa kỳ, Thường xuyên, Cuối kỳ
+            isDisabled = isThucHanhColumn;
+        } else if (selectedType === 'TH') {
+            // Môn thực hành: chỉ cho phép các cột thực hành
+            isDisabled = isLyThuyetColumn || scoreType === 'ck';
+        } else if (selectedType === 'TICH_HOP') {
+            // Môn tích hợp: cho phép tất cả các cột
+            isDisabled = false;
+        }
+        // Nếu không xác định được loại môn, cho phép tất cả
 
         // Parse value để hiển thị đúng format với 1 chữ số thập phân
         const numericValue = parseScore(value);
@@ -866,7 +1170,12 @@ function GradesPageContent({ keyValue }) {
                     }
                 }
             },
-            title: isDisabled ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' : 'Nhập điểm từ 0-10. Điểm sẽ được làm tròn theo quy định IUH.',
+            title: isDisabled ?
+                (isSpecial ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' :
+                    selectedType === 'LT' && isThucHanhColumn ? 'Môn lý thuyết - không có điểm thực hành' :
+                        selectedType === 'TH' && (isLyThuyetColumn || scoreType === 'ck') ? 'Môn thực hành - chỉ nhập điểm thực hành' :
+                            'Ô nhập bị vô hiệu hóa') :
+                'Nhập điểm từ 0-10. Điểm sẽ được làm tròn theo quy định IUH.',
             onInput: (e) => {
                 if (!isDisabled) {
                     const value = e.target.textContent.trim();
@@ -878,7 +1187,12 @@ function GradesPageContent({ keyValue }) {
                         e.target.title = validation.error;
                     } else {
                         e.target.style.backgroundColor = 'inherit';
-                        e.target.title = isDisabled ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' : 'Nhập điểm từ 0-10. Điểm sẽ được làm tròn theo quy định IUH.';
+                        e.target.title = isDisabled ?
+                            (isSpecial ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' :
+                                selectedType === 'LT' && isThucHanhColumn ? 'Môn lý thuyết - không có điểm thực hành' :
+                                    selectedType === 'TH' && (isLyThuyetColumn || scoreType === 'ck') ? 'Môn thực hành - chỉ nhập điểm thực hành' :
+                                        'Ô nhập bị vô hiệu hóa') :
+                            'Nhập điểm từ 0-10. Điểm sẽ được làm tròn theo quy định IUH.';
                     }
                 }
             }
@@ -936,6 +1250,7 @@ function GradesPageContent({ keyValue }) {
                                 React.createElement('th', { rowSpan: 3, className: 'col-ma-lhp' }, 'Mã lớp học phần'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-ten-mon' }, 'Tên môn học/học phần'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-tin-chi' }, 'Số tín chỉ'),
+                                React.createElement('th', { rowSpan: 3, className: 'col-loai-mon' }, 'Loại môn'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-giua-ky' }, 'Giữa kỳ'),
                                 React.createElement('th', { colSpan: 4, className: 'col-thuong-xuyen' }, 'Thường xuyên'),
                                 React.createElement('th', { colSpan: 5, className: 'col-thuc-hanh' }, 'Thực hành'),
@@ -976,6 +1291,7 @@ function GradesPageContent({ keyValue }) {
                                     React.createElement('td', { className: 'td-ma-lhp' }, subject.maLhp),
                                     React.createElement('td', { className: 'td-ten-mon' }, subject.name),
                                     React.createElement('td', { className: 'td-tin-chi' }, subject.credits),
+                                    createSubjectTypeSelector(semIndex, subIndex),
                                     createEditableCell(subject.diemGiuaKy, 'gk', semIndex, subIndex),
                                     // Thường xuyên columns (4) - editable
                                     createEditableCell(subject.thuongXuyen[0], 'tx1', semIndex, subIndex),
