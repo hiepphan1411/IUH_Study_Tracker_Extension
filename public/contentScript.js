@@ -573,14 +573,8 @@ function processAndSaveScheduleData() {
         },
         function () {
           if (chrome.runtime.lastError) {
-            console.log(
-              "Lỗi lưu dữ liệu chương trình khung:",
-              chrome.runtime.lastError
-            );
             return;
           }
-
-          console.log("Đã lưu dữ liệu chương trình khung thành công");
 
           chrome.runtime.sendMessage(
             {
@@ -602,7 +596,6 @@ function processAndSaveScheduleData() {
 
       return true;
     } catch (error) {
-      console.error("Lỗi trong saveCurriculumData:", error);
       return false;
     }
   }
@@ -750,10 +743,6 @@ function processAndSaveScheduleData() {
         },
         function () {
           if (chrome.runtime.lastError) {
-            console.log(
-              "Lỗi lưu dữ liệu chương trình khung:",
-              chrome.runtime.lastError
-            );
             return;
           }
 
