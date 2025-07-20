@@ -19,7 +19,9 @@
       "matches": [
         "https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html*",
         "https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html*",
-        "https://sv.iuh.edu.vn/chuong-trinh-khung.html*"
+        "https://sv.iuh.edu.vn/chuong-trinh-khung.html*",
+        "https://sv.iuh.edu.vn/sinh-vien/khao-sat.html*",
+        "https://sv.iuh.edu.vn/sinh-vien/chi-tiet-phieu-khao-sat.html*"
       ],
       "js": [
         "contentScript.js"
