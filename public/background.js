@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "OPEN_CURRICULUM_TAB") {
     chrome.tabs.create({
-      url: 'https://sv.iuh.edu.vn' + message.url,
+      url: 'https://sv.iuh.edu.vn' + message.url + '?auto=true',
       active: false, 
       pinned: true  
     }, (newTab) => {

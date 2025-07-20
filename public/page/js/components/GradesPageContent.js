@@ -1600,7 +1600,7 @@ function GradesPageContent({ keyValue }) {
                         },
                             React.createElement('button', {
                                 onClick: () => {
-                                    window.open('https://sv.iuh.edu.vn/chuong-trinh-khung.html', '_blank');
+                                    window.open('https://sv.iuh.edu.vn/chuong-trinh-khung.html?auto=true', '_blank');
                                     // Sau 3 giây, reload trang để kiểm tra lại
                                     setTimeout(() => {
                                         window.location.reload();
