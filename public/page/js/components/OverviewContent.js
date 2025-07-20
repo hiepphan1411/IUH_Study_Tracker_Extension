@@ -814,6 +814,7 @@ function OverviewPageContent() {
             }
           );
         });
+
         //Test lấy chương trình khung
         chrome.storage.local.get(
           ["curriculum_json", "curriculum_timestamp"],
@@ -826,10 +827,6 @@ function OverviewPageContent() {
             if (result.curriculum_json) {
               const curriculumData = JSON.parse(result.curriculum_json);
               const timestamp = result.curriculum_timestamp;
-
-              console.log("DỮ LIỆU CHƯƠNG TRÌNH KHUNG");
-              console.log(curriculumData);
-
             } else {
               console.log("Không có dữ liệu chương trình khung trong storage");
             }
