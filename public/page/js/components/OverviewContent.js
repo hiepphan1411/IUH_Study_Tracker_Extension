@@ -832,6 +832,15 @@ function OverviewPageContent() {
                 console.log("DỮ LIỆU CHƯƠNG TRÌNH KHUNG LOADED");
                 console.log(curriculumDataParsed);
 
+                // Log chi tiết cấu trúc dữ liệu
+                if (curriculumDataParsed && curriculumDataParsed.length > 0) {
+                  // console.log("Sample semester:", curriculumDataParsed[0]);
+                  if (curriculumDataParsed[0].monHoc && curriculumDataParsed[0].monHoc.length > 0) {
+                    // console.log("Sample subject:", curriculumDataParsed[0].monHoc[0]);
+                    // console.log("Subject keys:", Object.keys(curriculumDataParsed[0].monHoc[0]));
+                  }
+                }
+
                 // Lưu vào state
                 setCurriculumData(curriculumDataParsed);
 
@@ -844,27 +853,93 @@ function OverviewPageContent() {
                     return { soTLT: null, soTTH: null };
                   }
 
-                  const found = curriculumDataParsed.find(row => {
-                    if (Array.isArray(row) && row.length >= 3) {
-                      const curriculumSubjectName = row[2]; // Tên môn học ở vị trí thứ 3
-                      if (curriculumSubjectName) {
-                        return curriculumSubjectName.toLowerCase().trim() === subjectName.toLowerCase().trim();
+                  // Normalize subject name for better matching
+                  const normalizeSubjectName = (name) => {
+                    return name.toLowerCase()
+                      .trim()
+                      .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+                      .replace(/\*/g, '')    // Remove asterisk
+                      .replace(/[()]/g, '')  // Remove parentheses
+                      .trim();
+                  };
+
+                  const searchName = normalizeSubjectName(subjectName);
+
+                  // Tìm kiếm qua tất cả các học kỳ và môn học
+                  for (const semester of curriculumDataParsed) {
+                    if (semester.monHoc && Array.isArray(semester.monHoc)) {
+                      const found = semester.monHoc.find(subject => {
+                        // Kiểm tra tên môn học - sử dụng thuộc tính 'tenMon'
+                        const subjectNameInCurriculum = subject.tenMon ||
+                          subject['Tên môn học'] ||
+                          subject.tenMonHoc ||
+                          subject.name;
+
+                        if (subjectNameInCurriculum) {
+                          const curriculumName = normalizeSubjectName(subjectNameInCurriculum);
+
+                          // Exact match first
+                          if (curriculumName === searchName) {
+                            return true;
+                          }
+
+                          // Partial match for similar subjects
+                          if (curriculumName.includes(searchName) || searchName.includes(curriculumName)) {
+                            return true;
+                          }
+
+                          // Special handling for common variations
+                          const specialMatches = [
+                            ['giáo dục quốc phòng', 'giáo dục quốc phòng và an ninh'],
+                            ['giáo dục thể chất', 'giáo dục thể chất'],
+                            ['tiếng anh', 'chứng chỉ tiếng anh'],
+                            ['nhập môn tin học', 'nhập môn tin học']
+                          ];
+
+                          for (const [pattern1, pattern2] of specialMatches) {
+                            if ((curriculumName.includes(pattern1) && searchName.includes(pattern1)) ||
+                              (curriculumName.includes(pattern2) && searchName.includes(pattern2))) {
+                              return true;
+                            }
+                          }
+                        }
+                        return false;
+                      });
+
+                      if (found) {
+                        console.log(`Found curriculum data for "${subjectName}":`, found);
+
+                        // Trích xuất soTLT và soTTH - sử dụng đúng tên thuộc tính
+                        const soTLT = found.soTLT || found['Số TCTL'] || null;
+                        const soTTH = found.soTTH || found['Số TCTH'] || null;
+
+                        console.log(`Extracted: soTLT=${soTLT}, soTTH=${soTTH}`);
+                        return {
+                          soTLT: soTLT ? parseInt(soTLT) : null,
+                          soTTH: soTTH ? parseInt(soTTH) : null
+                        };
                       }
                     }
-                    return false;
-                  });
+                  }
 
-                  if (found && Array.isArray(found) && found.length >= 6) {
-                    // Giả định: [STT, Mã HP, Tên môn, Số TC, soTLT, soTTH, ...]
-                    const soTLT = parseInt(found[4]) || null;
-                    const soTTH = parseInt(found[5]) || null;
-                    return { soTLT, soTTH };
+                  // Only show warning for subjects that are not in the ignore list
+                  const ignoreWarnings = [
+                    'giáo dục quốc phòng',
+                    'giáo dục thể chất',
+                    'tiếng anh',
+                    'chứng chỉ tiếng anh'
+                  ];
+
+                  const shouldIgnoreWarning = ignoreWarnings.some(ignore =>
+                    subjectName.toLowerCase().includes(ignore)
+                  );
+
+                  if (!shouldIgnoreWarning) {
+                    console.warn(`No curriculum info found for "${subjectName}"`);
                   }
 
                   return { soTLT: null, soTTH: null };
-                };
-
-                console.log("Curriculum data đã được export sang window.curriculumData và window.getCurriculumInfo");
+                }; console.log("Curriculum data đã được export sang window.curriculumData và window.getCurriculumInfo");
 
               } catch (error) {
                 console.error("Lỗi parse curriculum data:", error);
