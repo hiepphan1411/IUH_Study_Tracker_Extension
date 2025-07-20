@@ -1590,7 +1590,7 @@ function GradesPageContent({ keyValue }) {
                                 lineHeight: '1.4',
                                 color: '#856404'
                             }
-                        }, 'Để extension hoạt động tốt nhất và tự động phân loại môn học, vui lòng đăng nhập trang chương trình khung trước. Hiện tại tất cả môn học sẽ được mặc định phân loại là "Lý thuyết".'),
+                        }, 'Để extension hoạt động tốt nhất và tự động phân loại môn học, vui lòng đăng nhập trang sv.iuh trước. Hiện tại tất cả môn học sẽ được mặc định phân loại là "Lý thuyết".'),
                         React.createElement('div', {
                             style: {
                                 display: 'flex',
