@@ -6,6 +6,146 @@ function GradesPageContent({ keyValue }) {
     const [error, setError] = React.useState(null);
     const [subjectTypes, setSubjectTypes] = React.useState({}); // Lưu trữ loại môn học đã chọn
     const [openDropdowns, setOpenDropdowns] = React.useState({}); // Lưu trữ trạng thái mở/đóng của các dropdown
+    const [curriculumLoaded, setCurriculumLoaded] = React.useState(false);
+
+    // Load curriculum data first
+    React.useEffect(() => {
+        const loadCurriculumData = () => {
+            chrome.storage.local.get(['curriculum_json'], function (result) {
+                if (chrome.runtime.lastError) {
+                    console.error("Lỗi lấy dữ liệu chương trình khung:", chrome.runtime.lastError);
+                    setCurriculumLoaded(true); // Still allow the component to work
+                    return;
+                }
+
+                if (result.curriculum_json) {
+                    try {
+                        const curriculumDataParsed = JSON.parse(result.curriculum_json);
+
+                        // Export curriculum data to window
+                        window.curriculumData = curriculumDataParsed;
+
+                        // Export getCurriculumInfo function
+                        window.getCurriculumInfo = (subjectName) => {
+                            if (!curriculumDataParsed || !Array.isArray(curriculumDataParsed)) {
+                                return { soTLT: null, soTTH: null };
+                            }
+
+                            // Normalize subject name for better matching
+                            const normalizeSubjectName = (name) => {
+                                return name.toLowerCase()
+                                    .trim()
+                                    .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+                                    .replace(/\*/g, '')    // Remove asterisk
+                                    .replace(/[()]/g, '')  // Remove parentheses
+                                    .trim();
+                            };
+
+                            const searchName = normalizeSubjectName(subjectName);
+
+                            for (const semester of curriculumDataParsed) {
+                                if (semester.monHoc && Array.isArray(semester.monHoc)) {
+                                    const found = semester.monHoc.find(subject => {
+                                        const subjectNameInCurriculum = subject.tenMon ||
+                                            subject['Tên môn học'] ||
+                                            subject.tenMonHoc ||
+                                            subject.name;
+
+                                        if (subjectNameInCurriculum) {
+                                            const curriculumName = normalizeSubjectName(subjectNameInCurriculum);
+
+                                            // Exact match first
+                                            if (curriculumName === searchName) {
+                                                return true;
+                                            }
+
+                                            // Partial match for similar subjects
+                                            if (curriculumName.includes(searchName) || searchName.includes(curriculumName)) {
+                                                return true;
+                                            }
+
+                                            // Special handling for common variations
+                                            const specialMatches = [
+                                                ['giáo dục quốc phòng', 'giáo dục quốc phòng và an ninh'],
+                                                ['giáo dục thể chất', 'giáo dục thể chất'],
+                                                ['tiếng anh', 'chứng chỉ tiếng anh'],
+                                                ['nhập môn tin học', 'nhập môn tin học']
+                                            ];
+
+                                            for (const [pattern1, pattern2] of specialMatches) {
+                                                if ((curriculumName.includes(pattern1) && searchName.includes(pattern1)) ||
+                                                    (curriculumName.includes(pattern2) && searchName.includes(pattern2))) {
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                        return false;
+                                    });
+
+                                    if (found) {
+                                        const soTLT = found.soTLT || found['Số TCTL'] || null;
+                                        const soTTH = found.soTTH || found['Số TCTH'] || null;
+
+                                        return {
+                                            soTLT: soTLT ? parseInt(soTLT) : null,
+                                            soTTH: soTTH ? parseInt(soTTH) : null
+                                        };
+                                    }
+                                }
+                            }
+
+                            // Only show warning for subjects that are not in the ignore list
+                            const ignoreWarnings = [
+                                'giáo dục quốc phòng',
+                                'giáo dục thể chất',
+                                'tiếng anh',
+                                'chứng chỉ tiếng anh'
+                            ];
+
+                            const shouldIgnoreWarning = ignoreWarnings.some(ignore =>
+                                subjectName.toLowerCase().includes(ignore)
+                            );
+
+                            if (!shouldIgnoreWarning) {
+                                console.warn(`No curriculum info found for "${subjectName}"`);
+                            }
+
+                            return { soTLT: null, soTTH: null };
+                        }; console.log("Curriculum data loaded in GradesPageContent");
+                        setCurriculumLoaded(true);
+                    } catch (error) {
+                        console.error("Lỗi parse curriculum data:", error);
+                        setCurriculumLoaded(true);
+                    }
+                } else {
+                    console.log("Không có dữ liệu chương trình khung trong storage");
+                    setCurriculumLoaded(true);
+                }
+            });
+        };
+
+        loadCurriculumData();
+    }, []);
+
+    // Auto-classify subjects when both curriculum and grades data are ready
+    React.useEffect(() => {
+        if (curriculumLoaded && gradesData) {
+            // console.log('Both curriculum and grades data ready, starting auto-classification...');
+            const newSubjectTypes = {};
+
+            gradesData.semesters.forEach((semester, semesterIndex) => {
+                semester.subjects.forEach((subject, subjectIndex) => {
+                    const key = `${semesterIndex}-${subjectIndex}`;
+                    const autoType = getAutoSubjectType(subject.name, subject);
+                    // console.log(`Auto-classifying "${subject.name}" as: ${autoType}`);
+                    newSubjectTypes[key] = autoType;
+                });
+            });
+
+            setSubjectTypes(newSubjectTypes);
+            // console.log('Auto-classification completed for real data:', newSubjectTypes);
+        }
+    }, [curriculumLoaded, gradesData]);
 
     // Danh sách môn bỏ qua khi tính GPA
     const listSubjectIgnoresCalcScore = [
@@ -82,7 +222,7 @@ function GradesPageContent({ keyValue }) {
     };
 
     // Hàm kiểm tra môn đặc biệt (chỉ có một cột điểm tổng kết)
-    const isSpecialSubject = (subjectName) => {
+    const isSpecialSubject = (subjectName, subject = null) => {
         const specialSubjects = [
             'thực tập doanh nghiệp',
             'khóa luận tốt nghiệp',
@@ -94,9 +234,29 @@ function GradesPageContent({ keyValue }) {
             'giáo dục thể chất 1',
             'giáo dục thể chất 2'
         ];
-        return specialSubjects.some(special =>
+
+        // Kiểm tra danh sách môn đặc biệt cố định
+        const isInSpecialList = specialSubjects.some(special =>
             subjectName.toLowerCase().includes(special.toLowerCase())
         );
+
+        if (isInSpecialList) {
+            return true;
+        }
+
+        // Kiểm tra đặc biệt cho "Tiếng Anh 2" và các môn tương tự
+        if (subjectName.toLowerCase().includes('tiếng anh') && subject) {
+            // Kiểm tra xem có điểm giữa kỳ và thường xuyên không
+            const hasGiuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined;
+            const hasThuongXuyen = subject.thuongXuyen.some(score => score !== null && score !== undefined);
+
+            // Nếu không có điểm giữa kỳ và thường xuyên → môn đặc biệt
+            if (!hasGiuaKy && !hasThuongXuyen) {
+                return true;
+            }
+        }
+
+        return false;
     };
 
     // Hàm xử lý thay đổi loại môn học
@@ -108,13 +268,112 @@ function GradesPageContent({ keyValue }) {
         }));
 
         // Có thể thêm logic tính lại điểm dựa trên loại môn học mới
-        console.log(`Changed subject type for ${key} to ${newType}`);
+        // console.log(`Changed subject type for ${key} to ${newType}`);
+    };
+
+    // Hàm tự động xác định loại môn dựa trên chương trình khung
+    const getAutoSubjectType = (subjectName, subject = null) => {
+        try {
+            // Kiểm tra đặc biệt cho "Tiếng Anh" khi không có điểm giữa kỳ và thường xuyên
+            if (subject && subjectName.toLowerCase().includes('tiếng anh')) {
+                const hasGiuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined;
+                const hasThuongXuyen = subject.thuongXuyen.some(score => score !== null && score !== undefined);
+
+                // Nếu không có điểm giữa kỳ và thường xuyên → môn đặc biệt (chỉ có điểm cuối kỳ)
+                if (!hasGiuaKy && !hasThuongXuyen) {
+                    console.log(`→ "${subjectName}" classified as SPECIAL (no midterm/regular scores)`);
+                    return 'SPECIAL'; // Môn đặc biệt
+                }
+            }
+
+            // Kiểm tra curriculum đã được load chưa
+            if (!curriculumLoaded) {
+                console.log('Curriculum not loaded yet, defaulting to LT');
+                return 'LT';
+            }
+
+            // Kiểm tra xem window.getCurriculumInfo có tồn tại không
+            if (typeof window.getCurriculumInfo === 'function') {
+                const curriculumInfo = window.getCurriculumInfo(subjectName);
+                // console.log(`Full curriculum info for "${subjectName}":`, curriculumInfo);
+
+                if (curriculumInfo) {
+                    let soTLT = curriculumInfo.soTLT;
+                    let soTTH = curriculumInfo.soTTH;
+
+                    // Kiểm tra các tên thuộc tính khác có thể có
+                    if (soTLT === null || soTLT === undefined) {
+                        soTLT = curriculumInfo.soTinChiLyThuyet || curriculumInfo.lyThuyet || curriculumInfo.LT || 0;
+                    }
+                    if (soTTH === null || soTTH === undefined) {
+                        soTTH = curriculumInfo.soTinChiThucHanh || curriculumInfo.thucHanh || curriculumInfo.TH || 0;
+                    }
+
+                    // console.log(`Auto classify "${subjectName}": soTLT=${soTLT}, soTTH=${soTTH}`);
+
+                    // Xác định loại môn dựa trên soTLT và soTTH
+                    if (soTLT > 0 && soTTH > 0) {
+                        // console.log(`→ Classified as TÍCH HỢP`);
+                        return 'TICH_HOP'; // Môn tích hợp
+                    } else if (soTLT === 0 && soTTH > 0) {
+                        // console.log(`→ Classified as THỰC HÀNH`);
+                        return 'TH'; // Môn thực hành
+                    } else if (soTLT > 0 && soTTH === 0) {
+                        // console.log(`→ Classified as LÝ THUYẾT`);
+                        return 'LT'; // Môn lý thuyết
+                    }
+                } else {
+                    console.warn(`No curriculum info found for "${subjectName}"`);
+                }
+            } else {
+                console.warn('window.getCurriculumInfo is not available yet');
+            }
+        } catch (error) {
+            console.warn('Lỗi khi lấy thông tin từ chương trình khung:', error);
+        }
+
+        // Kiểm tra các môn khác khi không có điểm giữa kỳ và thường xuyên → mặc định là lý thuyết
+        if (subject && !subjectName.toLowerCase().includes('tiếng anh')) {
+            const hasGiuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined;
+            const hasThuongXuyen = subject.thuongXuyen.some(score => score !== null && score !== undefined);
+
+            if (!hasGiuaKy && !hasThuongXuyen) {
+                console.log(`→ "${subjectName}" classified as LÝ THUYẾT (no midterm/regular scores, not Tiếng Anh)`);
+                return 'LT'; // Mặc định là lý thuyết cho các môn khác
+            }
+        }
+
+        console.log(`→ Default to LÝ THUYẾT for "${subjectName}"`);
+        // Mặc định là lý thuyết nếu không xác định được
+        return 'LT';
     };
 
     // Hàm lấy loại môn học hiện tại
     const getCurrentSubjectType = (semesterIndex, subjectIndex) => {
         const key = `${semesterIndex}-${subjectIndex}`;
-        return subjectTypes[key] || 'LT'; // Mặc định là Lý thuyết
+
+        // Nếu đã có trong state (từ phân loại tự động hoặc lựa chọn thủ công), sử dụng nó
+        if (subjectTypes[key]) {
+            return subjectTypes[key];
+        }
+
+        // Nếu chưa có, thử phân loại tự động (fallback case)
+        if (gradesData && gradesData.semesters && gradesData.semesters[semesterIndex] &&
+            gradesData.semesters[semesterIndex].subjects && gradesData.semesters[semesterIndex].subjects[subjectIndex]) {
+            const subject = gradesData.semesters[semesterIndex].subjects[subjectIndex];
+            const autoType = getAutoSubjectType(subject.name, subject);
+
+            // Lưu kết quả tự động vào subjectTypes
+            setSubjectTypes(prev => ({
+                ...prev,
+                [key]: autoType
+            }));
+
+            return autoType;
+        }
+
+        // Mặc định là Lý thuyết nếu không thể xác định
+        return 'LT';
     };
 
     // Component tạo selection button cho loại môn học
@@ -126,7 +385,8 @@ function GradesPageContent({ keyValue }) {
         const options = [
             { value: 'LT', label: 'Lý thuyết', title: 'Môn lý thuyết (soTLT > 0, soTTH = 0)' },
             { value: 'TH', label: 'Thực hành', title: 'Môn thực hành (soTLT = 0, soTTH > 0)' },
-            { value: 'TICH_HOP', label: 'Tích hợp', title: 'Môn tích hợp (soTLT > 0, soTTH > 0)' }
+            { value: 'TICH_HOP', label: 'Tích hợp', title: 'Môn tích hợp (soTLT > 0, soTTH > 0)' },
+            { value: 'SPECIAL', label: 'Đặc biệt', title: 'Môn đặc biệt (chỉ có điểm cuối kỳ)' }
         ];
 
         const currentOption = options.find(opt => opt.value === currentType);
@@ -172,7 +432,7 @@ function GradesPageContent({ keyValue }) {
                         fontSize: '13px',
                         fontWeight: '500',
                         cursor: 'pointer',
-                        boxShadow: isOpen ? '0 4px 6px rgba(0, 0, 0, 0.1)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
+                        // boxShadow: isOpen ? '0 4px 6px rgba(0, 0, 0, 0.1)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
                         transition: 'all 0.2s ease',
                         userSelect: 'none',
                         position: 'relative',
@@ -180,21 +440,21 @@ function GradesPageContent({ keyValue }) {
                         alignItems: 'center',
                         justifyContent: 'space-between'
                     },
-                    title: currentOption?.title || 'Chọn loại môn học',
-                    onMouseEnter: (e) => {
-                        if (!isOpen) {
-                            e.target.style.backgroundColor = '#e2e8f0';
-                            e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                        }
-                    },
-                    onMouseLeave: (e) => {
-                        if (!isOpen) {
-                            e.target.style.backgroundColor = '#f8fafc';
-                            e.target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
-                        }
-                    }
+                    title: currentOption?.title || 'Loại môn được xác định tự động từ chương trình khung',
+                    // onMouseEnter: (e) => {
+                    //     if (!isOpen) {
+                    //         e.target.style.backgroundColor = '#e2e8f0';
+                    //         e.target.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                    //     }
+                    // },
+                    // onMouseLeave: (e) => {
+                    //     if (!isOpen) {
+                    //         e.target.style.backgroundColor = '#f8fafc';
+                    //         e.target.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+                    //     }
+                    // }
                 },
-                    React.createElement('span', null, currentOption?.label || 'Lý thuyết'),
+                    React.createElement('span', null, currentOption?.label || 'Tự động'),
                     React.createElement('svg', {
                         style: {
                             width: '16px',
@@ -246,16 +506,16 @@ function GradesPageContent({ keyValue }) {
                                 transition: 'all 0.1s ease'
                             },
                             title: option.title,
-                            onMouseEnter: (e) => {
-                                if (option.value !== currentType) {
-                                    e.target.style.backgroundColor = '#f9fafb';
-                                }
-                            },
-                            onMouseLeave: (e) => {
-                                if (option.value !== currentType) {
-                                    e.target.style.backgroundColor = '#ffffff';
-                                }
-                            }
+                            // onMouseEnter: (e) => {
+                            //     if (option.value !== currentType) {
+                            //         e.target.style.backgroundColor = '#f9fafb';
+                            //     }
+                            // },
+                            // onMouseLeave: (e) => {
+                            //     if (option.value !== currentType) {
+                            //         e.target.style.backgroundColor = '#ffffff';
+                            //     }
+                            // }
                         }, option.label)
                     )
                 )
@@ -463,9 +723,34 @@ function GradesPageContent({ keyValue }) {
             ]
         };
 
-        // Không tự động tính toán summary cho mock data
-        // Summary sẽ được tính khi user thao tác với điểm
+        // Set dữ liệu trước
         setGradesData(mockData);
+
+        // Chờ curriculum data được load trước khi phân loại
+        const waitForCurriculumAndClassify = () => {
+            if (!curriculumLoaded) {
+                console.log('Waiting for curriculum to load...');
+                setTimeout(waitForCurriculumAndClassify, 500);
+                return;
+            }
+
+            console.log('Starting auto classification for mock data...');
+            const newSubjectTypes = {};
+
+            mockData.semesters.forEach((semester, semesterIndex) => {
+                semester.subjects.forEach((subject, subjectIndex) => {
+                    const key = `${semesterIndex}-${subjectIndex}`;
+                    const autoType = getAutoSubjectType(subject.name, subject);
+                    console.log(`Subject "${subject.name}" auto-classified as: ${autoType}`);
+                    newSubjectTypes[key] = autoType;
+                });
+            });
+
+            setSubjectTypes(newSubjectTypes);
+            console.log('Auto classification completed:', newSubjectTypes);
+        };
+
+        waitForCurriculumAndClassify();
     };
 
     // Process raw IUH data from contentScript into our format
@@ -498,10 +783,21 @@ function GradesPageContent({ keyValue }) {
                         return Math.round(parsed * 10) / 10;
                     };
 
+                    const subjectName = subject["Tên môn học"] || subject["Tên môn học/học phần"] || "";
+
+                    // Tạm thời đặt loại mặc định, sẽ được cập nhật sau khi curriculum load xong
+                    const key = `${index}-${subIndex}`;
+
+                    // Lưu loại môn mặc định vào state (sẽ được cập nhật sau)
+                    setSubjectTypes(prev => ({
+                        ...prev,
+                        [key]: 'LT' // Default to lý thuyết, will be updated after curriculum loads
+                    }));
+
                     return {
                         stt: subIndex + 1,
                         maLhp: subject["Mã lớp học phần"] || "",
-                        name: subject["Tên môn học"] || subject["Tên môn học/học phần"] || "",
+                        name: subjectName,
                         credits: parseInt(subject["Số tín chỉ"] || subject["Tín chỉ"]) || 0,
                         diemGiuaKy: parseScore(subject["Giữa kỳ"]),
                         // Parse Thường xuyên columns (4 columns)
@@ -522,7 +818,8 @@ function GradesPageContent({ keyValue }) {
                         diemCuoiKy: parseScore(subject["Cuối kỳ"]),
                         diemTongKet: parseScore(subject["Điểm tổng kết"]),
                         thangDiem4: parseScore(subject["Thang điểm 4"]),
-                        diemChu: subject["Điểm chữ"] || "", xepLoai: subject["Xếp loại"] || "",
+                        diemChu: subject["Điểm chữ"] || "",
+                        xepLoai: subject["Xếp loại"] || "",
                         ghiChu: subject["Ghi chú"] || "",
                         dat: subject["Đạt"] || ""
                     };
@@ -658,7 +955,7 @@ function GradesPageContent({ keyValue }) {
     const handleScoreChange = (semesterIndex, subjectIndex, field, value) => {
         const newGradesData = { ...gradesData };
         const subject = newGradesData.semesters[semesterIndex].subjects[subjectIndex];
-        const isSpecial = isSpecialSubject(subject.name);
+        const isSpecial = isSpecialSubject(subject.name, subject);
 
         // Validate điểm với quy tắc IUH
         const validation = validateScore(value);
@@ -1081,7 +1378,7 @@ function GradesPageContent({ keyValue }) {
     // Hàm tạo ô input có thể chỉnh sửa với logic màu đỏ cho điểm ≤ 5
     const createEditableCell = (value, scoreType, semesterIndex, subjectIndex) => {
         const subject = gradesData.semesters[semesterIndex].subjects[subjectIndex];
-        const isSpecial = isSpecialSubject(subject.name);
+        const isSpecial = isSpecialSubject(subject.name, subject);
         const selectedType = getCurrentSubjectType(semesterIndex, subjectIndex);
 
         // Xác định cột nào bị vô hiệu hóa dựa trên loại môn đã chọn
@@ -1253,7 +1550,7 @@ function GradesPageContent({ keyValue }) {
                                 React.createElement('th', { rowSpan: 3, className: 'col-loai-mon' }, 'Loại môn'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-giua-ky' }, 'Giữa kỳ'),
                                 React.createElement('th', { colSpan: 4, className: 'col-thuong-xuyen' }, 'Thường xuyên'),
-                                React.createElement('th', { colSpan: 5, rowSpan:2, className: 'col-thuc-hanh' }, 'Thực hành'),
+                                React.createElement('th', { colSpan: 5, rowSpan: 2, className: 'col-thuc-hanh' }, 'Thực hành'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-cuoi-ky' }, 'Cuối kỳ'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-tong-ket' }, 'Điểm tổng kết'),
                                 React.createElement('th', { rowSpan: 3, className: 'col-thang-diem-4' }, 'Thang điểm 4'),
