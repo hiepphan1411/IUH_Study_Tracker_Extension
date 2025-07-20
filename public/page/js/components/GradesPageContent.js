@@ -281,7 +281,7 @@ function GradesPageContent({ keyValue }) {
 
                 // Nếu không có điểm giữa kỳ và thường xuyên → môn đặc biệt (chỉ có điểm cuối kỳ)
                 if (!hasGiuaKy && !hasThuongXuyen) {
-                    console.log(`→ "${subjectName}" classified as SPECIAL (no midterm/regular scores)`);
+                    // console.log(`→ "${subjectName}" classified as SPECIAL (no midterm/regular scores)`);
                     return 'SPECIAL'; // Môn đặc biệt
                 }
             }
@@ -292,12 +292,18 @@ function GradesPageContent({ keyValue }) {
                 return 'LT';
             }
 
+            // Kiểm tra xem có dữ liệu chương trình khung không
+            if (typeof window.getCurriculumInfo !== 'function') {
+                console.log('No curriculum data available, defaulting to LT');
+                return 'LT';
+            }
+
             // Kiểm tra xem window.getCurriculumInfo có tồn tại không
             if (typeof window.getCurriculumInfo === 'function') {
                 const curriculumInfo = window.getCurriculumInfo(subjectName);
                 // console.log(`Full curriculum info for "${subjectName}":`, curriculumInfo);
 
-                if (curriculumInfo) {
+                if (curriculumInfo && (curriculumInfo.soTLT !== null || curriculumInfo.soTTH !== null)) {
                     let soTLT = curriculumInfo.soTLT;
                     let soTTH = curriculumInfo.soTTH;
 
@@ -323,10 +329,9 @@ function GradesPageContent({ keyValue }) {
                         return 'LT'; // Môn lý thuyết
                     }
                 } else {
-                    console.warn(`No curriculum info found for "${subjectName}"`);
+                    // Không tìm thấy thông tin trong chương trình khung, sử dụng logic dự phòng
+                    console.log(`No curriculum info found for "${subjectName}", using fallback logic`);
                 }
-            } else {
-                console.warn('window.getCurriculumInfo is not available yet');
             }
         } catch (error) {
             console.warn('Lỗi khi lấy thông tin từ chương trình khung:', error);
@@ -338,17 +343,15 @@ function GradesPageContent({ keyValue }) {
             const hasThuongXuyen = subject.thuongXuyen.some(score => score !== null && score !== undefined);
 
             if (!hasGiuaKy && !hasThuongXuyen) {
-                console.log(`→ "${subjectName}" classified as LÝ THUYẾT (no midterm/regular scores, not Tiếng Anh)`);
+                // console.log(`→ "${subjectName}" classified as LÝ THUYẾT (no midterm/regular scores, not Tiếng Anh)`);
                 return 'LT'; // Mặc định là lý thuyết cho các môn khác
             }
         }
 
-        console.log(`→ Default to LÝ THUYẾT for "${subjectName}"`);
+        console.log(`→ Default to LÝ THUYẾT for "${subjectName}" (no curriculum data or fallback)`);
         // Mặc định là lý thuyết nếu không xác định được
         return 'LT';
-    };
-
-    // Hàm lấy loại môn học hiện tại
+    };    // Hàm lấy loại môn học hiện tại
     const getCurrentSubjectType = (semesterIndex, subjectIndex) => {
         const key = `${semesterIndex}-${subjectIndex}`;
 
@@ -741,7 +744,7 @@ function GradesPageContent({ keyValue }) {
                 semester.subjects.forEach((subject, subjectIndex) => {
                     const key = `${semesterIndex}-${subjectIndex}`;
                     const autoType = getAutoSubjectType(subject.name, subject);
-                    console.log(`Subject "${subject.name}" auto-classified as: ${autoType}`);
+                    // console.log(`Subject "${subject.name}" auto-classified as: ${autoType}`);
                     newSubjectTypes[key] = autoType;
                 });
             });
@@ -1525,8 +1528,121 @@ function GradesPageContent({ keyValue }) {
         );
     }
 
+    // Hàm tạo banner thông báo trạng thái chương trình khung
+    const createCurriculumStatusBanner = () => {
+        const hasCurriculumData = typeof window.getCurriculumInfo === 'function';
+
+        if (hasCurriculumData) {
+            return React.createElement('div', {
+                style: {
+                    backgroundColor: '#d4edda',
+                    border: '1px solid #c3e6cb',
+                    borderRadius: '6px',
+                    padding: '12px 16px',
+                    marginBottom: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: '14px',
+                    color: '#155724'
+                }
+            },
+                React.createElement('span', { style: { fontSize: '16px' } }, '✅'),
+                React.createElement('span', null, 'Đã tải dữ liệu chương trình khung - Tự động phân loại môn học hoạt động')
+            );
+        } else {
+            return React.createElement('div', {
+                style: {
+                    backgroundColor: '#fff3cd',
+                    border: '1px solid #ffeaa7',
+                    borderRadius: '6px',
+                    padding: '16px 20px',
+                    marginBottom: '20px',
+                    fontSize: '14px',
+                    color: '#856404'
+                }
+            },
+                React.createElement('div', {
+                    style: {
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '12px'
+                    }
+                },
+                    React.createElement('span', { style: { fontSize: '20px', marginTop: '2px' } }, '⚠️'),
+                    React.createElement('div', {
+                        style: {
+                            flex: 1
+                        }
+                    },
+                        React.createElement('h4', {
+                            style: {
+                                margin: '0 0 8px 0',
+                                fontSize: '16px',
+                                fontWeight: 'bold',
+                                color: '#856404'
+                            }
+                        }, 'Chưa có dữ liệu chương trình khung'),
+                        React.createElement('p', {
+                            style: {
+                                margin: '0 0 12px 0',
+                                fontSize: '14px',
+                                lineHeight: '1.4',
+                                color: '#856404'
+                            }
+                        }, 'Để extension hoạt động tốt nhất và tự động phân loại môn học, vui lòng đăng nhập trang chương trình khung trước. Hiện tại tất cả môn học sẽ được mặc định phân loại là "Lý thuyết".'),
+                        React.createElement('div', {
+                            style: {
+                                display: 'flex',
+                                gap: '8px',
+                                marginTop: '12px'
+                            }
+                        },
+                            React.createElement('button', {
+                                onClick: () => {
+                                    window.open('https://sv.iuh.edu.vn/chuong-trinh-khung.html', '_blank');
+                                    // Sau 3 giây, reload trang để kiểm tra lại
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 3000);
+                                },
+                                style: {
+                                    backgroundColor: '#007bff',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '8px 16px',
+                                    fontSize: '13px',
+                                    cursor: 'pointer',
+                                    fontWeight: '500'
+                                }
+                            }, 'Đăng nhập ngay'),
+                            React.createElement('button', {
+                                onClick: () => {
+                                    window.location.reload();
+                                },
+                                style: {
+                                    backgroundColor: '#28a745',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    padding: '8px 16px',
+                                    fontSize: '13px',
+                                    cursor: 'pointer',
+                                    fontWeight: '500'
+                                }
+                            }, 'Làm mới')
+                        )
+                    )
+                )
+            );
+        }
+    };
+
     // Main render
     return React.createElement('div', { className: 'grades-page-container' },
+        // Status banner
+        createCurriculumStatusBanner(),
         // Render each semester
         gradesData.semesters.map((semester, semIndex) =>
             React.createElement('div', {
