@@ -179,13 +179,17 @@ function StudyPlanPageContent() {
               const nhom1Subjects = monHoc.filter((mon) => mon.nhomTC === "1");
               const nhom1Credits =
                 nhom1Subjects.length > 0
-                  ? parseFloat(nhom1Subjects[0].soTCBB) || 0
+                  ? parseFloat(nhom1Subjects[0].soTCBB) ||
+                    parseFloat(nhom1Subjects[0].soTC) ||
+                    0
                   : 0;
 
               const nhom2Subjects = monHoc.filter((mon) => mon.nhomTC === "2");
               const nhom2Credits =
                 nhom2Subjects.length > 0
-                  ? parseFloat(nhom2Subjects[0].soTCBB) || 0
+                  ? parseFloat(nhom2Subjects[0].soTCBB) ||
+                    parseFloat(nhom2Subjects[0].soTC) ||
+                    0
                   : 0;
 
               setCalculated((prev) => [...prev, nhom0MonHoc]);
