@@ -136,7 +136,7 @@ function GradesPageContent({ keyValue }) {
             gradesData.semesters.forEach((semester, semesterIndex) => {
                 semester.subjects.forEach((subject, subjectIndex) => {
                     const key = `${semesterIndex}-${subjectIndex}`;
-                    const autoType = getAutoSubjectType(subject.name);
+                    const autoType = getAutoSubjectType(subject.name, subject);
                     // console.log(`Auto-classifying "${subject.name}" as: ${autoType}`);
                     newSubjectTypes[key] = autoType;
                 });
@@ -222,7 +222,7 @@ function GradesPageContent({ keyValue }) {
     };
 
     // Hàm kiểm tra môn đặc biệt (chỉ có một cột điểm tổng kết)
-    const isSpecialSubject = (subjectName) => {
+    const isSpecialSubject = (subjectName, subject = null) => {
         const specialSubjects = [
             'thực tập doanh nghiệp',
             'khóa luận tốt nghiệp',
@@ -234,9 +234,29 @@ function GradesPageContent({ keyValue }) {
             'giáo dục thể chất 1',
             'giáo dục thể chất 2'
         ];
-        return specialSubjects.some(special =>
+
+        // Kiểm tra danh sách môn đặc biệt cố định
+        const isInSpecialList = specialSubjects.some(special =>
             subjectName.toLowerCase().includes(special.toLowerCase())
         );
+
+        if (isInSpecialList) {
+            return true;
+        }
+
+        // Kiểm tra đặc biệt cho "Tiếng Anh 2" và các môn tương tự
+        if (subjectName.toLowerCase().includes('tiếng anh') && subject) {
+            // Kiểm tra xem có điểm giữa kỳ và thường xuyên không
+            const hasGiuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined;
+            const hasThuongXuyen = subject.thuongXuyen.some(score => score !== null && score !== undefined);
+
+            // Nếu không có điểm giữa kỳ và thường xuyên → môn đặc biệt
+            if (!hasGiuaKy && !hasThuongXuyen) {
+                return true;
+            }
+        }
+
+        return false;
     };
 
     // Hàm xử lý thay đổi loại môn học
@@ -252,8 +272,20 @@ function GradesPageContent({ keyValue }) {
     };
 
     // Hàm tự động xác định loại môn dựa trên chương trình khung
-    const getAutoSubjectType = (subjectName) => {
+    const getAutoSubjectType = (subjectName, subject = null) => {
         try {
+            // Kiểm tra đặc biệt cho "Tiếng Anh" khi không có điểm giữa kỳ và thường xuyên
+            if (subject && subjectName.toLowerCase().includes('tiếng anh')) {
+                const hasGiuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined;
+                const hasThuongXuyen = subject.thuongXuyen.some(score => score !== null && score !== undefined);
+
+                // Nếu không có điểm giữa kỳ và thường xuyên → môn đặc biệt (chỉ có điểm cuối kỳ)
+                if (!hasGiuaKy && !hasThuongXuyen) {
+                    console.log(`→ "${subjectName}" classified as SPECIAL (no midterm/regular scores)`);
+                    return 'SPECIAL'; // Môn đặc biệt
+                }
+            }
+
             // Kiểm tra curriculum đã được load chưa
             if (!curriculumLoaded) {
                 console.log('Curriculum not loaded yet, defaulting to LT');
@@ -300,6 +332,17 @@ function GradesPageContent({ keyValue }) {
             console.warn('Lỗi khi lấy thông tin từ chương trình khung:', error);
         }
 
+        // Kiểm tra các môn khác khi không có điểm giữa kỳ và thường xuyên → mặc định là lý thuyết
+        if (subject && !subjectName.toLowerCase().includes('tiếng anh')) {
+            const hasGiuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined;
+            const hasThuongXuyen = subject.thuongXuyen.some(score => score !== null && score !== undefined);
+
+            if (!hasGiuaKy && !hasThuongXuyen) {
+                console.log(`→ "${subjectName}" classified as LÝ THUYẾT (no midterm/regular scores, not Tiếng Anh)`);
+                return 'LT'; // Mặc định là lý thuyết cho các môn khác
+            }
+        }
+
         console.log(`→ Default to LÝ THUYẾT for "${subjectName}"`);
         // Mặc định là lý thuyết nếu không xác định được
         return 'LT';
@@ -318,7 +361,7 @@ function GradesPageContent({ keyValue }) {
         if (gradesData && gradesData.semesters && gradesData.semesters[semesterIndex] &&
             gradesData.semesters[semesterIndex].subjects && gradesData.semesters[semesterIndex].subjects[subjectIndex]) {
             const subject = gradesData.semesters[semesterIndex].subjects[subjectIndex];
-            const autoType = getAutoSubjectType(subject.name);
+            const autoType = getAutoSubjectType(subject.name, subject);
 
             // Lưu kết quả tự động vào subjectTypes
             setSubjectTypes(prev => ({
@@ -342,7 +385,8 @@ function GradesPageContent({ keyValue }) {
         const options = [
             { value: 'LT', label: 'Lý thuyết', title: 'Môn lý thuyết (soTLT > 0, soTTH = 0)' },
             { value: 'TH', label: 'Thực hành', title: 'Môn thực hành (soTLT = 0, soTTH > 0)' },
-            { value: 'TICH_HOP', label: 'Tích hợp', title: 'Môn tích hợp (soTLT > 0, soTTH > 0)' }
+            { value: 'TICH_HOP', label: 'Tích hợp', title: 'Môn tích hợp (soTLT > 0, soTTH > 0)' },
+            { value: 'SPECIAL', label: 'Đặc biệt', title: 'Môn đặc biệt (chỉ có điểm cuối kỳ)' }
         ];
 
         const currentOption = options.find(opt => opt.value === currentType);
@@ -696,7 +740,7 @@ function GradesPageContent({ keyValue }) {
             mockData.semesters.forEach((semester, semesterIndex) => {
                 semester.subjects.forEach((subject, subjectIndex) => {
                     const key = `${semesterIndex}-${subjectIndex}`;
-                    const autoType = getAutoSubjectType(subject.name);
+                    const autoType = getAutoSubjectType(subject.name, subject);
                     console.log(`Subject "${subject.name}" auto-classified as: ${autoType}`);
                     newSubjectTypes[key] = autoType;
                 });
@@ -911,7 +955,7 @@ function GradesPageContent({ keyValue }) {
     const handleScoreChange = (semesterIndex, subjectIndex, field, value) => {
         const newGradesData = { ...gradesData };
         const subject = newGradesData.semesters[semesterIndex].subjects[subjectIndex];
-        const isSpecial = isSpecialSubject(subject.name);
+        const isSpecial = isSpecialSubject(subject.name, subject);
 
         // Validate điểm với quy tắc IUH
         const validation = validateScore(value);
@@ -1334,7 +1378,7 @@ function GradesPageContent({ keyValue }) {
     // Hàm tạo ô input có thể chỉnh sửa với logic màu đỏ cho điểm ≤ 5
     const createEditableCell = (value, scoreType, semesterIndex, subjectIndex) => {
         const subject = gradesData.semesters[semesterIndex].subjects[subjectIndex];
-        const isSpecial = isSpecialSubject(subject.name);
+        const isSpecial = isSpecialSubject(subject.name, subject);
         const selectedType = getCurrentSubjectType(semesterIndex, subjectIndex);
 
         // Xác định cột nào bị vô hiệu hóa dựa trên loại môn đã chọn
