@@ -450,7 +450,20 @@ function processAndSaveScheduleData() {
       const semester = {
         hocKy: semesterText,
         monHoc: [],
+        soTCTC: 0,
       };
+
+      const tuChonDiv = body.querySelector('div[lang="ctk-hptuchon"]');
+      if (tuChonDiv) {
+        const tuChonRow = tuChonDiv.closest("tr");
+        if (tuChonRow) {
+          const tcCell = tuChonRow.querySelector("td:nth-child(2) span");
+          if (tcCell) {
+            const tcValue = tcCell.textContent?.trim();
+            semester.soTCTC = parseInt(tcValue) || 0;
+          }
+        }
+      }
 
       const subjectRows = body.querySelectorAll("tr:not(.row-head)");
 
@@ -570,12 +583,12 @@ function processAndSaveScheduleData() {
 
 //Tự động điền khảo sát
 (function () {
-  'use strict';
-  
+  "use strict";
+
   if (window.location.href.includes("chi-tiet-phieu-khao-sat.html")) {
     const autoFillSurvey = () => {
       try {
-        document.querySelectorAll('.group-cautraloi').forEach((group) => {
+        document.querySelectorAll(".group-cautraloi").forEach((group) => {
           const liItem = group.children[4];
           if (liItem && liItem.children[0] && liItem.children[0].children[0]) {
             liItem.children[0].children[0].checked = true;
@@ -583,32 +596,30 @@ function processAndSaveScheduleData() {
         });
 
         // Điền ý kiến
-        const yKienInput = document.querySelector('.input-ykien');
+        const yKienInput = document.querySelector(".input-ykien");
         if (yKienInput) {
-          yKienInput.value = 'Em không có ý kiến gì thêm';
+          yKienInput.value = "Em không có ý kiến gì thêm";
         }
 
         // Gửi khảo sát
-        const submitBtn = document.querySelector('#btnGui');
+        const submitBtn = document.querySelector("#btnGui");
         if (submitBtn) {
           submitBtn.click();
         }
-
       } catch (error) {
         return;
       }
     };
 
-    if (document.readyState === 'complete') {
+    if (document.readyState === "complete") {
       setTimeout(autoFillSurvey, 1000);
     } else {
-      window.addEventListener('load', () => {
+      window.addEventListener("load", () => {
         setTimeout(autoFillSurvey, 1000);
       });
     }
-  }
-  else if (window.location.href.includes("khao-sat.html")) {
-    const survey = document.querySelector('.title');
+  } else if (window.location.href.includes("khao-sat.html")) {
+    const survey = document.querySelector(".title");
     if (survey) {
       survey.click();
     } else {
