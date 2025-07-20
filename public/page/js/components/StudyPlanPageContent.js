@@ -13,7 +13,6 @@ function StudyPlanPageContent() {
   });
 
   const [frameSubjects, setFrameSubjects] = React.useState([]);
-  const [calculated, setCalculated] = React.useState([]);
 
   React.useEffect(() => {
     const loadDataFrame = async () => {
@@ -169,34 +168,13 @@ function StudyPlanPageContent() {
             (totalSum, hocKy) => {
               const monHoc = hocKy.monHoc || [];
 
-              // Tổng tín chỉ nhóm 0 (cộng tất cả)
-              const nhom0MonHoc = monHoc.filter((mon) => mon.nhomTC === "0");
-
               const nhom0Credits = monHoc
                 .filter((mon) => mon.nhomTC === "0")
                 .reduce((sum, mon) => sum + (parseFloat(mon.soTC) || 0), 0);
 
-              const nhom1Subjects = monHoc.filter((mon) => mon.nhomTC === "1");
-              const nhom1Credits =
-                nhom1Subjects.length > 0
-                  ? parseFloat(nhom1Subjects[0].soTCBB) ||
-                    parseFloat(nhom1Subjects[0].soTC) ||
-                    0
-                  : 0;
+              const nhomTCCredits = hocKy.soTCTC;
 
-              const nhom2Subjects = monHoc.filter((mon) => mon.nhomTC === "2");
-              const nhom2Credits =
-                nhom2Subjects.length > 0
-                  ? parseFloat(nhom2Subjects[0].soTCBB) ||
-                    parseFloat(nhom2Subjects[0].soTC) ||
-                    0
-                  : 0;
-
-              setCalculated((prev) => [...prev, nhom0MonHoc]);
-              setCalculated((prev) => [...prev, nhom1Subjects[0]]);
-              setCalculated((prev) => [...prev, nhom2Subjects[0]]);
-
-              return totalSum + nhom0Credits + nhom1Credits + nhom2Credits;
+              return totalSum + nhom0Credits + nhomTCCredits;
             },
             0
           );
@@ -243,11 +221,6 @@ function StudyPlanPageContent() {
 
     loadData();
   }, [frameSubjects]);
-
-  console.log(
-    "Credits subjects: ",
-    calculated.filter((mh) => mh !== undefined)
-  );
 
   return React.createElement(
     "div",
