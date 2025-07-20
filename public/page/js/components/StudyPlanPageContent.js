@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */ 
+/* eslint-disable no-undef */
 function StudyPlanPageContent() {
   const [subjects, setSubjects] = React.useState([]);
   const [currentSubj, setCurrentSubj] = React.useState([]);
@@ -11,6 +11,63 @@ function StudyPlanPageContent() {
     remaining: 0,
     currentRanking: "",
   });
+
+  const [frameSubjects, setFrameSubjects] = React.useState([]);
+  const [calculated, setCalculated] = React.useState([]);
+
+  React.useEffect(() => {
+    const loadDataFrame = async () => {
+      setLoading(true);
+      try {
+        const result = await new Promise((resolve) => {
+          chrome.storage.local.get(
+            ["curriculum_json", "curriculum_timestamp"],
+            function (res) {
+              if (chrome.runtime.lastError) {
+                console.error("Lỗi lấy dữ liệu:", chrome.runtime.lastError);
+                resolve({ diem_json: null });
+                return;
+              }
+              resolve(res);
+
+              if (res.curriculum_json) {
+                const curriculumData = JSON.parse(res.curriculum_json);
+
+                //console.log("DỮ LIỆU CHƯƠNG TRÌNH KHUNG");
+                //console.log(curriculumData);
+              } else {
+                console.log(
+                  "Không có dữ liệu chương trình khung trong storage"
+                );
+              }
+            }
+          );
+        });
+
+        const curriculumJson = result.curriculum_json;
+
+        if (curriculumJson) {
+          const parsedData = JSON.parse(curriculumJson);
+
+          //const transformedSubjects = parsedData.flatMap((item) => item.monHoc);
+
+          //console.log("Result: ", transformedSubjects);
+
+          setFrameSubjects(parsedData);
+        } else {
+          console.warn("Không có dữ liệu điểm được lưu.");
+          setFrameSubjects([]);
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+        setFrameSubjects([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDataFrame();
+  }, []);
 
   React.useEffect(() => {
     const loadData = async () => {
@@ -35,7 +92,6 @@ function StudyPlanPageContent() {
         if (diemJson) {
           const parsedData = JSON.parse(diemJson);
 
-          console.log(parsedData);
           const allSubjects = parsedData.flatMap((item) => item.monHoc);
 
           //Array các môn đạt, hoặc không F
@@ -49,10 +105,32 @@ function StudyPlanPageContent() {
             0
           );
 
-          // Trung bình điểm tích lũy (10)
+          const excludedCodes = [
+            "4203003307", //GDTC 1
+            "4203003242", //GDQP 1
+            "4203003306", //GDTC 2
+            "4203015253", //TA1
+            "4203015216", //CCTA
+            "4203015254", //TA2
+            "4203003354", //GDQP 2
+          ];
+
+          // Lọc các môn không nằm trong danh sách loại trừ
           const gpaSubjects = passedSubjects.filter(
-            (mh) => mh["Điểm tổng kết"] && mh["Tín chỉ"]
+            (mh) =>
+              mh["Tín chỉ"] &&
+              mh["Điểm tổng kết"] &&
+              mh["Thang điểm 4"] &&
+              !excludedCodes.includes(
+                (mh["Mã lớp học phần"] || "").slice(0, -2)
+              )
           );
+          const totalCreditsGPA = gpaSubjects.reduce(
+            (sum, item) => sum + (parseFloat(item["Tín chỉ"]) || 0),
+            0
+          );
+
+          // Trung bình điểm tích lũy (10)
           const cumulativeGPA =
             gpaSubjects.length > 0
               ? (
@@ -62,32 +140,64 @@ function StudyPlanPageContent() {
                       (parseFloat(mh["Điểm tổng kết"].replace(",", ".")) || 0) *
                         (parseFloat(mh["Tín chỉ"]) || 0),
                     0
-                  ) / totalCredits
+                  ) / totalCreditsGPA
                 ).toFixed(2)
               : "---";
 
           // Trung bình điểm tích lũy (4)
-          const gpa4Subjects = passedSubjects.filter(
-            (mh) => mh["Thang điểm 4"]
-          );
           const cumulativeGPA4 =
-            gpa4Subjects.length > 0
+            gpaSubjects.length > 0
               ? (
-                  gpa4Subjects.reduce(
+                  gpaSubjects.reduce(
                     (sum, mh) =>
                       sum +
                       (parseFloat(mh["Thang điểm 4"].replace(",", ".")) || 0) *
                         (parseFloat(mh["Tín chỉ"]) || 0),
                     0
-                  ) / totalCredits
+                  ) / totalCreditsGPA
                 ).toFixed(2)
               : "---";
 
           // Số môn đã học
-          const studied = allSubjects.length;
+          const studied = allSubjects.filter((mh) => {
+            const stt = mh["STT"];
+            return stt && !isNaN(stt) && stt.trim() !== "";
+          }).length;
 
-          // Số môn còn lại (nếu biết tổng số môn, ví dụ 162 tín chỉ)
-          const totalCreditsRequired = 162;
+          //Tổng số tín chỉ yêu cầu
+          const totalCreditsRequired = frameSubjects.reduce(
+            (totalSum, hocKy) => {
+              const monHoc = hocKy.monHoc || [];
+
+              // Tổng tín chỉ nhóm 0 (cộng tất cả)
+              const nhom0MonHoc = monHoc.filter((mon) => mon.nhomTC === "0");
+
+              const nhom0Credits = monHoc
+                .filter((mon) => mon.nhomTC === "0")
+                .reduce((sum, mon) => sum + (parseFloat(mon.soTC) || 0), 0);
+
+              const nhom1Subjects = monHoc.filter((mon) => mon.nhomTC === "1");
+              const nhom1Credits =
+                nhom1Subjects.length > 0
+                  ? parseFloat(nhom1Subjects[0].soTCBB) || 0
+                  : 0;
+
+              const nhom2Subjects = monHoc.filter((mon) => mon.nhomTC === "2");
+              const nhom2Credits =
+                nhom2Subjects.length > 0
+                  ? parseFloat(nhom2Subjects[0].soTCBB) || 0
+                  : 0;
+
+              setCalculated((prev) => [...prev, nhom0MonHoc]);
+              setCalculated((prev) => [...prev, nhom1Subjects[0]]);
+              setCalculated((prev) => [...prev, nhom2Subjects[0]]);
+
+              return totalSum + nhom0Credits + nhom1Credits + nhom2Credits;
+            },
+            0
+          );
+
+          // Số tín chỉ còn lại (nếu biết tổng số môn, ví dụ 162 tín chỉ)
           const remaining = totalCreditsRequired - totalCredits;
 
           // Xếp loại học lực (dựa theo cumulativeGPA4)
@@ -128,7 +238,12 @@ function StudyPlanPageContent() {
     };
 
     loadData();
-  }, []);
+  }, [frameSubjects]);
+
+  console.log(
+    "Credits subjects: ",
+    calculated.filter((mh) => mh !== undefined)
+  );
 
   return React.createElement(
     "div",
