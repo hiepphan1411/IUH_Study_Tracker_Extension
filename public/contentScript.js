@@ -1,3 +1,4 @@
+/* eslint-disable */
 //Lấy điểm
 (function () {
   if (
@@ -174,7 +175,7 @@ function loadScheduleData() {
       return;
     }
 
-    loadWithFetch(startDate.toISOString(), 4, 0, token, () => {
+    loadWithFetch(startDate.toISOString(), 12, 0, token, () => {
       processAndSaveScheduleData();
     });
   } catch (error) {

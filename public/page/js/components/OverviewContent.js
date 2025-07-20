@@ -869,11 +869,8 @@ function OverviewPageContent() {
 
                     const transformedSubjects = parsedData;
 
-                    console.log('Result: ', transformedSubjects);
-                    console.log(
-                        'Thống kê: ',
-                        countGradesByLetter(transformedSubjects),
-                    );
+                    // console.log("Result: ", transformedSubjects);
+                    // console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
 
                     setSubjects(transformedSubjects);
                     setResults(transformedSubjects);
@@ -894,90 +891,64 @@ function OverviewPageContent() {
         loadData();
     }, []);
 
-        if (diemJson) {
-          const parsedData = JSON.parse(diemJson);
-
-          const transformedSubjects = parsedData;
-
-          // console.log("Result: ", transformedSubjects);
-          // console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
-
-          setSubjects(transformedSubjects);
-          setResults(transformedSubjects);
-        } else {
-          console.warn("Không có dữ liệu điểm được lưu.");
-          setSubjects([]);
-          setResults([]);
-        }
-      } catch (error) {
-        console.error("Error loading data:", error);
-        setSubjects([]);
-        setResults([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
-
-  return React.createElement(
-    "div",
-    { className: "page-content" },
-    loading
-      ? React.createElement(
-          "div",
-          { className: "loading" },
-          React.createElement("div", { className: "spinner" }),
-          React.createElement(
-            "span",
-            { className: "loading-text" },
-            "Đang tải dữ liệu..."
-          )
-        )
-      : React.createElement(
-          "div",
-          { className: "dashboard-grid" },
-          React.createElement(
-            "div",
-            {
-              className: "dashboard-row",
-              style: {
-                display: "flex",
-                gap: "20px",
-                marginBottom: "20px",
-                flexWrap: "wrap",
-              },
-            },
-            React.createElement(
-              "div",
-              {
-                className: "card dashboard-item",
-                style: { flex: "1", minWidth: "400px" },
-              },
-              React.createElement(StatisticsResultsBySemester, {
-                results: results,
-              })
-            ),
-            React.createElement(
-              "div",
-              {
-                className: "card dashboard-item",
-                style: { flex: "1", minWidth: "400px" },
-              },
-              React.createElement(SubjectResultStatistics, {
-                subjects: subjects,
-              })
-            )
-          ),
-          React.createElement(
-            "div",
-            { className: "card" },
-            React.createElement(SubjectGradeStatistic, { subjects: subjects })
-          )
-        )
-  );
-
+    return React.createElement(
+        'div',
+        { className: 'page-content' },
+        loading
+            ? React.createElement(
+                  'div',
+                  { className: 'loading' },
+                  React.createElement('div', { className: 'spinner' }),
+                  React.createElement(
+                      'span',
+                      { className: 'loading-text' },
+                      'Đang tải dữ liệu...',
+                  ),
+              )
+            : React.createElement(
+                  'div',
+                  { className: 'dashboard-grid' },
+                  React.createElement(
+                      'div',
+                      {
+                          className: 'dashboard-row',
+                          style: {
+                              display: 'flex',
+                              gap: '20px',
+                              marginBottom: '20px',
+                              flexWrap: 'wrap',
+                          },
+                      },
+                      React.createElement(
+                          'div',
+                          {
+                              className: 'card dashboard-item',
+                              style: { flex: '1', minWidth: '400px' },
+                          },
+                          React.createElement(StatisticsResultsBySemester, {
+                              results: results,
+                          }),
+                      ),
+                      React.createElement(
+                          'div',
+                          {
+                              className: 'card dashboard-item',
+                              style: { flex: '1', minWidth: '400px' },
+                          },
+                          React.createElement(SubjectResultStatistics, {
+                              subjects: subjects,
+                          }),
+                      ),
+                  ),
+                  React.createElement(
+                      'div',
+                      { className: 'card' },
+                      React.createElement(SubjectGradeStatistic, {
+                          subjects: subjects,
+                      }),
+                  ),
+              ),
+    );
 }
 
 window.SubjectGradeStatistic = SubjectGradeStatistic;

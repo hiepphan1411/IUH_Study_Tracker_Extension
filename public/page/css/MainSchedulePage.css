@@ -5,28 +5,49 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter',
         sans-serif;
-    background-color: #111827;
-    color: #f9fafb;
+    background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+    min-height: 100vh;
 }
 
 .layout {
     display: flex;
     height: 100vh;
-    background-color: #111827;
-    color: #f9fafb;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
     overflow: hidden;
+}
+
+.layout::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+            circle at 20% 20%,
+            rgba(16, 185, 129, 0.1) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at 80% 80%,
+            rgba(5, 150, 105, 0.1) 0%,
+            transparent 50%
+        );
+    pointer-events: none;
+    z-index: 1;
 }
 
 .sidebar {
     position: relative;
     z-index: 10;
-    transition: all 0.3s ease-in-out;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     flex-shrink: 0;
-    background-color: rgba(31, 41, 55, 0.5);
-    backdrop-filter: blur(12px);
-    border-right: 1px solid #374151;
+    backdrop-filter: blur(20px);
+    background: linear-gradient(135deg, #065f46 0%, #4966e7 100%);
+    border-radius: 0px 0px 10px 0px;
+    box-shadow: 0 25px 50px -12px rgba(6, 95, 70, 0.3);
 }
 
 .sidebar.open {
@@ -52,46 +73,57 @@ body {
 }
 
 .menu-button {
-    padding: 8px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    color: #f9fafb;
+    padding: 6px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
     cursor: pointer;
-    transition: background-color 0.2s;
-    max-width: fit-content;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    align-items: center;
 }
 
 .menu-button:hover {
-    background-color: #374151;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar-title {
-    font-size: 14px;
-    font-weight: bold;
-    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
     white-space: nowrap;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-nav {
-    margin-top: 8px;
+    margin-top: 16px;
     flex-grow: 1;
 }
 
 .sidebar-item {
     display: flex;
     align-items: center;
-    padding: 12px;
+    padding: 6px;
     font-size: 14px;
     font-weight: 500;
-    border-radius: 8px;
-    transition: background-color 0.2s;
+    border-radius: 16px;
+    transition: all 0.3s ease;
     margin-bottom: 8px;
     cursor: pointer;
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
 }
 
 .sidebar-item:hover {
-    background-color: #374151;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    
 }
 
 .sidebar-item.active {
@@ -101,11 +133,14 @@ body {
 .sidebar-item-icon {
     font-size: 20px;
     min-width: 20px;
+    color: #ffffff;
 }
 
 .sidebar-item-text {
     margin-left: 16px;
     white-space: nowrap;
+    color: #ffffff;
+    font-weight: 500;
 }
 
 .sidebar-footer {
@@ -116,19 +151,22 @@ body {
     width: 100%;
     display: flex;
     align-items: center;
-    padding: 12px;
+    padding: 8px;
     font-size: 14px;
     font-weight: 500;
-    border-radius: 8px;
-    background: transparent;
-    border: none;
-    color: #d1d5db;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
 .back-button:hover {
-    background-color: #374151;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .back-button-icon {
@@ -148,34 +186,49 @@ body {
     overflow: hidden;
 }
 
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 2;
+}
+
 .header {
-    background-color: #1f2937;
-    padding: 16px;
+    background: linear-gradient(135deg, #065f46 0%, #4966e7 100%);
+    padding: 10px;
+    margin: 0 12px 0 0;
+    box-shadow: 0 10px 25px rgba(6, 95, 70, 0.15);
+    width: 100%;
 }
 
 .header-content {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
 }
 
 .header-icon {
-    background: linear-gradient(to right, #3b82f6, #64748b);
+    background: rgba(255, 255, 255, 0.2);
     padding: 8px;
-    border-radius: 50%;
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .header-icon svg {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     color: white;
 }
 
 .header-title {
-    font-size: 20px;
-    font-weight: bold;
-    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    color: rgb(255, 255, 255);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 
 .content-area {
     flex: 1;
@@ -238,7 +291,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 1.5rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #065f46 0%, #4966e7 100%);
     color: white;
 }
 
@@ -337,7 +390,7 @@ body {
 }
 
 .day-name {
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-bottom: 0.25rem;
 }
 
@@ -353,7 +406,7 @@ body {
     padding: 12px;
     font-weight: 500;
     font-size: 14px;
-    text-align: left;
+    text-align: center;
     width: 80px;
     border-right: 1px solid #e5e7eb;
     position: sticky;
@@ -374,7 +427,7 @@ body {
     padding: 6px;
     border-radius: 4px;
     margin-bottom: 0.5rem;
-    border-left: 3px solid #3b82f6;
+    border-left: 4px solid #3b82f6;
     transition: all 0.2s ease;
     cursor: pointer;
 }
@@ -402,6 +455,8 @@ body {
 
 .class-time,
 .class-room,
+.class-name,
+.class-lesson,
 .class-teacher {
     font-size: 0.75rem;
     color: #6b7280;
@@ -469,4 +524,7 @@ body {
     .current-week p {
         font-size: 12px;
     }
+}
+.no-data-cell{
+  color: white;
 }
