@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* eslint-disable */
 
 function GradesPageContent({ keyValue }) {
     const [gradesData, setGradesData] = React.useState(null);

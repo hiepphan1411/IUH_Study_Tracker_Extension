@@ -1,4 +1,5 @@
-/* eslint-disable no-undef */
+/* eslint-disable */
+
 const {
   BarChart,
   Bar,
@@ -151,7 +152,11 @@ function SubjectGradeStatistic({ subjects }) {
         React.createElement(
           "div",
           {
-            style: { display: "flex", flexDirection: "column", gap: "5px" },
+            style: {
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px",
+            },
           },
           React.createElement(
             "label",
@@ -197,7 +202,11 @@ function SubjectGradeStatistic({ subjects }) {
         React.createElement(
           "div",
           {
-            style: { display: "flex", flexDirection: "column", gap: "5px" },
+            style: {
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px",
+            },
           },
           React.createElement(
             "label",
@@ -257,7 +266,12 @@ function SubjectGradeStatistic({ subjects }) {
               BarChart,
               {
                 data: subjectData,
-                margin: { top: 20, right: 30, left: 20, bottom: 60 },
+                margin: {
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 60,
+                },
               },
               React.createElement(CartesianGrid, {
                 strokeDasharray: "3 3",
@@ -484,7 +498,11 @@ function StatisticsResultsBySemester({ results }) {
       React.createElement(
         "div",
         {
-          style: { display: "flex", flexDirection: "column", gap: "5px" },
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            gap: "5px",
+          },
         },
         React.createElement(
           "label",
@@ -1064,7 +1082,9 @@ function OverviewPageContent() {
           React.createElement(
             "div",
             { className: "card" },
-            React.createElement(SubjectGradeStatistic, { subjects: subjects })
+            React.createElement(SubjectGradeStatistic, {
+              subjects: subjects,
+            })
           )
         )
   );
