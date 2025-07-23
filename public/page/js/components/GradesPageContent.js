@@ -488,7 +488,7 @@ function GradesPageContent({ keyValue }) {
         const isManuallyChanged = manuallyChangedSubjects[dropdownKey] || false;
 
         const options = [
-            { value: 'CHUA_XAC_DINH', label: 'Chưa xác định', title: 'Chưa xác định loại môn (cho phép nhập tất cả cột)' },
+            { value: 'CHUA_XAC_DINH', label: 'N/A', title: 'Chưa xác định loại môn (cho phép nhập tất cả cột)' },
             { value: 'LT', label: 'Lý thuyết', title: 'Môn lý thuyết (soTLT > 0, soTTH = 0)' },
             { value: 'TH', label: 'Thực hành', title: 'Môn thực hành (soTLT = 0, soTTH > 0)' },
             { value: 'TICH_HOP', label: 'Tích hợp', title: 'Môn tích hợp (soTLT > 0, soTTH > 0)' },
@@ -1655,15 +1655,16 @@ function GradesPageContent({ keyValue }) {
                         e.target.style.color = '#dc2626';
                         e.target.style.backgroundColor = '#fef2f2';
                         e.target.title = validation.error;
-                    } else {
-                        e.target.style.backgroundColor = 'inherit';
-                        e.target.title = isDisabled ?
-                            (selectedType === 'SPECIAL' ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' :
-                                selectedType === 'LT' && isThucHanhColumn ? 'Môn lý thuyết - không có điểm thực hành' :
-                                    selectedType === 'TH' && (isLyThuyetColumn || scoreType === 'ck') ? 'Môn thực hành - chỉ nhập điểm thực hành' :
-                                        'Ô nhập bị vô hiệu hóa') :
-                            'Nhập điểm từ 0-10. Điểm sẽ được làm tròn theo quy định IUH.';
                     }
+                    //  else {
+                    //     e.target.style.backgroundColor = 'inherit';
+                    //     e.target.title = isDisabled ?
+                    //         (selectedType === 'SPECIAL' ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' :
+                    //             selectedType === 'LT' && isThucHanhColumn ? 'Môn lý thuyết - không có điểm thực hành' :
+                    //                 selectedType === 'TH' && (isLyThuyetColumn || scoreType === 'ck') ? 'Môn thực hành - chỉ nhập điểm thực hành' :
+                    //                     'Ô nhập bị vô hiệu hóa') :
+                    //         'Nhập điểm từ 0-10. Điểm sẽ được làm tròn theo quy định IUH.';
+                    // }
                 }
             }
         }, displayValue);
@@ -1760,7 +1761,7 @@ function GradesPageContent({ keyValue }) {
                                 lineHeight: '1.4',
                                 color: '#856404'
                             }
-                        }, 'Để extension hoạt động tốt nhất và tự động phân loại môn học, vui lòng đăng nhập trang sv.iuh trước. Hiện tại tất cả môn học sẽ được mặc định phân loại là "Lý thuyết".'),
+                        }, 'Để extension hoạt động tốt nhất và tự động phân loại môn học, vui lòng đăng nhập trang sv.iuh trước. Hiện tại tất cả môn học sẽ được mặc định phân loại là N/A ".'),
                         React.createElement('div', {
                             style: {
                                 display: 'flex',
