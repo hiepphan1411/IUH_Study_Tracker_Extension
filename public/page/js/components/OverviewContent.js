@@ -931,18 +931,13 @@ function OverviewPageContent() {
                       });
 
                       if (found) {
-                        console.log(
-                          `Found curriculum data for "${subjectName}":`,
-                          found
-                        );
+                        // console.log(`Found curriculum data for "${subjectName}":`, found);
 
                         // Trích xuất soTLT và soTTH - sử dụng đúng tên thuộc tính
                         const soTLT = found.soTLT || found["Số TCTL"] || null;
                         const soTTH = found.soTTH || found["Số TCTH"] || null;
 
-                        console.log(
-                          `Extracted: soTLT=${soTLT}, soTTH=${soTTH}`
-                        );
+                        // console.log(`Extracted: soTLT=${soTLT}, soTTH=${soTTH}`);
                         return {
                           soTLT: soTLT ? parseInt(soTLT) : null,
                           soTTH: soTTH ? parseInt(soTTH) : null,
