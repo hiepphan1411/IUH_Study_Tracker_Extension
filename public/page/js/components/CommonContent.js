@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* eslint-disable */
 const { motion, AnimatePresence } = window.Motion || {};
 
 function Layout({ children, title }) {

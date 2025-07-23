@@ -175,7 +175,7 @@ function loadScheduleData() {
       return;
     }
 
-    loadWithFetch(startDate.toISOString(), 12, 0, token, () => {
+    loadWithFetch(startDate.toISOString(), 20, 0, token, () => {
       processAndSaveScheduleData();
     });
   } catch (error) {

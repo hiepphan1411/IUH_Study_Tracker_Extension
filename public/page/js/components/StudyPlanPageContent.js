@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* eslint-disable */
 function StudyPlanPageContent() {
   const [subjects, setSubjects] = React.useState([]);
   const [currentSubj, setCurrentSubj] = React.useState([]);

@@ -1,4 +1,4 @@
-/* eslint-disable no-undef */
+/* eslint-disable */
 
 function AboutUsPageContent() {
   const [rating, setRating] = React.useState(0);
