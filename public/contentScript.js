@@ -389,8 +389,6 @@ function processAndSaveScheduleData() {
       capNhatLuc: new Date().toISOString(),
     };
 
-    console.log("Dữ liệu đã lấy: ", scheduleData);
-
     chrome.storage.local.set(
       {
         schedule_json: JSON.stringify(scheduleData),
@@ -426,7 +424,6 @@ function processAndSaveScheduleData() {
 //Chuyển trang sang chương trình khung khi người dùng đăng nhập sv.iuh
 (function () {
   if (window.location.href.includes("dashboard.html")) {
-
     chrome.storage.local.get(
       ["curriculum_json", "curriculum_timestamp"],
       function (result) {
@@ -573,30 +570,8 @@ function processAndSaveScheduleData() {
         },
         function () {
           if (chrome.runtime.lastError) {
-            console.log(
-              "Lỗi lưu dữ liệu chương trình khung:",
-              chrome.runtime.lastError
-            );
             return;
           }
-
-          console.log("Đã lưu dữ liệu chương trình khung thành công");
-
-          chrome.runtime.sendMessage(
-            {
-              type: "CURRICULUM_SAVED",
-              data: curriculumData,
-              closeTab: true,
-            },
-            (response) => {
-              if (chrome.runtime.lastError) {
-                console.log(
-                  "Lỗi gửi message:",
-                  chrome.runtime.lastError.message
-                );
-              }
-            }
-          );
         }
       );
 
@@ -606,16 +581,15 @@ function processAndSaveScheduleData() {
       return false;
     }
   }
-
-  const isAutoOpenedTab =
-    document.referrer.includes("dashboard.html") ||
-    sessionStorage.getItem("curriculum_tab_opened");
-
+  // Kiểm tra xem có phải tab được mở tự động không
+  const urlParams = new URLSearchParams(window.location.search);
+  const isAutoOpened =
+    urlParams.get("auto") === "true";
   window.addEventListener("load", () => {
     setTimeout(() => {
       const success = saveCurriculumData();
 
-      if (success && isAutoOpenedTab) {
+      if (isAutoOpened) {
         setTimeout(() => {
           window.close();
         }, 2000);
@@ -627,168 +601,11 @@ function processAndSaveScheduleData() {
     setTimeout(() => {
       const success = saveCurriculumData();
 
-      if (success && isAutoOpenedTab) {
+      if ( isAutoOpened) {
         setTimeout(() => {
           window.close();
         }, 1000);
       }
-    }, 1000);
-  }
-})();
-
-(function () {
-  if (!window.location.href.includes("chuong-trinh-khung.html")) {
-    return;
-  }
-
-  function parseCurriculumData() {
-    const table = document.querySelector("#viewChuongTrinhKhung table");
-    if (!table) {
-      return null;
-    }
-
-    const result = [];
-    const tbody = table.querySelectorAll("tbody");
-
-    tbody.forEach((body) => {
-      const semesterHeader = body.querySelector(".row-head:first-child");
-      if (!semesterHeader) return;
-
-      const semesterText = semesterHeader
-        .querySelector("td")
-        ?.textContent?.trim();
-      if (!semesterText) return;
-
-      const semester = {
-        hocKy: semesterText,
-        monHoc: [],
-        soTCTC: 0,
-      };
-
-      const tuChonDiv = body.querySelector('div[lang="ctk-hptuchon"]');
-      if (tuChonDiv) {
-        const tuChonRow = tuChonDiv.closest("tr");
-        if (tuChonRow) {
-          const tcCell = tuChonRow.querySelector("td:nth-child(2) span");
-          if (tcCell) {
-            const tcValue = tcCell.textContent?.trim();
-            semester.soTCTC = parseInt(tcValue) || 0;
-          }
-        }
-      }
-
-      const subjectRows = body.querySelectorAll("tr:not(.row-head)");
-
-      subjectRows.forEach((row) => {
-        const cells = row.querySelectorAll("td");
-        if (cells.length < 10) return;
-
-        const stt = cells[0]?.textContent?.trim();
-        if (!stt || isNaN(parseInt(stt))) return;
-
-        const tenMonElement = cells[1]?.querySelector("div");
-        const tenMon = tenMonElement?.textContent?.trim().replace(/\s+/g, " ");
-        if (!tenMon) return;
-
-        const maHocPhan = cells[2]?.querySelector("div")?.textContent?.trim();
-
-        const soTC = cells[4]?.querySelector("div")?.textContent?.trim();
-
-        const soTLT = cells[5]?.querySelector("div")?.textContent?.trim();
-
-        const soTTH = cells[6]?.querySelector("div")?.textContent?.trim();
-
-        const nhomTC = cells[7]?.querySelector("div")?.textContent?.trim();
-
-        const soTCBB = cells[8]?.querySelector("div")?.textContent?.trim();
-
-        let trangThai = "Chưa học";
-        const statusCell = cells[9]?.querySelector("div");
-        if (statusCell) {
-          const hasCheck = statusCell.querySelector(".check");
-          if (hasCheck) {
-            trangThai = "Đạt";
-          } else {
-            trangThai = "Chưa học";
-          }
-        }
-
-        const monHoc = {
-          tenMon: tenMon || "",
-          maHocPhan: maHocPhan || "",
-          soTC: soTC || "0",
-          soTLT: soTLT || "0",
-          soTTH: soTTH || "0",
-          nhomTC: nhomTC || "0",
-          soTCBB: soTCBB || "",
-          trangThai: trangThai,
-        };
-
-        semester.monHoc.push(monHoc);
-      });
-
-      if (semester.monHoc.length > 0) {
-        result.push(semester);
-      }
-    });
-
-    return result;
-  }
-
-  function saveCurriculumData() {
-    try {
-      const curriculumData = parseCurriculumData();
-
-      if (!curriculumData || curriculumData.length === 0) {
-        return;
-      }
-
-      chrome.storage.local.set(
-        {
-          curriculum_json: JSON.stringify(curriculumData, null, 2),
-          curriculum_timestamp: Date.now(),
-        },
-        function () {
-          if (chrome.runtime.lastError) {
-            console.log(
-              "Lỗi lưu dữ liệu chương trình khung:",
-              chrome.runtime.lastError
-            );
-            return;
-          }
-
-          //   chrome.runtime.sendMessage(
-          //     {
-          //       type: "CURRICULUM_SAVED",
-          //       data: curriculumData,
-          //     },
-          //     (response) => {
-          //       if (chrome.runtime.lastError) {
-          //         console.log("Lỗi gửi message:", chrome.runtime.lastError.message);
-          //       } else {
-          //         console.log("Đã lưu và gửi dữ liệu chương trình khung thành công");
-          //       }
-          //     }
-          //   );
-        }
-      );
-
-      return true;
-    } catch (error) {
-      console.error("Lỗi trong saveCurriculumData:", error);
-      return false;
-    }
-  }
-
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      saveCurriculumData();
-    }, 2000);
-  });
-
-  if (document.readyState === "complete") {
-    setTimeout(() => {
-      saveCurriculumData();
     }, 1000);
   }
 })();

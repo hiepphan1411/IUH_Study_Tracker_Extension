@@ -247,119 +247,119 @@ function SubjectGradeStatistic({ subjects }) {
       },
       hasData
         ? React.createElement(
-          ResponsiveContainer,
-          {
-            width: "98%",
-            height: "100%",
-            minWidth: 0,
-          },
-          React.createElement(
-            BarChart,
+            ResponsiveContainer,
             {
-              data: subjectData,
-              margin: { top: 20, right: 30, left: 20, bottom: 60 },
-            },
-            React.createElement(CartesianGrid, {
-              strokeDasharray: "3 3",
-              stroke: "#4B5563",
-            }),
-            React.createElement(XAxis, {
-              dataKey: "name",
-              stroke: "#9CA3AF",
-              fontSize: 12,
-              angle: -45,
-              textAnchor: "end",
-              height: 80,
-              interval: 0,
-            }),
-            React.createElement(YAxis, {
-              stroke: "#9CA3AF",
-              domain: getYAxisDomain(),
-              fontSize: 12,
-            }),
-            React.createElement(Tooltip, {
-              contentStyle: {
-                backgroundColor: "rgba(31, 41, 55, 0.8)",
-                borderColor: "#4B5563",
-                borderRadius: "8px",
-              },
-              itemStyle: { color: "#E5E7EB" },
-              formatter: getTooltipFormatter(),
-            }),
-            React.createElement(Legend),
-            React.createElement(Bar, {
-              dataKey: "value",
-              name: `Điểm số (thang ${selectedScale})`,
-              fill: "#059669",
-            })
-          )
-        )
-        : React.createElement(
-          "div",
-          {
-            style: {
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
+              width: "98%",
               height: "100%",
-              color: "#9CA3AF",
-              textAlign: "center",
+              minWidth: 0,
             },
-          },
-          React.createElement(
+            React.createElement(
+              BarChart,
+              {
+                data: subjectData,
+                margin: { top: 20, right: 30, left: 20, bottom: 60 },
+              },
+              React.createElement(CartesianGrid, {
+                strokeDasharray: "3 3",
+                stroke: "#4B5563",
+              }),
+              React.createElement(XAxis, {
+                dataKey: "name",
+                stroke: "#9CA3AF",
+                fontSize: 12,
+                angle: -45,
+                textAnchor: "end",
+                height: 80,
+                interval: 0,
+              }),
+              React.createElement(YAxis, {
+                stroke: "#9CA3AF",
+                domain: getYAxisDomain(),
+                fontSize: 12,
+              }),
+              React.createElement(Tooltip, {
+                contentStyle: {
+                  backgroundColor: "rgba(31, 41, 55, 0.8)",
+                  borderColor: "#4B5563",
+                  borderRadius: "8px",
+                },
+                itemStyle: { color: "#E5E7EB" },
+                formatter: getTooltipFormatter(),
+              }),
+              React.createElement(Legend),
+              React.createElement(Bar, {
+                dataKey: "value",
+                name: `Điểm số (thang ${selectedScale})`,
+                fill: "#059669",
+              })
+            )
+          )
+        : React.createElement(
             "div",
             {
               style: {
-                fontSize: "48px",
-                marginBottom: "16px",
-                opacity: 0.5,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+                color: "#9CA3AF",
+                textAlign: "center",
               },
             },
-            "📊"
-          ),
-          React.createElement(
-            "h3",
-            {
-              style: {
-                fontSize: "18px",
-                marginBottom: "8px",
-                color: "#D1D5DB",
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontSize: "48px",
+                  marginBottom: "16px",
+                  opacity: 0.5,
+                },
               },
-            },
-            "Không có dữ liệu"
-          ),
-          React.createElement(
-            "p",
-            {
-              style: {
-                fontSize: "14px",
-                opacity: 0.8,
+              "📊"
+            ),
+            React.createElement(
+              "h3",
+              {
+                style: {
+                  fontSize: "18px",
+                  marginBottom: "8px",
+                  color: "#D1D5DB",
+                },
               },
-            },
-            selectedSemester === "all"
-              ? "Chưa có dữ liệu điểm số nào."
-              : `Không có dữ liệu cho ${selectedSemesterLabel}.`
-          ),
-          selectedSemester !== "all" &&
-          React.createElement(
-            "button",
-            {
-              onClick: () => setSelectedSemester("all"),
-              style: {
-                marginTop: "12px",
-                padding: "8px 16px",
-                backgroundColor: "#6366F1",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
+              "Không có dữ liệu"
+            ),
+            React.createElement(
+              "p",
+              {
+                style: {
+                  fontSize: "14px",
+                  opacity: 0.8,
+                },
               },
-            },
-            "Xem tất cả học kỳ"
+              selectedSemester === "all"
+                ? "Chưa có dữ liệu điểm số nào."
+                : `Không có dữ liệu cho ${selectedSemesterLabel}.`
+            ),
+            selectedSemester !== "all" &&
+              React.createElement(
+                "button",
+                {
+                  onClick: () => setSelectedSemester("all"),
+                  style: {
+                    marginTop: "12px",
+                    padding: "8px 16px",
+                    backgroundColor: "#6366F1",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  },
+                },
+                "Xem tất cả học kỳ"
+              )
           )
-        )
     )
   );
 }
@@ -530,52 +530,52 @@ function StatisticsResultsBySemester({ results }) {
       },
       semesterData.length > 0
         ? React.createElement(
-          ResponsiveContainer,
-          { width: "100%", height: "100%" },
-          React.createElement(
-            LineChart,
-            { data: semesterData },
-            React.createElement(CartesianGrid, {
-              strokeDasharray: "3 3",
-              stroke: "#e5e7eb",
-            }),
-            React.createElement(XAxis, {
-              dataKey: "name",
-              stroke: "#6b7280",
-            }),
-            React.createElement(YAxis, {
-              stroke: "#6b7280",
-              domain: getYAxisDomain(),
-            }),
-            React.createElement(Tooltip, {
-              contentStyle: {
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                borderColor: "#d1d5db",
-                borderRadius: "8px",
-                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-              },
-              itemStyle: { color: "#374151" },
-              formatter: getTooltipFormatter(),
-            }),
-            React.createElement(Line, {
-              type: "monotone",
-              dataKey: "average",
-              stroke: "#059669",
-              strokeWidth: 3,
-              dot: { fill: "#059669", strokeWidth: 2, r: 6 },
-              activeDot: { r: 8, strokeWidth: 2 },
-              name: `Điểm trung bình (thang ${selectedScale})`,
-            })
+            ResponsiveContainer,
+            { width: "100%", height: "100%" },
+            React.createElement(
+              LineChart,
+              { data: semesterData },
+              React.createElement(CartesianGrid, {
+                strokeDasharray: "3 3",
+                stroke: "#e5e7eb",
+              }),
+              React.createElement(XAxis, {
+                dataKey: "name",
+                stroke: "#6b7280",
+              }),
+              React.createElement(YAxis, {
+                stroke: "#6b7280",
+                domain: getYAxisDomain(),
+              }),
+              React.createElement(Tooltip, {
+                contentStyle: {
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  borderColor: "#d1d5db",
+                  borderRadius: "8px",
+                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                },
+                itemStyle: { color: "#374151" },
+                formatter: getTooltipFormatter(),
+              }),
+              React.createElement(Line, {
+                type: "monotone",
+                dataKey: "average",
+                stroke: "#059669",
+                strokeWidth: 3,
+                dot: { fill: "#059669", strokeWidth: 2, r: 6 },
+                activeDot: { r: 8, strokeWidth: 2 },
+                name: `Điểm trung bình (thang ${selectedScale})`,
+              })
+            )
           )
-        )
         : React.createElement(
-          "div",
-          {
-            className: "no-data-container",
-            style: { height: "100%" },
-          },
-          React.createElement("p", null, "Không có dữ liệu để hiển thị")
-        )
+            "div",
+            {
+              className: "no-data-container",
+              style: { height: "100%" },
+            },
+            React.createElement("p", null, "Không có dữ liệu để hiển thị")
+          )
     )
   );
 }
@@ -643,20 +643,20 @@ function SubjectResultStatistics({ subjects }) {
         "Thống kê tổng quan kết quả môn học"
       ),
       totalSubjects > 0 &&
-      React.createElement(
-        "div",
-        {
-          style: {
-            fontSize: "14px",
-            color: "#6b7280",
-            fontWeight: "500",
-            backgroundColor: "#f3f4f6",
-            padding: "8px 12px",
-            borderRadius: "6px",
+        React.createElement(
+          "div",
+          {
+            style: {
+              fontSize: "14px",
+              color: "#6b7280",
+              fontWeight: "500",
+              backgroundColor: "#f3f4f6",
+              padding: "8px 12px",
+              borderRadius: "6px",
+            },
           },
-        },
-        `Tổng: ${totalSubjects} môn học`
-      )
+          `Tổng: ${totalSubjects} môn học`
+        )
     ),
     React.createElement(
       "div",
@@ -666,104 +666,104 @@ function SubjectResultStatistics({ subjects }) {
       },
       subjectData.length > 0
         ? React.createElement(
-          ResponsiveContainer,
-          { width: "100%", height: "100%" },
-          React.createElement(
-            PieChart,
-            null,
+            ResponsiveContainer,
+            { width: "100%", height: "100%" },
             React.createElement(
-              Pie,
-              {
-                data: subjectData,
-                cx: "50%",
-                cy: "50%",
-                labelLine: false,
-                outerRadius: 80,
-                fill: "#8884d8",
-                dataKey: "value",
-                label: ({ name, percent, value }) =>
-                  `${name}: ${value} (${(percent * 100).toFixed(0)}%)`,
-              },
-              subjectData.map((entry, index) =>
-                React.createElement(Cell, {
-                  key: `cell-${entry.grade}-${index}`,
-                  fill: entry.color,
-                })
-              )
-            ),
-            React.createElement(Tooltip, {
-              contentStyle: {
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                borderColor: "#d1d5db",
-                borderRadius: "8px",
-                boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-              },
-              itemStyle: { color: "#374151" },
-              formatter: (value, name, props) => [
-                `${value} môn học (${((value / totalSubjects) * 100).toFixed(
-                  1
-                )}%)`,
-                name,
-              ],
-            }),
-            React.createElement(Legend, {
-              verticalAlign: "bottom",
-              height: 36,
-              iconType: "circle",
-              wrapperStyle: {
-                fontSize: "12px",
-                color: "#6b7280",
-              },
-            })
+              PieChart,
+              null,
+              React.createElement(
+                Pie,
+                {
+                  data: subjectData,
+                  cx: "50%",
+                  cy: "50%",
+                  labelLine: false,
+                  outerRadius: 80,
+                  fill: "#8884d8",
+                  dataKey: "value",
+                  label: ({ name, percent, value }) =>
+                    `${name}: ${value} (${(percent * 100).toFixed(0)}%)`,
+                },
+                subjectData.map((entry, index) =>
+                  React.createElement(Cell, {
+                    key: `cell-${entry.grade}-${index}`,
+                    fill: entry.color,
+                  })
+                )
+              ),
+              React.createElement(Tooltip, {
+                contentStyle: {
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  borderColor: "#d1d5db",
+                  borderRadius: "8px",
+                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                },
+                itemStyle: { color: "#374151" },
+                formatter: (value, name, props) => [
+                  `${value} môn học (${((value / totalSubjects) * 100).toFixed(
+                    1
+                  )}%)`,
+                  name,
+                ],
+              }),
+              React.createElement(Legend, {
+                verticalAlign: "bottom",
+                height: 36,
+                iconType: "circle",
+                wrapperStyle: {
+                  fontSize: "12px",
+                  color: "#6b7280",
+                },
+              })
+            )
           )
-        )
         : React.createElement(
-          "div",
-          {
-            className: "no-data-container",
-            style: {
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#9ca3af",
-              textAlign: "center",
-            },
-          },
-          React.createElement(
             "div",
             {
+              className: "no-data-container",
               style: {
-                fontSize: "48px",
-                marginBottom: "16px",
-                opacity: 0.5,
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#9ca3af",
+                textAlign: "center",
               },
             },
-            "📊"
-          ),
-          React.createElement(
-            "h3",
-            {
-              style: {
-                fontSize: "18px",
-                marginBottom: "8px",
-                color: "#d1d5db",
+            React.createElement(
+              "div",
+              {
+                style: {
+                  fontSize: "48px",
+                  marginBottom: "16px",
+                  opacity: 0.5,
+                },
               },
-            },
-            "Không có dữ liệu"
-          ),
-          React.createElement(
-            "p",
-            {
-              style: {
-                fontSize: "14px",
-                opacity: 0.8,
+              "📊"
+            ),
+            React.createElement(
+              "h3",
+              {
+                style: {
+                  fontSize: "18px",
+                  marginBottom: "8px",
+                  color: "#d1d5db",
+                },
               },
-            },
-            "Chưa có dữ liệu điểm chữ để hiển thị thống kê."
+              "Không có dữ liệu"
+            ),
+            React.createElement(
+              "p",
+              {
+                style: {
+                  fontSize: "14px",
+                  opacity: 0.8,
+                },
+              },
+              "Chưa có dữ liệu điểm chữ để hiển thị thống kê."
+            )
           )
-        )
     )
   );
 }
@@ -820,7 +820,10 @@ function OverviewPageContent() {
           ["curriculum_json", "curriculum_timestamp"],
           function (result) {
             if (chrome.runtime.lastError) {
-              console.error("Lỗi lấy dữ liệu chương trình khung:", chrome.runtime.lastError);
+              console.error(
+                "Lỗi lấy dữ liệu chương trình khung:",
+                chrome.runtime.lastError
+              );
               return;
             }
 
@@ -835,7 +838,10 @@ function OverviewPageContent() {
                 // Log chi tiết cấu trúc dữ liệu
                 if (curriculumDataParsed && curriculumDataParsed.length > 0) {
                   // console.log("Sample semester:", curriculumDataParsed[0]);
-                  if (curriculumDataParsed[0].monHoc && curriculumDataParsed[0].monHoc.length > 0) {
+                  if (
+                    curriculumDataParsed[0].monHoc &&
+                    curriculumDataParsed[0].monHoc.length > 0
+                  ) {
                     // console.log("Sample subject:", curriculumDataParsed[0].monHoc[0]);
                     // console.log("Subject keys:", Object.keys(curriculumDataParsed[0].monHoc[0]));
                   }
@@ -849,17 +855,21 @@ function OverviewPageContent() {
 
                 // Export hàm helper để lấy thông tin môn học
                 window.getCurriculumInfo = (subjectName) => {
-                  if (!curriculumDataParsed || !Array.isArray(curriculumDataParsed)) {
+                  if (
+                    !curriculumDataParsed ||
+                    !Array.isArray(curriculumDataParsed)
+                  ) {
                     return { soTLT: null, soTTH: null };
                   }
 
                   // Normalize subject name for better matching
                   const normalizeSubjectName = (name) => {
-                    return name.toLowerCase()
+                    return name
+                      .toLowerCase()
                       .trim()
-                      .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
-                      .replace(/\*/g, '')    // Remove asterisk
-                      .replace(/[()]/g, '')  // Remove parentheses
+                      .replace(/\s+/g, " ") // Replace multiple spaces with single space
+                      .replace(/\*/g, "") // Remove asterisk
+                      .replace(/[()]/g, "") // Remove parentheses
                       .trim();
                   };
 
@@ -868,15 +878,18 @@ function OverviewPageContent() {
                   // Tìm kiếm qua tất cả các học kỳ và môn học
                   for (const semester of curriculumDataParsed) {
                     if (semester.monHoc && Array.isArray(semester.monHoc)) {
-                      const found = semester.monHoc.find(subject => {
+                      const found = semester.monHoc.find((subject) => {
                         // Kiểm tra tên môn học - sử dụng thuộc tính 'tenMon'
-                        const subjectNameInCurriculum = subject.tenMon ||
-                          subject['Tên môn học'] ||
+                        const subjectNameInCurriculum =
+                          subject.tenMon ||
+                          subject["Tên môn học"] ||
                           subject.tenMonHoc ||
                           subject.name;
 
                         if (subjectNameInCurriculum) {
-                          const curriculumName = normalizeSubjectName(subjectNameInCurriculum);
+                          const curriculumName = normalizeSubjectName(
+                            subjectNameInCurriculum
+                          );
 
                           // Exact match first
                           if (curriculumName === searchName) {
@@ -884,21 +897,31 @@ function OverviewPageContent() {
                           }
 
                           // Partial match for similar subjects
-                          if (curriculumName.includes(searchName) || searchName.includes(curriculumName)) {
+                          if (
+                            curriculumName.includes(searchName) ||
+                            searchName.includes(curriculumName)
+                          ) {
                             return true;
                           }
 
                           // Special handling for common variations
                           const specialMatches = [
-                            ['giáo dục quốc phòng', 'giáo dục quốc phòng và an ninh'],
-                            ['giáo dục thể chất', 'giáo dục thể chất'],
-                            ['tiếng anh', 'chứng chỉ tiếng anh'],
-                            ['nhập môn tin học', 'nhập môn tin học']
+                            [
+                              "giáo dục quốc phòng",
+                              "giáo dục quốc phòng và an ninh",
+                            ],
+                            ["giáo dục thể chất", "giáo dục thể chất"],
+                            ["tiếng anh", "chứng chỉ tiếng anh"],
+                            ["nhập môn tin học", "nhập môn tin học"],
                           ];
 
                           for (const [pattern1, pattern2] of specialMatches) {
-                            if ((curriculumName.includes(pattern1) && searchName.includes(pattern1)) ||
-                              (curriculumName.includes(pattern2) && searchName.includes(pattern2))) {
+                            if (
+                              (curriculumName.includes(pattern1) &&
+                                searchName.includes(pattern1)) ||
+                              (curriculumName.includes(pattern2) &&
+                                searchName.includes(pattern2))
+                            ) {
                               return true;
                             }
                           }
@@ -907,14 +930,16 @@ function OverviewPageContent() {
                       });
 
                       if (found) {
+                        // console.log(`Found curriculum data for "${subjectName}":`, found);
 
                         // Trích xuất soTLT và soTTH - sử dụng đúng tên thuộc tính
-                        const soTLT = found.soTLT || found['Số TCTL'] || null;
-                        const soTTH = found.soTTH || found['Số TCTH'] || null;
+                        const soTLT = found.soTLT || found["Số TCTL"] || null;
+                        const soTTH = found.soTTH || found["Số TCTH"] || null;
 
+                        // console.log(`Extracted: soTLT=${soTLT}, soTTH=${soTTH}`);
                         return {
                           soTLT: soTLT ? parseInt(soTLT) : null,
-                          soTTH: soTTH ? parseInt(soTTH) : null
+                          soTTH: soTTH ? parseInt(soTTH) : null,
                         };
                       }
                     }
@@ -922,23 +947,27 @@ function OverviewPageContent() {
 
                   // Only show warning for subjects that are not in the ignore list
                   const ignoreWarnings = [
-                    'giáo dục quốc phòng',
-                    'giáo dục thể chất',
-                    'tiếng anh',
-                    'chứng chỉ tiếng anh'
+                    "giáo dục quốc phòng",
+                    "giáo dục thể chất",
+                    "tiếng anh",
+                    "chứng chỉ tiếng anh",
                   ];
 
-                  const shouldIgnoreWarning = ignoreWarnings.some(ignore =>
+                  const shouldIgnoreWarning = ignoreWarnings.some((ignore) =>
                     subjectName.toLowerCase().includes(ignore)
                   );
 
                   if (!shouldIgnoreWarning) {
-                    console.warn(`No curriculum info found for "${subjectName}"`);
+                    console.warn(
+                      `No curriculum info found for "${subjectName}"`
+                    );
                   }
 
                   return { soTLT: null, soTTH: null };
-                }; console.log("Curriculum data đã được export sang window.curriculumData và window.getCurriculumInfo");
-
+                };
+                console.log(
+                  "Curriculum data đã được export sang window.curriculumData và window.getCurriculumInfo"
+                );
               } catch (error) {
                 console.error("Lỗi parse curriculum data:", error);
               }
@@ -982,56 +1011,56 @@ function OverviewPageContent() {
     { className: "page-content" },
     loading
       ? React.createElement(
-        "div",
-        { className: "loading" },
-        React.createElement("div", { className: "spinner" }),
-        React.createElement(
-          "span",
-          { className: "loading-text" },
-          "Đang tải dữ liệu..."
-        )
-      )
-      : React.createElement(
-        "div",
-        { className: "dashboard-grid" },
-        React.createElement(
           "div",
-          {
-            className: "dashboard-row",
-            style: {
-              display: "flex",
-              gap: "20px",
-              marginBottom: "20px",
-              flexWrap: "wrap",
-            },
-          },
+          { className: "loading" },
+          React.createElement("div", { className: "spinner" }),
+          React.createElement(
+            "span",
+            { className: "loading-text" },
+            "Đang tải dữ liệu..."
+          )
+        )
+      : React.createElement(
+          "div",
+          { className: "dashboard-grid" },
           React.createElement(
             "div",
             {
-              className: "card dashboard-item",
-              style: { flex: "1", minWidth: "400px" },
+              className: "dashboard-row",
+              style: {
+                display: "flex",
+                gap: "20px",
+                marginBottom: "20px",
+                flexWrap: "wrap",
+              },
             },
-            React.createElement(StatisticsResultsBySemester, {
-              results: results,
-            })
+            React.createElement(
+              "div",
+              {
+                className: "card dashboard-item",
+                style: { flex: "1", minWidth: "400px" },
+              },
+              React.createElement(StatisticsResultsBySemester, {
+                results: results,
+              })
+            ),
+            React.createElement(
+              "div",
+              {
+                className: "card dashboard-item",
+                style: { flex: "1", minWidth: "400px" },
+              },
+              React.createElement(SubjectResultStatistics, {
+                subjects: subjects,
+              })
+            )
           ),
           React.createElement(
             "div",
-            {
-              className: "card dashboard-item",
-              style: { flex: "1", minWidth: "400px" },
-            },
-            React.createElement(SubjectResultStatistics, {
-              subjects: subjects,
-            })
+            { className: "card" },
+            React.createElement(SubjectGradeStatistic, { subjects: subjects })
           )
-        ),
-        React.createElement(
-          "div",
-          { className: "card" },
-          React.createElement(SubjectGradeStatistic, { subjects: subjects })
         )
-      )
   );
 }
 
