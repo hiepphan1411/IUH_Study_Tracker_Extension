@@ -7,6 +7,7 @@ function GradesPageContent({ keyValue }) {
     const [subjectTypes, setSubjectTypes] = React.useState({}); // Lưu trữ loại môn học đã chọn
     const [openDropdowns, setOpenDropdowns] = React.useState({}); // Lưu trữ trạng thái mở/đóng của các dropdown
     const [curriculumLoaded, setCurriculumLoaded] = React.useState(false);
+    const [manuallyChangedSubjects, setManuallyChangedSubjects] = React.useState({}); // Theo dõi môn nào đã được thay đổi thủ công
 
     // Load curriculum data first
     React.useEffect(() => {
@@ -35,17 +36,46 @@ function GradesPageContent({ keyValue }) {
                             const normalizeSubjectName = (name) => {
                                 return name.toLowerCase()
                                     .trim()
-                                    .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
-                                    .replace(/\*/g, '')    // Remove asterisk
-                                    .replace(/[()]/g, '')  // Remove parentheses
+                                    .replace(/\s+/g, ' ')     // Replace multiple spaces with single space
+                                    .replace(/\*/g, '')       // Remove asterisk
+                                    .replace(/[()]/g, '')     // Remove parentheses
+                                    .replace(/[.,;:]/g, '')   // Remove punctuation
                                     .trim();
+                            };
+
+                            // Calculate string similarity using Levenshtein distance
+                            const calculateStringSimilarity = (str1, str2) => {
+                                const len1 = str1.length;
+                                const len2 = str2.length;
+                                const matrix = Array(len2 + 1).fill(null).map(() => Array(len1 + 1).fill(null));
+
+                                for (let i = 0; i <= len1; i++) matrix[0][i] = i;
+                                for (let j = 0; j <= len2; j++) matrix[j][0] = j;
+
+                                for (let j = 1; j <= len2; j++) {
+                                    for (let i = 1; i <= len1; i++) {
+                                        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                                        matrix[j][i] = Math.min(
+                                            matrix[j - 1][i] + 1,     // deletion
+                                            matrix[j][i - 1] + 1,     // insertion
+                                            matrix[j - 1][i - 1] + cost // substitution
+                                        );
+                                    }
+                                }
+
+                                const distance = matrix[len2][len1];
+                                const maxLength = Math.max(len1, len2);
+                                return maxLength === 0 ? 1 : (maxLength - distance) / maxLength;
                             };
 
                             const searchName = normalizeSubjectName(subjectName);
 
+                            let bestMatch = null;
+                            let bestSimilarity = 0;
+
                             for (const semester of curriculumDataParsed) {
                                 if (semester.monHoc && Array.isArray(semester.monHoc)) {
-                                    const found = semester.monHoc.find(subject => {
+                                    for (const subject of semester.monHoc) {
                                         const subjectNameInCurriculum = subject.tenMon ||
                                             subject['Tên môn học'] ||
                                             subject.tenMonHoc ||
@@ -54,44 +84,109 @@ function GradesPageContent({ keyValue }) {
                                         if (subjectNameInCurriculum) {
                                             const curriculumName = normalizeSubjectName(subjectNameInCurriculum);
 
-                                            // Exact match first
+                                            // Exact match - highest priority
                                             if (curriculumName === searchName) {
-                                                return true;
+                                                const soTLT = subject.soTLT || subject['Số TCTL'] || null;
+                                                const soTTH = subject.soTTH || subject['Số TCTH'] || null;
+                                                return {
+                                                    soTLT: soTLT ? parseInt(soTLT) : null,
+                                                    soTTH: soTTH ? parseInt(soTTH) : null
+                                                };
                                             }
 
-                                            // Partial match for similar subjects
+                                            // Enhanced matching for Tiếng Anh subjects
+                                            if (searchName.includes('tiếng anh') && curriculumName.includes('tiếng anh')) {
+                                                // Phân biệt rõ ràng giữa "Tiếng Anh 1/2" và "Chứng chỉ Tiếng Anh"
+                                                const searchHasNumber = /tiếng anh\s+\d+/.test(searchName);
+                                                const curriculumHasNumber = /tiếng anh\s+\d+/.test(curriculumName);
+                                                const searchIsCertificate = searchName.includes('chứng chỉ');
+                                                const curriculumIsCertificate = curriculumName.includes('chứng chỉ');
+
+                                                console.log(`  🔍 Tiếng Anh analysis - Search: "${searchName}" (hasNumber: ${searchHasNumber}, isCert: ${searchIsCertificate}), Curriculum: "${curriculumName}" (hasNumber: ${curriculumHasNumber}, isCert: ${curriculumIsCertificate})`);
+                                                // Nếu cả hai đều có số (Tiếng Anh 1, Tiếng Anh 2)
+                                                if (searchHasNumber && curriculumHasNumber) {
+                                                    const searchNumber = searchName.match(/tiếng anh\s+(\d+)/);
+                                                    const curriculumNumber = curriculumName.match(/tiếng anh\s+(\d+)/);
+
+                                                    if (searchNumber && curriculumNumber && searchNumber[1] === curriculumNumber[1]) {
+                                                        console.log(`  ✅ Tiếng Anh ${searchNumber[1]} exact match found!`);
+                                                        const soTLT = subject.soTLT || subject['Số TCTL'] || null;
+                                                        const soTTH = subject.soTTH || subject['Số TCTH'] || null;
+                                                        return {
+                                                            soTLT: soTLT ? parseInt(soTLT) : null,
+                                                            soTTH: soTTH ? parseInt(soTTH) : null
+                                                        };
+                                                    } else {
+                                                        console.log(`  ❌ Number mismatch: search=${searchNumber?.[1]} vs curriculum=${curriculumNumber?.[1]}`);
+                                                    }
+                                                }
+
+                                                // Nếu cả hai đều là chứng chỉ
+                                                if (searchIsCertificate && curriculumIsCertificate) {
+                                                    console.log(`  ✅ Chứng chỉ Tiếng Anh match found!`);
+                                                    const soTLT = subject.soTLT || subject['Số TCTL'] || null;
+                                                    const soTTH = subject.soTTH || subject['Số TCTH'] || null;
+                                                    return {
+                                                        soTLT: soTLT ? parseInt(soTLT) : null,
+                                                        soTTH: soTTH ? parseInt(soTTH) : null
+                                                    };
+                                                }
+
+                                                // Không cho match giữa "Tiếng Anh 1/2" và "Chứng chỉ Tiếng Anh"
+                                                if ((searchHasNumber && curriculumIsCertificate) || (searchIsCertificate && curriculumHasNumber)) {
+                                                    console.log(`  ❌ Skipping cross-match between numbered and certificate Tiếng Anh`);
+                                                    continue;
+                                                }
+
+                                                // Skip any other Tiếng Anh matching to avoid confusion
+                                                console.log(`  ❌ Skipping other Tiếng Anh matching to avoid confusion`);
+                                                continue;
+                                            }                                            // Partial matching
                                             if (curriculumName.includes(searchName) || searchName.includes(curriculumName)) {
-                                                return true;
+                                                const similarity = calculateStringSimilarity(searchName, curriculumName);
+
+                                                if (similarity > bestSimilarity) {
+                                                    bestSimilarity = similarity;
+                                                    bestMatch = subject;
+                                                }
                                             }
 
-                                            // Special handling for common variations
+                                            // Similarity matching with threshold
+                                            const similarity = calculateStringSimilarity(searchName, curriculumName);
+                                            if (similarity > 0.8 && similarity > bestSimilarity) {
+                                                bestSimilarity = similarity;
+                                                bestMatch = subject;
+                                            }
+
+                                            // Special handling for common variations (không bao gồm tiếng anh vì đã xử lý riêng)
                                             const specialMatches = [
                                                 ['giáo dục quốc phòng', 'giáo dục quốc phòng và an ninh'],
                                                 ['giáo dục thể chất', 'giáo dục thể chất'],
-                                                ['tiếng anh', 'chứng chỉ tiếng anh'],
                                                 ['nhập môn tin học', 'nhập môn tin học']
-                                            ];
-
-                                            for (const [pattern1, pattern2] of specialMatches) {
+                                            ]; for (const [pattern1, pattern2] of specialMatches) {
                                                 if ((curriculumName.includes(pattern1) && searchName.includes(pattern1)) ||
                                                     (curriculumName.includes(pattern2) && searchName.includes(pattern2))) {
-                                                    return true;
+                                                    const soTLT = subject.soTLT || subject['Số TCTL'] || null;
+                                                    const soTTH = subject.soTTH || subject['Số TCTH'] || null;
+                                                    return {
+                                                        soTLT: soTLT ? parseInt(soTLT) : null,
+                                                        soTTH: soTTH ? parseInt(soTTH) : null
+                                                    };
                                                 }
                                             }
                                         }
-                                        return false;
-                                    });
-
-                                    if (found) {
-                                        const soTLT = found.soTLT || found['Số TCTL'] || null;
-                                        const soTTH = found.soTTH || found['Số TCTH'] || null;
-
-                                        return {
-                                            soTLT: soTLT ? parseInt(soTLT) : null,
-                                            soTTH: soTTH ? parseInt(soTTH) : null
-                                        };
                                     }
                                 }
+                            }
+
+                            // Return best match if found with good similarity
+                            if (bestMatch && bestSimilarity > 0.7) {
+                                const soTLT = bestMatch.soTLT || bestMatch['Số TCTL'] || null;
+                                const soTTH = bestMatch.soTTH || bestMatch['Số TCTH'] || null;
+                                return {
+                                    soTLT: soTLT ? parseInt(soTLT) : null,
+                                    soTTH: soTTH ? parseInt(soTTH) : null
+                                };
                             }
 
                             // Only show warning for subjects that are not in the ignore list
@@ -136,16 +231,24 @@ function GradesPageContent({ keyValue }) {
             gradesData.semesters.forEach((semester, semesterIndex) => {
                 semester.subjects.forEach((subject, subjectIndex) => {
                     const key = `${semesterIndex}-${subjectIndex}`;
-                    const autoType = getAutoSubjectType(subject.name, subject);
-                    // console.log(`Auto-classifying "${subject.name}" as: ${autoType}`);
-                    newSubjectTypes[key] = autoType;
+
+                    // Chỉ auto-classify những môn chưa được thay đổi thủ công
+                    if (!manuallyChangedSubjects[key]) {
+                        const autoType = getAutoSubjectType(subject.name, subject);
+                        // console.log(`Auto-classifying "${subject.name}" as: ${autoType}`);
+                        newSubjectTypes[key] = autoType;
+                    } else {
+                        // Giữ nguyên lựa chọn thủ công của người dùng
+                        newSubjectTypes[key] = subjectTypes[key];
+                        // console.log(`Keeping manual selection for "${subject.name}": ${subjectTypes[key]}`);
+                    }
                 });
             });
 
             setSubjectTypes(newSubjectTypes);
             // console.log('Auto-classification completed for real data:', newSubjectTypes);
         }
-    }, [curriculumLoaded, gradesData]);
+    }, [curriculumLoaded, gradesData, manuallyChangedSubjects]);
 
     // Danh sách môn bỏ qua khi tính GPA
     const listSubjectIgnoresCalcScore = [
@@ -262,13 +365,20 @@ function GradesPageContent({ keyValue }) {
     // Hàm xử lý thay đổi loại môn học
     const handleSubjectTypeChange = (semesterIndex, subjectIndex, newType) => {
         const key = `${semesterIndex}-${subjectIndex}`;
+
+        // Cập nhật loại môn học
         setSubjectTypes(prev => ({
             ...prev,
             [key]: newType
         }));
 
-        // Có thể thêm logic tính lại điểm dựa trên loại môn học mới
-        // console.log(`Changed subject type for ${key} to ${newType}`);
+        // Đánh dấu môn này đã được thay đổi thủ công
+        setManuallyChangedSubjects(prev => ({
+            ...prev,
+            [key]: true
+        }));
+
+        console.log(`User manually changed subject type for ${key} to ${newType}`);
     };
 
     // Hàm tự động xác định loại môn dựa trên chương trình khung
@@ -288,14 +398,14 @@ function GradesPageContent({ keyValue }) {
 
             // Kiểm tra curriculum đã được load chưa
             if (!curriculumLoaded) {
-                console.log('Curriculum not loaded yet, defaulting to LT');
-                return 'LT';
+                console.log('Curriculum not loaded yet, defaulting to CHUA_XAC_DINH');
+                return 'CHUA_XAC_DINH';
             }
 
             // Kiểm tra xem có dữ liệu chương trình khung không
             if (typeof window.getCurriculumInfo !== 'function') {
-                console.log('No curriculum data available, defaulting to LT');
-                return 'LT';
+                console.log('No curriculum data available, defaulting to CHUA_XAC_DINH');
+                return 'CHUA_XAC_DINH';
             }
 
             // Kiểm tra xem window.getCurriculumInfo có tồn tại không
@@ -330,27 +440,18 @@ function GradesPageContent({ keyValue }) {
                     }
                 } else {
                     // Không tìm thấy thông tin trong chương trình khung, sử dụng logic dự phòng
-                    console.log(`No curriculum info found for "${subjectName}", using fallback logic`);
+                    console.log(`No curriculum info found for "${subjectName}", defaulting to CHUA_XAC_DINH`);
+                    return 'CHUA_XAC_DINH';
                 }
             }
         } catch (error) {
             console.warn('Lỗi khi lấy thông tin từ chương trình khung:', error);
+            return 'CHUA_XAC_DINH';
         }
 
-        // Kiểm tra các môn khác khi không có điểm giữa kỳ và thường xuyên → mặc định là lý thuyết
-        if (subject && !subjectName.toLowerCase().includes('tiếng anh')) {
-            const hasGiuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined;
-            const hasThuongXuyen = subject.thuongXuyen.some(score => score !== null && score !== undefined);
-
-            if (!hasGiuaKy && !hasThuongXuyen) {
-                // console.log(`→ "${subjectName}" classified as LÝ THUYẾT (no midterm/regular scores, not Tiếng Anh)`);
-                return 'LT'; // Mặc định là lý thuyết cho các môn khác
-            }
-        }
-
-        console.log(`→ Default to LÝ THUYẾT for "${subjectName}" (no curriculum data or fallback)`);
-        // Mặc định là lý thuyết nếu không xác định được
-        return 'LT';
+        console.log(`→ Default to CHƯA XÁC ĐỊNH for "${subjectName}" (no curriculum data or fallback)`);
+        // Mặc định là chưa xác định nếu không có chương trình khung
+        return 'CHUA_XAC_DINH';
     };    // Hàm lấy loại môn học hiện tại
     const getCurrentSubjectType = (semesterIndex, subjectIndex) => {
         const key = `${semesterIndex}-${subjectIndex}`;
@@ -384,25 +485,71 @@ function GradesPageContent({ keyValue }) {
         const currentType = getCurrentSubjectType(semesterIndex, subjectIndex);
         const dropdownKey = `${semesterIndex}-${subjectIndex}`;
         const isOpen = openDropdowns[dropdownKey] || false;
+        const isManuallyChanged = manuallyChangedSubjects[dropdownKey] || false;
 
         const options = [
+            { value: 'CHUA_XAC_DINH', label: 'Chưa xác định', title: 'Chưa xác định loại môn (cho phép nhập tất cả cột)' },
             { value: 'LT', label: 'Lý thuyết', title: 'Môn lý thuyết (soTLT > 0, soTTH = 0)' },
             { value: 'TH', label: 'Thực hành', title: 'Môn thực hành (soTLT = 0, soTTH > 0)' },
             { value: 'TICH_HOP', label: 'Tích hợp', title: 'Môn tích hợp (soTLT > 0, soTTH > 0)' },
             { value: 'SPECIAL', label: 'Đặc biệt', title: 'Môn đặc biệt (chỉ có điểm cuối kỳ)' }
         ];
 
+        // Thêm tùy chọn reset nếu môn đã được thay đổi thủ công
+        if (isManuallyChanged) {
+            options.push({
+                value: 'RESET_AUTO',
+                label: '🔄 Reset về tự động',
+                title: 'Đặt lại về phân loại tự động theo chương trình khung',
+                isReset: true
+            });
+        }
+
         const currentOption = options.find(opt => opt.value === currentType);
 
         const handleToggleDropdown = () => {
-            setOpenDropdowns(prev => ({
-                ...prev,
-                [dropdownKey]: !prev[dropdownKey]
-            }));
+            setOpenDropdowns(prev => {
+                const isCurrentlyOpen = prev[dropdownKey];
+
+                if (isCurrentlyOpen) {
+                    // Nếu dropdown hiện tại đang mở, đóng nó
+                    return {};
+                } else {
+                    // Nếu dropdown hiện tại đang đóng, đóng tất cả và mở chỉ dropdown này
+                    return { [dropdownKey]: true };
+                }
+            });
         };
 
         const handleOptionClick = (value) => {
-            handleSubjectTypeChange(semesterIndex, subjectIndex, value);
+            if (value === 'RESET_AUTO') {
+                // Reset về auto-classify
+                const key = `${semesterIndex}-${subjectIndex}`;
+
+                // Xóa khỏi danh sách đã thay đổi thủ công
+                setManuallyChangedSubjects(prev => {
+                    const newState = { ...prev };
+                    delete newState[key];
+                    return newState;
+                });
+
+                // Tự động phân loại lại môn này
+                if (gradesData && gradesData.semesters && gradesData.semesters[semesterIndex] &&
+                    gradesData.semesters[semesterIndex].subjects && gradesData.semesters[semesterIndex].subjects[subjectIndex]) {
+                    const subject = gradesData.semesters[semesterIndex].subjects[subjectIndex];
+                    const autoType = getAutoSubjectType(subject.name, subject);
+
+                    setSubjectTypes(prev => ({
+                        ...prev,
+                        [key]: autoType
+                    }));
+
+                    console.log(`Reset subject ${key} to auto-classify: ${autoType}`);
+                }
+            } else {
+                handleSubjectTypeChange(semesterIndex, subjectIndex, value);
+            }
+
             setOpenDropdowns(prev => ({
                 ...prev,
                 [dropdownKey]: false
@@ -443,7 +590,9 @@ function GradesPageContent({ keyValue }) {
                         alignItems: 'center',
                         justifyContent: 'space-between'
                     },
-                    title: currentOption?.title || 'Loại môn được xác định tự động từ chương trình khung',
+                    title: isManuallyChanged ?
+                        `${currentOption?.title || 'Loại môn'} (Đã thay đổi thủ công - Click để xem tùy chọn Reset)` :
+                        (currentOption?.title || 'Loại môn được xác định tự động từ chương trình khung'),
                     // onMouseEnter: (e) => {
                     //     if (!isOpen) {
                     //         e.target.style.backgroundColor = '#e2e8f0';
@@ -457,7 +606,11 @@ function GradesPageContent({ keyValue }) {
                     //     }
                     // }
                 },
-                    React.createElement('span', null, currentOption?.label || 'Tự động'),
+                    React.createElement('span', null,
+                        isManuallyChanged ?
+                            `${currentOption?.label || 'Tự động'} ✏️` :
+                            (currentOption?.label || 'Tự động')
+                    ),
                     React.createElement('svg', {
                         style: {
                             width: '16px',
@@ -502,11 +655,14 @@ function GradesPageContent({ keyValue }) {
                             style: {
                                 padding: '8px 10px',
                                 fontSize: '13px',
-                                fontWeight: '500',
+                                fontWeight: option.isReset ? 'bold' : '500',
                                 cursor: 'pointer',
-                                backgroundColor: option.value === currentType ? '#eff6ff' : '#ffffff',
-                                color: option.value === currentType ? '#1d4ed8' : '#374151',
-                                transition: 'all 0.1s ease'
+                                backgroundColor: option.value === currentType ? '#eff6ff' :
+                                    (option.isReset ? '#f0f9ff' : '#ffffff'),
+                                color: option.value === currentType ? '#1d4ed8' :
+                                    (option.isReset ? '#0369a1' : '#374151'),
+                                transition: 'all 0.1s ease',
+                                borderTop: option.isReset ? '1px solid #e5e7eb' : 'none'
                             },
                             title: option.title,
                             // onMouseEnter: (e) => {
@@ -529,6 +685,9 @@ function GradesPageContent({ keyValue }) {
     const loadGradesFromStorage = async () => {
         setIsLoading(true);
         setError(null);
+
+        // Reset trạng thái thay đổi thủ công khi load dữ liệu mới
+        setManuallyChangedSubjects({});
 
         try {
             // Attempt to load from Chrome storage first
@@ -571,6 +730,9 @@ function GradesPageContent({ keyValue }) {
     };
 
     const loadMockData = () => {
+        // Reset trạng thái thay đổi thủ công khi load mock data
+        setManuallyChangedSubjects({});
+
         // Mock data theo format IUH từ hình ảnh
         const mockData = {
             semesters: [
@@ -794,7 +956,7 @@ function GradesPageContent({ keyValue }) {
                     // Lưu loại môn mặc định vào state (sẽ được cập nhật sau)
                     setSubjectTypes(prev => ({
                         ...prev,
-                        [key]: 'LT' // Default to lý thuyết, will be updated after curriculum loads
+                        [key]: 'CHUA_XAC_DINH' // Default to chưa xác định, will be updated after curriculum loads
                     }));
 
                     return {
@@ -874,8 +1036,8 @@ function GradesPageContent({ keyValue }) {
                 // Nếu chưa có điểm thường xuyên, chỉ tính giữa kỳ và cuối kỳ
                 diemTongKet = (giuaKy * 30 + cuoiKy * 70) / 100;
             }
-        } else if (subjectType === 'TICH_HOP') {
-            // Môn tích hợp - kết hợp lý thuyết và thực hành
+        } else if (subjectType === 'TICH_HOP' || subjectType === 'CHUA_XAC_DINH') {
+            // Môn tích hợp hoặc chưa xác định - kết hợp lý thuyết và thực hành
             const diemTongKetLT = slDiemLTKhacKhong > 0 ?
                 ((dsDiemTK.reduce((prev, curr) => prev + curr, 0) / slDiemLTKhacKhong) * 20 + giuaKy * 30 + cuoiKy * 50) / 100 :
                 (giuaKy * 30 + cuoiKy * 70) / 100;
@@ -884,9 +1046,16 @@ function GradesPageContent({ keyValue }) {
 
             if (validThucHanhScores.length > 0) {
                 const diemTongKetTH = validThucHanhScores.reduce((sum, score) => sum + score, 0) / validThucHanhScores.length;
-                tinChi === 3
-                    ? (diemTongKet = (diemTongKetLT * 2 + diemTongKetTH) / 3)
-                    : (diemTongKet = (diemTongKetLT * 3 + diemTongKetTH) / 4);
+                if (tinChi === 2) {
+                    // Môn tích hợp 2 tín chỉ: 0.4 tín lý thuyết + 0.6 tín thực hành
+                    diemTongKet = (diemTongKetLT * 0.4 + diemTongKetTH * 0.6);
+                } else if (tinChi === 3) {
+                    // Môn tích hợp 3 tín chỉ: 2 tín lý thuyết + 1 tín thực hành
+                    diemTongKet = (diemTongKetLT * 2 + diemTongKetTH) / 3;
+                } else {
+                    // Môn tích hợp 4+ tín chỉ: 3 tín lý thuyết + 1 tín thực hành
+                    diemTongKet = (diemTongKetLT * 3 + diemTongKetTH) / 4;
+                }
             } else {
                 // Nếu chưa có điểm thực hành, chỉ tính phần lý thuyết
                 diemTongKet = diemTongKetLT;
@@ -958,7 +1127,7 @@ function GradesPageContent({ keyValue }) {
     const handleScoreChange = (semesterIndex, subjectIndex, field, value) => {
         const newGradesData = { ...gradesData };
         const subject = newGradesData.semesters[semesterIndex].subjects[subjectIndex];
-        const isSpecial = isSpecialSubject(subject.name, subject);
+        const selectedType = getCurrentSubjectType(semesterIndex, subjectIndex);
 
         // Validate điểm với quy tắc IUH
         const validation = validateScore(value);
@@ -981,9 +1150,9 @@ function GradesPageContent({ keyValue }) {
             subject[field] = parsedValue;
         }
 
-        // Xử lý tính điểm cho môn đặc biệt
-        if (isSpecial) {
-            // Với môn đặc biệt, chỉ cần có điểm tổng kết (từ cột cuối kỳ)
+        // Xử lý tính điểm dựa trên loại môn được chọn
+        if (selectedType === 'SPECIAL') {
+            // Môn đặc biệt: chỉ cần có điểm tổng kết (từ cột cuối kỳ)
             if (field === 'diemCuoiKy' && parsedValue !== null) {
                 if (parsedValue < 3 && parsedValue !== 0) {
                     // Điểm cuối kỳ < 3 (nhưng không phải 0) - không đạt
@@ -1025,11 +1194,8 @@ function GradesPageContent({ keyValue }) {
             const giuaKy = subject.diemGiuaKy !== null && subject.diemGiuaKy !== undefined ? subject.diemGiuaKy : null;
             const cuoiKy = subject.diemCuoiKy !== null && subject.diemCuoiKy !== undefined ? subject.diemCuoiKy : null;
 
-            // Lấy loại môn học hiện tại
-            const currentSubjectType = getCurrentSubjectType(semesterIndex, subjectIndex);
-
             // Kiểm tra điều kiện tính điểm dựa trên loại môn
-            if (currentSubjectType === 'TH') {
+            if (selectedType === 'TH') {
                 // Môn thực hành - chỉ cần có ít nhất 1 điểm thực hành
                 if (dsDiemTH.length > 0) {
                     const scoreData = {
@@ -1057,7 +1223,7 @@ function GradesPageContent({ keyValue }) {
                     subject.dat = '';
                 }
             } else {
-                // Môn lý thuyết và môn tích hợp - cần điểm giữa kỳ và cuối kỳ
+                // Môn lý thuyết, môn tích hợp, hoặc chưa xác định - cần điểm giữa kỳ và cuối kỳ
                 if (giuaKy === null || giuaKy === undefined) {
                     // Chưa có điểm giữa kỳ
                     subject.diemTongKet = null;
@@ -1251,9 +1417,14 @@ function GradesPageContent({ keyValue }) {
 
             if (validThucHanhScores.length > 0) {
                 const diemThucHanh = validThucHanhScores.reduce((sum, score) => sum + score, 0) / validThucHanhScores.length;
-                if (tinChi === 3) {
+                if (tinChi === 2) {
+                    // Môn tích hợp 2 tín chỉ: 1 tín lý thuyết + 1 tín thực hành
+                    diemTongKet = (diemLT * 1 + diemThucHanh * 1) / 2;
+                } else if (tinChi === 3) {
+                    // Môn tích hợp 3 tín chỉ: 2 tín lý thuyết + 1 tín thực hành
                     diemTongKet = (diemLT * 2 + diemThucHanh) / 3;
                 } else {
+                    // Môn tích hợp 4+ tín chỉ: 3 tín lý thuyết + 1 tín thực hành
                     diemTongKet = (diemLT * 3 + diemThucHanh) / 4;
                 }
             } else {
@@ -1381,7 +1552,6 @@ function GradesPageContent({ keyValue }) {
     // Hàm tạo ô input có thể chỉnh sửa với logic màu đỏ cho điểm ≤ 5
     const createEditableCell = (value, scoreType, semesterIndex, subjectIndex) => {
         const subject = gradesData.semesters[semesterIndex].subjects[subjectIndex];
-        const isSpecial = isSpecialSubject(subject.name, subject);
         const selectedType = getCurrentSubjectType(semesterIndex, subjectIndex);
 
         // Xác định cột nào bị vô hiệu hóa dựa trên loại môn đã chọn
@@ -1390,7 +1560,7 @@ function GradesPageContent({ keyValue }) {
 
         let isDisabled = false;
 
-        if (isSpecial) {
+        if (selectedType === 'SPECIAL') {
             // Môn đặc biệt: chỉ cho phép nhập cột cuối kỳ
             isDisabled = scoreType !== 'ck';
         } else if (selectedType === 'LT') {
@@ -1399,8 +1569,8 @@ function GradesPageContent({ keyValue }) {
         } else if (selectedType === 'TH') {
             // Môn thực hành: chỉ cho phép các cột thực hành
             isDisabled = isLyThuyetColumn || scoreType === 'ck';
-        } else if (selectedType === 'TICH_HOP') {
-            // Môn tích hợp: cho phép tất cả các cột
+        } else if (selectedType === 'TICH_HOP' || selectedType === 'CHUA_XAC_DINH') {
+            // Môn tích hợp hoặc chưa xác định: cho phép tất cả các cột
             isDisabled = false;
         }
         // Nếu không xác định được loại môn, cho phép tất cả
@@ -1471,7 +1641,7 @@ function GradesPageContent({ keyValue }) {
                 }
             },
             title: isDisabled ?
-                (isSpecial ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' :
+                (selectedType === 'SPECIAL' ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' :
                     selectedType === 'LT' && isThucHanhColumn ? 'Môn lý thuyết - không có điểm thực hành' :
                         selectedType === 'TH' && (isLyThuyetColumn || scoreType === 'ck') ? 'Môn thực hành - chỉ nhập điểm thực hành' :
                             'Ô nhập bị vô hiệu hóa') :
@@ -1488,7 +1658,7 @@ function GradesPageContent({ keyValue }) {
                     } else {
                         e.target.style.backgroundColor = 'inherit';
                         e.target.title = isDisabled ?
-                            (isSpecial ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' :
+                            (selectedType === 'SPECIAL' ? 'Môn đặc biệt - chỉ nhập điểm cuối kỳ' :
                                 selectedType === 'LT' && isThucHanhColumn ? 'Môn lý thuyết - không có điểm thực hành' :
                                     selectedType === 'TH' && (isLyThuyetColumn || scoreType === 'ck') ? 'Môn thực hành - chỉ nhập điểm thực hành' :
                                         'Ô nhập bị vô hiệu hóa') :
