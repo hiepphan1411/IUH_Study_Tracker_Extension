@@ -17,6 +17,7 @@ function StudyPlanPageContent() {
     React.useState([]);
   const [subjectGoals, setSubjectGoals] = React.useState({});
   const [selectedSubjects, setSelectedSubjects] = React.useState({});
+  const [hasCurriculumData, setHasCurriculumData] = React.useState(false);
 
   // Load dữ liệu từ localStorage khi component mount
   React.useEffect(() => {
@@ -70,7 +71,7 @@ function StudyPlanPageContent() {
             function (res) {
               if (chrome.runtime.lastError) {
                 console.error("Lỗi lấy dữ liệu:", chrome.runtime.lastError);
-                resolve({ diem_json: null });
+                resolve({ curriculum_json: null });
                 return;
               }
               resolve(res);
@@ -99,13 +100,19 @@ function StudyPlanPageContent() {
           //console.log("Result: ", transformedSubjects);
 
           setFrameSubjects(parsedData);
+          setHasCurriculumData(true);
         } else {
-          console.warn("Không có dữ liệu điểm được lưu.");
           setFrameSubjects([]);
+          setHasCurriculumData(false);
+          
+          // alert("⚠️ CẢNH BÁO\n\nVui lòng đăng nhập vào trang sv.iuh để lấy dữ liệu chương trình khung và thử lại.");
         }
       } catch (error) {
-        console.error("Error loading data:", error);
+        console.log("Error loading data:", error);
         setFrameSubjects([]);
+        setHasCurriculumData(false);
+        
+        // alert("⚠️ CẢNH BÁO\n\nVui lòng đăng nhập vào trang sv.iuh để lấy dữ liệu chương trình khung và thử lại.");
       } finally {
         setLoading(false);
       }
@@ -254,7 +261,7 @@ function StudyPlanPageContent() {
             currentRanking: ranking,
           });
         } else {
-          console.warn("Không có dữ liệu điểm được lưu.");
+          console.log("Không có dữ liệu điểm được lưu.");
           setSubjects([]);
         }
       } catch (error) {
@@ -884,6 +891,169 @@ function StudyPlanPageContent() {
     );
   };
 
+
+  if (!hasCurriculumData) {
+    return React.createElement(
+      "div",
+      {
+        className: "page-content",
+        style: {
+          color: "#fff",
+          minHeight: "100vh",
+          padding: 24,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        },
+      },
+      React.createElement(
+        "div",
+        {
+          className: "card",
+          style: {
+            borderRadius: 16,
+            padding: 48,
+            textAlign: "center",
+            background: "linear-gradient(135deg, #fef3c7 0%, #fed7aa 50%, #fecaca 100%)",
+            color: "#92400e",
+            maxWidth: "600px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)",
+            border: "2px solid #f59e0b",
+            position: "relative",
+            overflow: "hidden"
+          },
+        },
+   
+        React.createElement(
+          "div",
+          {
+            style: {
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(251, 191, 36, 0.1) 10px, rgba(251, 191, 36, 0.1) 20px)",
+              animation: "slide 3s linear infinite",
+              pointerEvents: "none"
+            }
+          }
+        ),
+        React.createElement(
+          "div",
+          {
+            style: {
+              position: "relative",
+              zIndex: 1
+            }
+          },
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontSize: 64,
+                marginBottom: 24,
+                animation: "bounce 2s infinite, pulse 1.5s ease-in-out infinite alternate"
+              }
+            },
+            "⚠️"
+          ),
+          React.createElement(
+            "h2",
+            {
+              style: {
+                fontSize: 28,
+                fontWeight: 800,
+                marginBottom: 20,
+                color: "#dc2626",
+                textShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                letterSpacing: "-0.025em"
+              },
+            },
+            "Chưa có dữ liệu chương trình khung"
+          ),
+          React.createElement(
+            "p",
+            {
+              style: {
+                fontSize: 18,
+                lineHeight: 1.7,
+                margin: "0 0 24px 0",
+                color: "#b45309",
+                fontWeight: 500
+              },
+            },
+            "Vui lòng đăng nhập vào trang ",
+            React.createElement(
+              "strong",
+              {
+                style: {
+                  color: "#dc2626",
+                  fontWeight: 700
+                }
+              },
+              "sv.iuh"
+            ),
+            " để lấy dữ liệu chương trình khung và thử lại."
+          ),
+          React.createElement(
+            "div",
+            {
+              style: {
+                padding: "16px 24px",
+                background: "rgba(254, 243, 199, 0.8)",
+                borderRadius: 12,
+                border: "1px solid #f59e0b",
+                fontSize: 16,
+                color: "#92400e",
+                fontWeight: 600
+              }
+            },
+            "💡 Hướng dẫn: Truy cập sv.iuh.edu.vn → Đăng nhập → Xem chương trình khung"
+          )
+        ),
+
+        React.createElement(
+          "style",
+          null,
+          `
+          @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+              transform: translateY(0);
+            }
+            40% {
+              transform: translateY(-10px);
+            }
+            60% {
+              transform: translateY(-5px);
+            }
+          }
+          
+          @keyframes pulse {
+            0% {
+              transform: scale(1);
+              filter: drop-shadow(0 0 0 rgba(220, 38, 38, 0.7));
+            }
+            100% {
+              transform: scale(1.1);
+              filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.4));
+            }
+          }
+          
+          @keyframes slide {
+            0% {
+              transform: translateX(-40px);
+            }
+            100% {
+              transform: translateX(40px);
+            }
+          }
+          `
+        )
+      )
+    );
+  }
+
   return React.createElement(
     "div",
     {
@@ -1273,7 +1443,6 @@ function StudyPlanPageContent() {
           "button",
           {
             type: "button",
-            className: "reset-button",
             onClick: function () {
               var shouldReset = window.confirm("Bạn có chắc chắn muốn xóa toàn bộ kế hoạch học tập đã lưu không?");
               if (shouldReset) {
@@ -1287,12 +1456,13 @@ function StudyPlanPageContent() {
               fontWeight: "600",
               padding: "10px 18px",
               backgroundColor: "#dc2626",
-              color: "#ffffff",
+              color: "#ffffff !important",
               borderRadius: "8px",
               cursor: "pointer",
               textAlign: "center",
               textDecoration: "none",
               minWidth: "140px",
+              border: "none",
               boxShadow: "0 2px 4px rgba(220, 38, 38, 0.2)"
             }
           },
