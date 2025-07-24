@@ -18,6 +18,48 @@ function StudyPlanPageContent() {
   const [subjectGoals, setSubjectGoals] = React.useState({});
   const [selectedSubjects, setSelectedSubjects] = React.useState({});
 
+  // Load dữ liệu từ localStorage khi component mount
+  React.useEffect(() => {
+    const loadStudyPlanData = () => {
+      try {
+        const savedSelectedSubjects = localStorage.getItem('studyPlan_selectedSubjects');
+        const savedSubjectGoals = localStorage.getItem('studyPlan_subjectGoals');
+
+        if (savedSelectedSubjects) {
+          const parsedSelectedSubjects = JSON.parse(savedSelectedSubjects);
+          setSelectedSubjects(parsedSelectedSubjects);
+        }
+
+        if (savedSubjectGoals) {
+          const parsedSubjectGoals = JSON.parse(savedSubjectGoals);
+          setSubjectGoals(parsedSubjectGoals);
+        }
+      } catch (error) {
+        console.error('Error loading study plan data from localStorage:', error);
+      }
+    };
+
+    loadStudyPlanData();
+  }, []);
+
+  // Lưu selectedSubjects vào localStorage khi thay đổi
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('studyPlan_selectedSubjects', JSON.stringify(selectedSubjects));
+    } catch (error) {
+      console.error('Error saving selected subjects to localStorage:', error);
+    }
+  }, [selectedSubjects]);
+
+  // Lưu subjectGoals vào localStorage khi thay đổi
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('studyPlan_subjectGoals', JSON.stringify(subjectGoals));
+    } catch (error) {
+      console.error('Error saving subject goals to localStorage:', error);
+    }
+  }, [subjectGoals]);
+
   React.useEffect(() => {
     const loadDataFrame = async () => {
       setLoading(true);
@@ -137,28 +179,28 @@ function StudyPlanPageContent() {
           const cumulativeGPA =
             gpaSubjects.length > 0
               ? (
-                  gpaSubjects.reduce(
-                    (sum, mh) =>
-                      sum +
-                      (parseFloat(mh["Điểm tổng kết"].replace(",", ".")) || 0) *
-                        (parseFloat(mh["Tín chỉ"]) || 0),
-                    0
-                  ) / totalCreditsGPA
-                ).toFixed(2)
+                gpaSubjects.reduce(
+                  (sum, mh) =>
+                    sum +
+                    (parseFloat(mh["Điểm tổng kết"].replace(",", ".")) || 0) *
+                    (parseFloat(mh["Tín chỉ"]) || 0),
+                  0
+                ) / totalCreditsGPA
+              ).toFixed(2)
               : "---";
 
           // Trung bình điểm tích lũy (4)
           const cumulativeGPA4 =
             gpaSubjects.length > 0
               ? (
-                  gpaSubjects.reduce(
-                    (sum, mh) =>
-                      sum +
-                      (parseFloat(mh["Thang điểm 4"].replace(",", ".")) || 0) *
-                        (parseFloat(mh["Tín chỉ"]) || 0),
-                    0
-                  ) / totalCreditsGPA
-                ).toFixed(2)
+                gpaSubjects.reduce(
+                  (sum, mh) =>
+                    sum +
+                    (parseFloat(mh["Thang điểm 4"].replace(",", ".")) || 0) *
+                    (parseFloat(mh["Tín chỉ"]) || 0),
+                  0
+                ) / totalCreditsGPA
+              ).toFixed(2)
               : "---";
 
           // Số môn đã học
@@ -501,10 +543,21 @@ function StudyPlanPageContent() {
   const handleSubjectSelection = (subjectKey, isSelected) => {
     // Kiểm tra nếu đang bỏ chọn thì không cần validate
     if (!isSelected) {
-      setSelectedSubjects((prev) => ({
-        ...prev,
-        [subjectKey]: isSelected,
-      }));
+      setSelectedSubjects((prev) => {
+        const newSelected = {
+          ...prev,
+          [subjectKey]: isSelected,
+        };
+
+        // Lưu ngay vào localStorage
+        try {
+          localStorage.setItem('studyPlan_selectedSubjects', JSON.stringify(newSelected));
+        } catch (error) {
+          console.error('Error saving selected subjects to localStorage:', error);
+        }
+
+        return newSelected;
+      });
       return;
     }
 
@@ -514,10 +567,21 @@ function StudyPlanPageContent() {
       .find((subj) => subj.originalIndex === subjectKey);
 
     if (!selectedSubject) {
-      setSelectedSubjects((prev) => ({
-        ...prev,
-        [subjectKey]: isSelected,
-      }));
+      setSelectedSubjects((prev) => {
+        const newSelected = {
+          ...prev,
+          [subjectKey]: isSelected,
+        };
+
+        // Lưu ngay vào localStorage
+        try {
+          localStorage.setItem('studyPlan_selectedSubjects', JSON.stringify(newSelected));
+        } catch (error) {
+          console.error('Error saving selected subjects to localStorage:', error);
+        }
+
+        return newSelected;
+      });
       return;
     }
 
@@ -543,14 +607,10 @@ function StudyPlanPageContent() {
         // Kiểm tra nếu vượt quá số tín chỉ yêu cầu của nhóm
         if (newTotalCredits > semesterData.soTCTC) {
           alert(
-            `⚠️ Chú ý đảm bảo số tín chỉ trong nhóm tự chọn!\n\nNhóm ${
-              selectedSubject.nhomTC
-            } yêu cầu: ${
-              semesterData.soTCTC
-            } tín chỉ\nĐã chọn: ${currentGroupCredits} tín chỉ\nMôn này: ${
-              selectedSubject.soTC
-            } tín chỉ\nTổng sẽ là: ${newTotalCredits} tín chỉ (vượt quá ${
-              newTotalCredits - semesterData.soTCTC
+            `⚠️ Chú ý đảm bảo số tín chỉ trong nhóm tự chọn!\n\nNhóm ${selectedSubject.nhomTC
+            } yêu cầu: ${semesterData.soTCTC
+            } tín chỉ\nĐã chọn: ${currentGroupCredits} tín chỉ\nMôn này: ${selectedSubject.soTC
+            } tín chỉ\nTổng sẽ là: ${newTotalCredits} tín chỉ (vượt quá ${newTotalCredits - semesterData.soTCTC
             } tín chỉ)\n\nVui lòng bỏ chọn môn khác trong nhóm này trước!`
           );
           return;
@@ -558,10 +618,21 @@ function StudyPlanPageContent() {
       }
     }
 
-    setSelectedSubjects((prev) => ({
-      ...prev,
-      [subjectKey]: isSelected,
-    }));
+    setSelectedSubjects((prev) => {
+      const newSelected = {
+        ...prev,
+        [subjectKey]: isSelected,
+      };
+
+      // Lưu ngay vào localStorage
+      try {
+        localStorage.setItem('studyPlan_selectedSubjects', JSON.stringify(newSelected));
+      } catch (error) {
+        console.error('Error saving selected subjects to localStorage:', error);
+      }
+
+      return newSelected;
+    });
   };
 
   // Hàm kiểm tra học kỳ đã hoàn thành chưa
@@ -645,7 +716,7 @@ function StudyPlanPageContent() {
         const diemTX =
           thuongXuyen.length > 0
             ? thuongXuyen.reduce((sum, score) => sum + score, 0) /
-              thuongXuyen.length
+            thuongXuyen.length
             : 0;
         diemTongKet = diemTX * 0.2 + diemGK * 0.3 + diemCK * 0.5;
       }
@@ -654,7 +725,7 @@ function StudyPlanPageContent() {
         const diemTX =
           thuongXuyen.length > 0
             ? thuongXuyen.reduce((sum, score) => sum + score, 0) /
-              thuongXuyen.length
+            thuongXuyen.length
             : 0;
         const diemLT = diemTX * 0.2 + diemGK * 0.3 + diemCK * 0.5;
 
@@ -727,13 +798,37 @@ function StudyPlanPageContent() {
       return;
     }
 
-    setSubjectGoals((prev) => ({
-      ...prev,
-      [subjectKey]: {
-        ...prev[subjectKey],
-        [field]: validation.value,
-      },
-    }));
+    setSubjectGoals((prev) => {
+      const newGoals = {
+        ...prev,
+        [subjectKey]: {
+          ...prev[subjectKey],
+          [field]: validation.value,
+        },
+      };
+
+      // Lưu ngay vào localStorage
+      try {
+        localStorage.setItem('studyPlan_subjectGoals', JSON.stringify(newGoals));
+      } catch (error) {
+        console.error('Error saving subject goals to localStorage:', error);
+      }
+
+      return newGoals;
+    });
+  };
+
+  // Hàm xóa dữ liệu đã lưu (có thể sử dụng để reset)
+  const clearStudyPlanData = () => {
+    try {
+      localStorage.removeItem('studyPlan_selectedSubjects');
+      localStorage.removeItem('studyPlan_subjectGoals');
+      setSelectedSubjects({});
+      setSubjectGoals({});
+      console.log('Study plan data cleared successfully');
+    } catch (error) {
+      console.error('Error clearing study plan data:', error);
+    }
   };
 
   // Tạo Edit giữa các cell trong tb
@@ -752,12 +847,19 @@ function StudyPlanPageContent() {
         contentEditable: isEnabled,
         suppressContentEditableWarning: true,
         style: {
+          border: "1px solid #e5e7eb",
+          padding: "6px 4px",
+          fontSize: 12,
+          lineHeight: 1.3,
+          verticalAlign: "middle",
+          textAlign: "center",
           outline: "none",
-          backgroundColor: isEnabled ? "#f8fafc" : "#f3f4f6",
+          backgroundColor: isEnabled ? "rgba(255, 255, 255, 0.8)" : "#f9fafb",
           color: isEnabled ? "#1e293b" : "#9ca3af",
           cursor: isEnabled ? "text" : "not-allowed",
-          padding: "8px",
-          textAlign: "center",
+          transition: "all 0.2s ease",
+          minWidth: "50px",
+          width: "50px"
         },
         onBlur: (e) => {
           if (isEnabled) {
@@ -905,152 +1007,235 @@ function StudyPlanPageContent() {
       ),
       currentSubj.length === 0
         ? React.createElement(
-            "div",
+          "div",
+          {
+            style: {
+              borderRadius: 10,
+              border: "1px solid #22304a",
+              padding: 40,
+              textAlign: "center",
+              color: "#ffffff",
+              background: "linear-gradient(135deg, #065f46 0%, #10b981 100%)",
+            },
+          },
+          React.createElement(
+            "p",
             {
               style: {
-                borderRadius: 10,
-                border: "1px solid #22304a",
-                padding: 40,
-                textAlign: "center",
-                color: "#9ca3af",
-                backgroundColor: "#1e293b",
+                fontSize: 16,
+                margin: 0,
               },
             },
-            React.createElement(
-              "p",
-              {
-                style: {
-                  fontSize: 16,
-                  margin: 0,
-                },
-              },
-              "Không có môn ở trạng thái đang học"
-            )
+            "Không có môn ở trạng thái đang học"
           )
+        )
         : React.createElement(
-            "div",
+          "div",
+          {
+            className: "table-responsive",
+            style: {
+              overflowX: "auto",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              marginBottom: "20px"
+            },
+          },
+          React.createElement(
+            "table",
             {
+              className: "grades-table",
               style: {
-                borderRadius: 10,
-                border: "1px solid #22304a",
-                overflow: "hidden",
+                width: "100%",
+                borderCollapse: "collapse",
+                background: "white",
+                fontSize: 13,
+                minWidth: "800px"
               },
             },
             React.createElement(
-              "table",
+              "thead",
               {
                 style: {
-                  width: "100%",
-                  color: "#fff",
-                  borderCollapse: "collapse",
-                  fontSize: 15,
-                },
+                  background: "linear-gradient(135deg, #065f46 0%, #059669 100%)",
+                  color: "#ffffff",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 10
+                }
               },
               React.createElement(
-                "thead",
-                { style: { background: "#1e293b" } },
-                React.createElement(
-                  "tr",
-                  null,
-                  [
-                    "STT",
-                    "MÃ HỌC PHẦN",
-                    "TÊN MÔN",
-                    "TÍN CHỈ",
-                    "ĐIỂM TỔNG KẾT",
-                    "THANG 4",
-                    "XẾP LOẠI",
-                  ].map((header, idx) =>
-                    React.createElement(
-                      "th",
-                      {
-                        key: idx,
-                        style: {
-                          padding: "12px 8px",
-                          borderBottom: "1px solid #22304a",
-                          fontWeight: 600,
-                          color: "#a5b4fc",
-                          textAlign: idx === 0 ? "center" : "left",
-                          fontSize: 13,
-                          letterSpacing: 0.5,
-                        },
-                      },
-                      header
-                    )
-                  )
-                )
-              ),
-              React.createElement(
-                "tbody",
+                "tr",
                 null,
-                currentSubj.map((subj, idx) =>
+                [
+                  "STT",
+                  "MÃ HỌC PHẦN",
+                  "TÊN MÔN",
+                  "TÍN CHỈ",
+                  "ĐIỂM TỔNG KẾT",
+                  "THANG 4",
+                  "XẾP LOẠI",
+                ].map((header, idx) =>
                   React.createElement(
-                    "tr",
+                    "th",
                     {
                       key: idx,
                       style: {
-                        borderBottom: "1px solid #22304a",
-                        background: idx % 2 === 0 ? "#20293a" : "#181f2a",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: idx === 0 ? "center" : "left",
+                        fontWeight: 600,
+                        fontSize: 13,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff"
                       },
                     },
-                    React.createElement(
-                      "td",
-                      {
-                        style: {
-                          textAlign: "center",
-                          padding: "10px 8px",
-                          fontWeight: 600,
-                          color: "#60a5fa",
-                        },
+                    header
+                  )
+                )
+              )
+            ),
+            React.createElement(
+              "tbody",
+              null,
+              currentSubj.map((subj, idx) =>
+                React.createElement(
+                  "tr",
+                  {
+                    key: idx,
+                    className: "subject-row",
+                    style: {
+                      transition: "all 0.15s ease"
+                    },
+                  },
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-stt",
+                      style: {
+                        textAlign: "center",
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        fontWeight: 600,
+                        color: "#6b7280",
+                        background: "rgba(249, 250, 251, 0.5)"
                       },
-                      subj["STT"]
-                    ),
-                    React.createElement(
-                      "td",
-                      {
-                        style: {
-                          padding: "10px 8px",
-                          fontWeight: 600,
-                        },
+                    },
+                    subj["STT"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-ma-lhp",
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 12,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        fontFamily: "'Courier New', monospace",
+                        color: "#4b5563",
+                        background: "rgba(249, 250, 251, 0.3)",
+                        fontWeight: 600,
                       },
-                      subj["Mã lớp học phần"]
-                    ),
-                    React.createElement(
-                      "td",
-                      { style: { padding: "10px 8px", fontWeight: 500 } },
-                      subj["Tên môn học"]
-                    ),
-                    React.createElement(
-                      "td",
-                      { style: { padding: "10px 8px", fontWeight: 500 } },
-                      subj["Tín chỉ"]
-                    ),
-                    React.createElement(
-                      "td",
-                      { style: { padding: "10px 8px", color: "#a5b4fc" } },
-                      subj["Điểm tổng kết"]
-                    ),
-                    React.createElement(
-                      "td",
-                      {
-                        style: {
-                          padding: "10px 8px",
-                          color: "#fbbf24",
-                          fontWeight: 600,
-                        },
+                    },
+                    subj["Mã lớp học phần"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-ten-mon",
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "left",
+                        paddingLeft: "5px",
+                        fontWeight: 500,
+                        color: "#111827",
+                        minWidth: "160px",
+                        maxWidth: "180px",
+                        wordWrap: "break-word"
+                      }
+                    },
+                    subj["Tên môn học"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-tin-chi",
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        color: "#059669"
+                      }
+                    },
+                    subj["Tín chỉ"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        color: "#2546eb"
                       },
-                      subj["Thang điểm 4"]
-                    ),
-                    React.createElement(
-                      "td",
-                      { style: { padding: "10px 8px", color: "#a5b4fc" } },
-                      subj["Xếp loại"]
-                    )
+                    },
+                    subj["Điểm tổng kết"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-thang-diem-4",
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        color: "#6366f1",
+                      },
+                    },
+                    subj["Thang điểm 4"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "center",
+                        color: "#a5b4fc"
+                      }
+                    },
+                    subj["Xếp loại"]
                   )
                 )
               )
             )
           )
+        )
     ),
 
     //Lập kế hoạch học tập
@@ -1065,7 +1250,7 @@ function StudyPlanPageContent() {
         },
       },
       React.createElement(
-        "h2",
+        "div",
         {
           className: "card-title",
           style: {
@@ -1073,10 +1258,46 @@ function StudyPlanPageContent() {
             fontWeight: 700,
             marginBottom: 24,
             paddingBottom: 4,
-            display: "inline-block",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           },
         },
-        "Lập kế hoạch học tập (Các môn chưa học)"
+        React.createElement(
+          "span",
+          null,
+          "Lập kế hoạch học tập (Các môn chưa học)"
+        ),
+
+        React.createElement(
+          "button",
+          {
+            type: "button",
+            className: "reset-button",
+            onClick: function () {
+              var shouldReset = window.confirm("Bạn có chắc chắn muốn xóa toàn bộ kế hoạch học tập đã lưu không?");
+              if (shouldReset) {
+                clearStudyPlanData();
+                window.alert("Đã xóa kế hoạch học tập thành công!");
+              }
+            },
+            style: {
+              display: "inline-block",
+              fontSize: "14px",
+              fontWeight: "600",
+              padding: "10px 18px",
+              backgroundColor: "#dc2626",
+              color: "#ffffff",
+              borderRadius: "8px",
+              cursor: "pointer",
+              textAlign: "center",
+              textDecoration: "none",
+              minWidth: "140px",
+              boxShadow: "0 2px 4px rgba(220, 38, 38, 0.2)"
+            }
+          },
+          "Xóa Kế Hoạch"
+        )
       ),
 
       // Render những môn chưa học
@@ -1103,47 +1324,57 @@ function StudyPlanPageContent() {
                 gap: "8px",
               },
             },
-            `${semesterData.semesterName} ${
-              semesterData.soTCTC > 0
-                ? `(Tự chọn: ${semesterData.soTCTC} TC)`
-                : ""
+            `${semesterData.semesterName} ${semesterData.soTCTC > 0
+              ? `(Tự chọn: ${semesterData.soTCTC} TC)`
+              : ""
             }`,
             isCompleted &&
-              React.createElement(
-                "span",
-                {
-                  style: {
-                    fontSize: "16px",
-                    color: "#22c55e",
-                    fontWeight: "bold",
-                  },
+            React.createElement(
+              "span",
+              {
+                style: {
+                  fontSize: "16px",
+                  color: "#22c55e",
+                  fontWeight: "bold",
                 },
-                "✓ DONE"
-              )
+              },
+              "✓ DONE"
+            )
           ),
           React.createElement(
             "div",
             {
+              className: "table-responsive",
               style: {
-                borderRadius: 10,
-                border: "1px solid #22304a",
-                overflow: "hidden",
-                marginBottom: 24,
+                overflowX: "auto",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                marginBottom: "24px"
               },
             },
             React.createElement(
               "table",
               {
+                className: "grades-table",
                 style: {
                   width: "100%",
-                  color: "#fff",
                   borderCollapse: "collapse",
-                  fontSize: 13,
+                  background: "white",
+                  fontSize: 12,
+                  minWidth: "1200px",
                 },
               },
               React.createElement(
                 "thead",
-                { style: { background: "#1e293b" } },
+                {
+                  style: {
+                    background: "linear-gradient(135deg, #065f46 0%, #059669 100%)",
+                    color: "#ffffff",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 10
+                  }
+                },
                 React.createElement(
                   "tr",
                   null,
@@ -1152,12 +1383,17 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "40px",
+                        width: "40px"
                       },
                     },
                     "STT"
@@ -1167,27 +1403,37 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "60px",
+                        width: "60px"
                       },
                     },
-                    "Dự ĐỊNH"
+                    "DỰ ĐỊNH"
                   ),
                   React.createElement(
                     "th",
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
                         fontWeight: 600,
-                        color: "#a5b4fc",
-                        textAlign: "left",
-                        fontSize: 13,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "80px",
+                        width: "80px"
                       },
                     },
                     "MÃ MÔN"
@@ -1197,12 +1443,15 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
                         fontWeight: 600,
-                        color: "#a5b4fc",
-                        textAlign: "left",
-                        fontSize: 13,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff"
                       },
                     },
                     "TÊN MÔN"
@@ -1212,12 +1461,17 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "50px",
+                        width: "50px"
                       },
                     },
                     "TÍN CHỈ"
@@ -1227,12 +1481,17 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "70px",
+                        width: "70px"
                       },
                     },
                     "LOẠI MÔN"
@@ -1242,12 +1501,15 @@ function StudyPlanPageContent() {
                     {
                       colSpan: 11,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff"
                       },
                     },
                     "MỤC TIÊU"
@@ -1257,12 +1519,17 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "50px",
+                        width: "50px"
                       },
                     },
                     "TỔNG KẾT"
@@ -1272,42 +1539,57 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "45px",
+                        width: "45px"
                       },
                     },
-                    "THANG 4"
+                    "T4"
                   ),
                   React.createElement(
                     "th",
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "40px",
+                        width: "40px"
                       },
                     },
-                    "ĐIỂM CHỮ"
+                    "CHỮ"
                   ),
                   React.createElement(
                     "th",
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "65px",
+                        width: "65px"
                       },
                     },
                     "XẾP LOẠI"
@@ -1317,12 +1599,17 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "70px",
+                        width: "70px"
                       },
                     },
                     "GHI CHÚ"
@@ -1332,12 +1619,17 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 3,
                       style: {
-                        padding: "12px 8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
                         textAlign: "center",
-                        fontSize: 13,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "35px",
+                        width: "35px"
                       },
                     },
                     "ĐẠT"
@@ -1351,12 +1643,15 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 2,
                       style: {
-                        padding: "8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
                         textAlign: "center",
+                        fontWeight: 600,
                         fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff"
                       },
                     },
                     "GK"
@@ -1366,12 +1661,16 @@ function StudyPlanPageContent() {
                     {
                       colSpan: 4,
                       style: {
-                        padding: "8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
                         textAlign: "center",
+                        fontWeight: 600,
                         fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        background: "rgba(224, 242, 254, 0.2)"
                       },
                     },
                     "THƯỜNG XUYÊN"
@@ -1381,12 +1680,16 @@ function StudyPlanPageContent() {
                     {
                       colSpan: 5,
                       style: {
-                        padding: "8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
                         textAlign: "center",
+                        fontWeight: 600,
                         fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        background: "rgba(243, 229, 245, 0.2)"
                       },
                     },
                     "THỰC HÀNH"
@@ -1396,12 +1699,15 @@ function StudyPlanPageContent() {
                     {
                       rowSpan: 2,
                       style: {
-                        padding: "8px",
-                        borderBottom: "1px solid #22304a",
-                        fontWeight: 600,
-                        color: "#a5b4fc",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
                         textAlign: "center",
+                        fontWeight: 600,
                         fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff"
                       },
                     },
                     "CK"
@@ -1416,12 +1722,18 @@ function StudyPlanPageContent() {
                       {
                         key: `tx${num}`,
                         style: {
-                          padding: "6px",
-                          borderBottom: "1px solid #22304a",
-                          fontWeight: 600,
-                          color: "#a5b4fc",
+                          border: "1px solid #d1d5db",
+                          padding: "6px 4px",
                           textAlign: "center",
-                          fontSize: 11,
+                          fontWeight: 600,
+                          fontSize: 12,
+                          lineHeight: 1.2,
+                          verticalAlign: "middle",
+                          whiteSpace: "nowrap",
+                          color: "#ffffff",
+                          background: "rgba(224, 242, 254, 0.3)",
+                          minWidth: "50px",
+                          width: "50px"
                         },
                       },
                       num
@@ -1433,12 +1745,18 @@ function StudyPlanPageContent() {
                       {
                         key: `th${num}`,
                         style: {
-                          padding: "6px",
-                          borderBottom: "1px solid #22304a",
-                          fontWeight: 600,
-                          color: "#a5b4fc",
+                          border: "1px solid #d1d5db",
+                          padding: "6px 4px",
                           textAlign: "center",
-                          fontSize: 11,
+                          fontWeight: 600,
+                          fontSize: 12,
+                          lineHeight: 1.2,
+                          verticalAlign: "middle",
+                          whiteSpace: "nowrap",
+                          color: "#ffffff",
+                          background: "rgba(243, 229, 245, 0.3)",
+                          minWidth: "50px",
+                          width: "50px"
                         },
                       },
                       num
@@ -1462,20 +1780,26 @@ function StudyPlanPageContent() {
                     "tr",
                     {
                       key: subjectKey,
+                      className: "subject-row",
                       style: {
-                        borderBottom: "1px solid #22304a",
-                        background: idx % 2 === 0 ? "#20293a" : "#181f2a",
+                        transition: "all 0.15s ease",
                         opacity: isSelected ? 1 : 0.6,
                       },
                     },
                     React.createElement(
                       "td",
                       {
+                        className: "td-stt",
                         style: {
                           textAlign: "center",
-                          padding: "10px 8px",
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
                           fontWeight: 600,
-                          color: "#60a5fa",
+                          color: "#6b7280",
+                          background: "rgba(249, 250, 251, 0.5)"
                         },
                       },
                       idx + 1
@@ -1484,8 +1808,10 @@ function StudyPlanPageContent() {
                       "td",
                       {
                         style: {
-                          padding: "8px",
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
                           textAlign: "center",
+                          background: "rgba(249, 250, 251, 0.3)"
                         },
                       },
                       React.createElement("input", {
@@ -1497,28 +1823,63 @@ function StudyPlanPageContent() {
                           width: "16px",
                           height: "16px",
                           cursor: "pointer",
-                          accentColor: "#60a5fa",
+                          accentColor: "#059669",
                         },
                       })
                     ),
                     React.createElement(
                       "td",
-                      { style: { padding: "10px 8px", fontWeight: 500 } },
+                      {
+                        className: "td-ma-lhp",
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          fontFamily: "'Courier New', monospace",
+                          color: "#4b5563",
+                          background: "rgba(249, 250, 251, 0.3)",
+                          fontWeight: 600,
+                        }
+                      },
                       subject.maMon
                     ),
                     React.createElement(
                       "td",
-                      { style: { padding: "10px 8px", fontWeight: 500 } },
+                      {
+                        className: "td-ten-mon",
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "left",
+                          paddingLeft: "5px",
+                          fontWeight: 500,
+                          color: "#111827",
+                          minWidth: "160px",
+                          maxWidth: "180px",
+                          wordWrap: "break-word"
+                        }
+                      },
                       subject.tenMon
                     ),
                     React.createElement(
                       "td",
                       {
+                        className: "td-tin-chi",
                         style: {
-                          padding: "10px 8px",
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
                           textAlign: "center",
-                          fontWeight: 500,
-                        },
+                          fontWeight: 600,
+                          color: "#059669"
+                        }
                       },
                       subject.soTC
                     ),
@@ -1526,17 +1887,21 @@ function StudyPlanPageContent() {
                       "td",
                       {
                         style: {
-                          padding: "10px 8px",
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
                           textAlign: "center",
-                          fontSize: "11px",
-                          color: subject.nhomTC !== "0" ? "#fbbf24" : "#a5b4fc",
+                          color: subject.nhomTC !== "0" ? "#f59e0b" : "#6366f1",
+                          fontWeight: 500
                         },
                       },
                       subjectType === "TICH_HOP"
                         ? "Tích hợp"
                         : subjectType === "TH"
-                        ? "Thực hành"
-                        : "Lý thuyết"
+                          ? "Thực hành"
+                          : "Lý thuyết"
                     ),
                     createGoalCell(
                       subjectKey,
@@ -1567,76 +1932,151 @@ function StudyPlanPageContent() {
                       subjectKey,
                       "th1",
                       isSelected &&
-                        (subjectType === "TH" || subjectType === "TICH_HOP")
+                      (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(
                       subjectKey,
                       "th2",
                       isSelected &&
-                        (subjectType === "TH" || subjectType === "TICH_HOP")
+                      (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(
                       subjectKey,
                       "th3",
                       isSelected &&
-                        (subjectType === "TH" || subjectType === "TICH_HOP")
+                      (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(
                       subjectKey,
                       "th4",
                       isSelected &&
-                        (subjectType === "TH" || subjectType === "TICH_HOP")
+                      (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(
                       subjectKey,
                       "th5",
                       isSelected &&
-                        (subjectType === "TH" || subjectType === "TICH_HOP")
+                      (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(subjectKey, "diemCK", isSelected),
                     React.createElement(
                       "td",
                       {
+                        className: "td-tong-ket",
                         style: {
-                          padding: "10px 8px",
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
                           textAlign: "center",
-                          fontWeight: 600,
+                          fontWeight: 700,
                           color: goalScore
                             ? goalScore >= 8
                               ? "#22c55e"
                               : goalScore >= 6.5
-                              ? "#f59e0b"
-                              : "#ef4444"
+                                ? "#f59e0b"
+                                : "#ef4444"
                             : "#9ca3af",
+                          minWidth: "50px",
+                          width: "50px"
                         },
                       },
                       goalScore ? goalScore.toFixed(1).replace(".", ",") : ""
                     ),
                     React.createElement(
                       "td",
-                      { style: { padding: "10px 8px", textAlign: "center" } },
+                      {
+                        className: "td-thang-diem-4",
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "center",
+                          fontWeight: 600,
+                          color: "#6366f1",
+                          minWidth: "45px",
+                          width: "45px"
+                        }
+                      },
                       score4 ? score4.toFixed(1).replace(".", ",") : ""
                     ),
                     React.createElement(
                       "td",
-                      { style: { padding: "10px 8px", textAlign: "center" } },
+                      {
+                        className: "td-diem-chu",
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "center",
+                          fontWeight: 700,
+                          color: "#7c3aed",
+                          minWidth: "40px",
+                          width: "40px"
+                        }
+                      },
                       score4 ? convertScore4ToChar(score4) : ""
                     ),
                     React.createElement(
                       "td",
-                      { style: { padding: "10px 8px", textAlign: "center" } },
+                      {
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "center",
+                          fontWeight: 600,
+                          color: "#6b7280",
+                          minWidth: "65px",
+                          width: "65px"
+                        }
+                      },
                       score4 ? convertScore4ToClassification(score4) : ""
                     ),
                     React.createElement(
                       "td",
-                      { style: { padding: "10px 8px", textAlign: "center" } },
+                      {
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "center",
+                          color: subject.nhomTC !== "0" ? "#f59e0b" : "#6366f1",
+                          fontWeight: 500,
+                          minWidth: "70px",
+                          width: "70px"
+                        }
+                      },
                       subject.nhomTC !== "0"
                         ? `Tự chọn (${subject.nhomTC})`
                         : "Bắt buộc"
                     ),
                     React.createElement(
                       "td",
-                      { style: { padding: "10px 8px", textAlign: "center" } },
+                      {
+                        className: "td-dat",
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "center",
+                          color: "#10b981",
+                          fontWeight: 700,
+                          minWidth: "35px",
+                          width: "35px"
+                        }
+                      },
                       score4 && score4 > 0 ? "✓" : ""
                     )
                   );
