@@ -53,13 +53,13 @@ const SIDEBAR_ITEMS = [
   {
     name: "Overview",
     icon: "📊",
-    color: "#6366f1",
+    color: "#ffffff",
     page: "overview",
   },
   {
     name: "View Learning Results",
     icon: "📚",
-    color: "#6366f1",
+    color: "#ffffff",
     page: "grades",
   },
   {
