@@ -544,35 +544,59 @@ function StatisticsResultsBySemester({ results }) {
       "div",
       {
         className: "chart-content",
-        style: { height: "320px" },
+        style: {
+          height: "400px",
+          width: "100%",
+          minHeight: "300px",
+          maxHeight: "600px",
+          overflow: "hidden",
+        },
       },
       semesterData.length > 0
         ? React.createElement(
             ResponsiveContainer,
-            { width: "100%", height: "100%" },
+            {
+              width: "98%",
+              height: "100%",
+              minWidth: 0,
+            },
             React.createElement(
               LineChart,
-              { data: semesterData },
+              {
+                data: semesterData,
+                margin: {
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 100,
+                },
+              },
               React.createElement(CartesianGrid, {
                 strokeDasharray: "3 3",
-                stroke: "#e5e7eb",
+                stroke: "#4B5563",
               }),
               React.createElement(XAxis, {
                 dataKey: "name",
-                stroke: "#6b7280",
+                stroke: "#9CA3AF",
+                fontSize: 12,
+                angle: -45,
+                textAnchor: "end",
+                height: 30,
+                interval: 0,
+                tick: { fontSize: 12 },
               }),
               React.createElement(YAxis, {
-                stroke: "#6b7280",
+                stroke: "#9CA3AF",
                 domain: getYAxisDomain(),
+                fontSize: 12,
               }),
               React.createElement(Tooltip, {
                 contentStyle: {
-                  backgroundColor: "rgba(255, 255, 255, 0.95)",
-                  borderColor: "#d1d5db",
+                  backgroundColor: "rgba(31, 41, 55, 0.8)",
+                  borderColor: "#4B5563",
                   borderRadius: "8px",
-                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
                 },
-                itemStyle: { color: "#374151" },
+                itemStyle: { color: "#E5E7EB" },
                 formatter: getTooltipFormatter(),
               }),
               React.createElement(Line, {
@@ -833,7 +857,7 @@ function OverviewPageContent() {
             }
           );
         });
-
+        console.log(result);
         //Lấy chương trình khung và lưu vào state
         chrome.storage.local.get(
           ["curriculum_json", "curriculum_timestamp"],
@@ -949,18 +973,13 @@ function OverviewPageContent() {
                       });
 
                       if (found) {
-                        console.log(
-                          `Found curriculum data for "${subjectName}":`,
-                          found
-                        );
+                        // console.log(`Found curriculum data for "${subjectName}":`, found);
 
                         // Trích xuất soTLT và soTTH - sử dụng đúng tên thuộc tính
                         const soTLT = found.soTLT || found["Số TCTL"] || null;
                         const soTTH = found.soTTH || found["Số TCTH"] || null;
 
-                        console.log(
-                          `Extracted: soTLT=${soTLT}, soTTH=${soTTH}`
-                        );
+                        // console.log(`Extracted: soTLT=${soTLT}, soTTH=${soTTH}`);
                         return {
                           soTLT: soTLT ? parseInt(soTLT) : null,
                           soTTH: soTTH ? parseInt(soTTH) : null,
@@ -1008,7 +1027,7 @@ function OverviewPageContent() {
 
           const transformedSubjects = parsedData;
 
-          // console.log("Result: ", transformedSubjects);
+          console.log("Result: ", transformedSubjects);
           // console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
 
           setSubjects(transformedSubjects);

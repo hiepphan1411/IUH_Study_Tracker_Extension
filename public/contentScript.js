@@ -131,7 +131,7 @@
   }
 
   window.addEventListener("load", () => {
-    setTimeout(exportTableToJson, 2000);
+    setTimeout(exportTableToJson, 500);
   });
 })();
 
@@ -182,62 +182,6 @@ function loadScheduleData() {
     console.log("Lỗi khi tải dữ liệu lịch học:", error);
   }
 }
-
-// function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
-//   const promises = [];
-
-//   for (let i = 0; i < soTuan; i++) {
-//     const ngay = new Date(startDate);
-//     ngay.setDate(ngay.getDate() + i * 7);
-
-//     console.log(
-//       `Fetch request tuần ${i + 1}, ngày: ${ngay.toLocaleDateString()}`
-//     );
-
-//     const formData = new FormData();
-//     formData.append("k", token);
-//     formData.append("pNgayHienTai", ngay.toISOString());
-//     formData.append("pLoaiLich", loaiLich.toString());
-
-//     const promise = fetch("/SinhVienTraCuu/GetDanhSachLichTheoTuan", {
-//       method: "POST",
-//       body: formData,
-//       headers: {
-//         "X-Requested-With": "XMLHttpRequest",
-//       },
-//     })
-//       .then((response) => {
-//         if (!response.ok) {
-//           throw new Error(`HTTP error! status: ${response.status}`);
-//         }
-//         return response.text();
-//       })
-//       .then((data) => {
-//         window.ketQuaMang.push({
-//           tuan: i + 1,
-//           ngayBatDau: ngay.toISOString(),
-//           duLieu: data,
-//           loaiLich: loaiLich,
-//         });
-//         console.log(window.ketQuaMang);
-//       })
-//       .catch((err) => {
-//         console.log(`Fetch lỗi tuần ${i + 1}:`, err);
-//       });
-
-//     promises.push(promise);
-//   }
-//   Promise.all(promises)
-//     .then(() => {
-//       if (callback) {
-//         callback();
-//       }
-//     })
-//     .catch((error) => {
-//       if (callback) callback();
-//     });
-// }
-
 function loadWithFetch(startDate, soTuan, loaiLich, token, callback) {
   const promises = [];
   const baseDate = new Date(startDate);
@@ -593,9 +537,9 @@ function processAndSaveScheduleData() {
       if (isAutoOpened) {
         setTimeout(() => {
           window.close();
-        }, 2000);
+        }, 500);
       }
-    }, 2000);
+    }, 500);
   });
 
   if (document.readyState === "complete") {
@@ -605,9 +549,9 @@ function processAndSaveScheduleData() {
       if ( isAutoOpened) {
         setTimeout(() => {
           window.close();
-        }, 1000);
+        }, 500);
       }
-    }, 1000);
+    }, 500);
   }
 })();
 
