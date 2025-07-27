@@ -83,12 +83,12 @@ const customConfirm = (message, options = {}) => {
       resolve(false);
     };
 
-    modal.onclick = (e) => {
-      if (e.target === modal) {
-        cleanup();
-        resolve(false);
-      }
-    };
+    // modal.onclick = (e) => {
+    //   if (e.target === modal) {
+    //     cleanup();
+    //     resolve(false);
+    //   }
+    // };
 
     document.body.appendChild(modal);
   });
@@ -751,7 +751,7 @@ function StudyPlanPageContent() {
             }
           );
 
-          if (!shouldContinue) {
+          if (shouldContinue) {
             return;
           }
         }

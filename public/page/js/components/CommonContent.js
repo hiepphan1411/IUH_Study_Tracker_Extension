@@ -87,7 +87,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
 
     return React.createElement(motion.div, {
         className: `sidebar ${isSidebarOpen ? 'open' : 'closed'}`,
-        animate: { width: isSidebarOpen ? 225 : 80 }
+        animate: { width: isSidebarOpen ? 215 : 70 }
     },
         React.createElement('div', { className: 'sidebar-content' },
             React.createElement('div', { className: 'sidebar-header' },
@@ -97,7 +97,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                     onClick: () => setIsSidebarOpen(!isSidebarOpen),
                     className: 'menu-button'
                 },
-                    React.createElement(MenuIcon, { size: 24 })
+                    React.createElement(MenuIcon, { size: 20 })
                 ),
                 isSidebarOpen && React.createElement(motion.h2, {
                     className: "sidebar-title fade-in",
