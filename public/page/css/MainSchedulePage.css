@@ -528,3 +528,30 @@ body {
 .no-data-cell{
   color: white;
 }
+
+/* Thêm vào file CSS của bạn */
+.table-responsive {
+    /* Cho phép dropdown hiển thị ra ngoài table */
+    overflow: visible !important;
+}
+
+.grades-table {
+    /* Đảm bảo table cells có thể chứa dropdown */
+    overflow: visible;
+}
+
+.td-subject-type {
+    /* Đảm bảo cell có thể chứa dropdown */
+    overflow: visible !important;
+    position: relative;
+}
+
+.custom-dropdown {
+    /* Đảm bảo dropdown container không bị cắt */
+    z-index: 1000;
+}
+
+/* Đảm bảo dropdown menu luôn hiển thị trên cùng */
+.custom-dropdown > div[style*="position: absolute"] {
+    z-index: 9999 !important;
+}
