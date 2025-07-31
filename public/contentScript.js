@@ -164,7 +164,7 @@ function loadScheduleData() {
     window.ketQuaMang = [];
 
     const now = new Date();
-    const startDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("k");
@@ -174,7 +174,7 @@ function loadScheduleData() {
       return;
     }
 
-    loadWithFetch(startDate.toISOString(), 4, 0, token, () => {
+    loadWithFetch(startDate.toISOString(), 20, 0, token, () => {
       processAndSaveScheduleData();
     });
   } catch (error) {
