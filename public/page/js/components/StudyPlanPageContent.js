@@ -2,11 +2,11 @@ const customConfirm = (message, options = {}) => {
   const {
     confirmText = "Tiếp tục",
     cancelText = "Hủy bỏ",
-    confirmColor = "#dc2626"
+    confirmColor = "#dc2626",
   } = options;
 
   return new Promise((resolve) => {
-    const modal = document.createElement('div');
+    const modal = document.createElement("div");
     modal.style.cssText = `
       position: fixed;
       top: 0;
@@ -73,12 +73,12 @@ const customConfirm = (message, options = {}) => {
       document.body.removeChild(modal);
     };
 
-    modal.querySelector('#confirm-btn').onclick = () => {
+    modal.querySelector("#confirm-btn").onclick = () => {
       cleanup();
       resolve(true);
     };
 
-    modal.querySelector('#cancel-btn').onclick = () => {
+    modal.querySelector("#cancel-btn").onclick = () => {
       cleanup();
       resolve(false);
     };
@@ -356,7 +356,7 @@ function StudyPlanPageContent() {
           }
 
           const currentSubjects = allSubjects.filter(
-            (item) => item["Xếp loại"] === ""
+            (item) => item["Điểm tổng kết"] === ""
           );
 
           setCurrentSubj(currentSubjects);
@@ -736,18 +736,20 @@ function StudyPlanPageContent() {
         if (newTotalCredits > semesterData.soTCTC) {
           const shouldContinue = await customConfirm(
             `⚠️ CẢNH BÁO: VƯỢT QUÁ SỐ TÍN CHỈ YÊU CẦU!\n\n` +
-            `Thông tin nhóm tự chọn ${selectedSubject.nhomTC}:\n` +
-            `• Yêu cầu: ${semesterData.soTCTC} tín chỉ\n` +
-            `• Đã chọn: ${currentGroupCredits} tín chỉ\n` +
-            `• Môn này: ${selectedSubject.soTC} tín chỉ\n` +
-            `• Tổng sau khi chọn: ${newTotalCredits} tín chỉ\n` +
-            `• Vượt quá: ${newTotalCredits - semesterData.soTCTC} tín chỉ\n\n` +
-            `Lưu ý: Việc chọn học cùng môn trong cùng một nhóm tự chọn, kết quả chỉ được chọn một trong các môn có điểm tb cao nhất.\n\n` +
-            `❓ Bạn có chắc chắn muốn tiếp tục chọn môn "${selectedSubject.tenMon}" không?`,
+              `Thông tin nhóm tự chọn ${selectedSubject.nhomTC}:\n` +
+              `• Yêu cầu: ${semesterData.soTCTC} tín chỉ\n` +
+              `• Đã chọn: ${currentGroupCredits} tín chỉ\n` +
+              `• Môn này: ${selectedSubject.soTC} tín chỉ\n` +
+              `• Tổng sau khi chọn: ${newTotalCredits} tín chỉ\n` +
+              `• Vượt quá: ${
+                newTotalCredits - semesterData.soTCTC
+              } tín chỉ\n\n` +
+              `Lưu ý: Việc chọn học cùng môn trong cùng một nhóm tự chọn, kết quả chỉ được chọn một trong các môn có điểm tb cao nhất.\n\n` +
+              `❓ Bạn có chắc chắn muốn tiếp tục chọn môn "${selectedSubject.tenMon}" không?`,
             {
               confirmText: "Hủy bỏ",
               cancelText: "Vẫn tiếp tục",
-              confirmColor: "#059669"
+              confirmColor: "#059669",
             }
           );
 
@@ -1582,8 +1584,22 @@ function StudyPlanPageContent() {
         React.createElement(
           "button",
           {
-            type: "button",
             className: "reset-plan-button",
+            // style: {
+            //   display: "inline-block",
+            //   padding: "10px 18px !important",
+            //   fontSize: "14px",
+            //   fontWeight: 600,
+            //   backgroundColor: "#dc2626 !important",
+            //   color: "#ffffff !important",
+            //   border: "none",
+            //   borderRadius: "8px !important",
+            //   cursor: "pointer",
+            //   textAlign: "center",
+            //   textDecoration: "none",
+            //   minWidth: "140px",
+            //   boxShadow: "0 2px 4px rgba(220, 38, 38, 0.2)",
+            // },
             onClick: function () {
               var shouldReset = window.confirm(
                 "Bạn có chắc chắn muốn xóa toàn bộ kế hoạch học tập đã lưu không?"
@@ -2391,4 +2407,3 @@ function StudyPlanPageContent() {
 }
 
 window.StudyPlanPageContent = StudyPlanPageContent;
-          

@@ -35,18 +35,14 @@ function App() {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case "grades":
-        return React.createElement(GradesPageContent, {
-          keyValue: key,
-        });
+        return React.createElement(GradesPageContent, { keyValue: key });
       case "study-plan":
-        return React.createElement(StudyPlanPageContent, {
-          keyValue: key,
-        });
+        return React.createElement(StudyPlanPageContent, { keyValue: key });
+      case "about":
+        return React.createElement(AboutUsPageContent, { keyValue: key });
       case "overview":
       default:
-        return React.createElement(OverviewPageContent, {
-          keyValue: key,
-        });
+        return React.createElement(OverviewPageContent, { keyValue: key });
     }
   };
 
@@ -56,6 +52,8 @@ function App() {
         return "Xem Điểm";
       case "study-plan":
         return "Kế hoạch học tập";
+      case "about":
+        return "Giới thiệu";
       case "overview":
       default:
         return "Tổng quan";
