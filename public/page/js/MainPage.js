@@ -1,4 +1,5 @@
-function App() { 
+/* eslint-disable */
+function App() {
   const [currentPage, setCurrentPage] = React.useState("overview");
   const [key, setKey] = React.useState("");
 
@@ -6,7 +7,7 @@ function App() {
     const urlParams = new URLSearchParams(window.location.search);
     const keyParam = urlParams.get("k");
     const pageParam = urlParams.get("page");
-    
+
     if (keyParam) {
       setKey(keyParam);
     }
@@ -21,13 +22,16 @@ function App() {
   const navigateTo = (page) => {
     setCurrentPage(page);
 
-    const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*\.html$/, "/MainPage.html");
-    const newUrl = `${baseUrl}?page=${page}${key ? `&k=${encodeURIComponent(key)}` : ""}`;
-    
+    const baseUrl =
+      window.location.origin +
+      window.location.pathname.replace(/\/[^/]*\.html$/, "/MainPage.html");
+    const newUrl = `${baseUrl}?page=${page}${
+      key ? `&k=${encodeURIComponent(key)}` : ""
+    }`;
+
     window.history.pushState({}, "", newUrl);
   };
 
-  
   const renderCurrentPage = () => {
     switch (currentPage) {
       case "grades":
@@ -62,7 +66,7 @@ function App() {
       title: getPageTitle(),
       currentPage: currentPage,
       onNavigate: navigateTo,
-      onOpenStudyPlan: () => navigateTo("study-plan"), 
+      onOpenStudyPlan: () => navigateTo("study-plan"),
     },
     renderCurrentPage()
   );

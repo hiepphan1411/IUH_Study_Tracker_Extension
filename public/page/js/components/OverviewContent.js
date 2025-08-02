@@ -1,4 +1,5 @@
-/* eslint-disable no-undef */
+/* eslint-disable */
+
 const {
   BarChart,
   Bar,
@@ -151,7 +152,11 @@ function SubjectGradeStatistic({ subjects }) {
         React.createElement(
           "div",
           {
-            style: { display: "flex", flexDirection: "column", gap: "5px" },
+            style: {
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px",
+            },
           },
           React.createElement(
             "label",
@@ -197,7 +202,11 @@ function SubjectGradeStatistic({ subjects }) {
         React.createElement(
           "div",
           {
-            style: { display: "flex", flexDirection: "column", gap: "5px" },
+            style: {
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px",
+            },
           },
           React.createElement(
             "label",
@@ -257,7 +266,12 @@ function SubjectGradeStatistic({ subjects }) {
               BarChart,
               {
                 data: subjectData,
-                margin: { top: 20, right: 30, left: 20, bottom: 60 },
+                margin: {
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 60,
+                },
               },
               React.createElement(CartesianGrid, {
                 strokeDasharray: "3 3",
@@ -843,7 +857,7 @@ function OverviewPageContent() {
             }
           );
         });
-        console.log(result);
+        //console.log(result);
         //Lấy chương trình khung và lưu vào state
         chrome.storage.local.get(
           ["curriculum_json", "curriculum_timestamp"],
@@ -861,8 +875,8 @@ function OverviewPageContent() {
                 const curriculumDataParsed = JSON.parse(result.curriculum_json);
                 const timestamp = result.curriculum_timestamp;
 
-                console.log("DỮ LIỆU CHƯƠNG TRÌNH KHUNG LOADED");
-                console.log(curriculumDataParsed);
+                //console.log("DỮ LIỆU CHƯƠNG TRÌNH KHUNG LOADED");
+                //console.log(curriculumDataParsed);
 
                 // Log chi tiết cấu trúc dữ liệu
                 if (curriculumDataParsed && curriculumDataParsed.length > 0) {
@@ -994,14 +1008,12 @@ function OverviewPageContent() {
 
                   return { soTLT: null, soTTH: null };
                 };
-                console.log(
-                  "Curriculum data đã được export sang window.curriculumData và window.getCurriculumInfo"
-                );
+                //console.log("Curriculum data đã được export sang window.curriculumData và window.getCurriculumInfo");
               } catch (error) {
                 console.error("Lỗi parse curriculum data:", error);
               }
             } else {
-              console.log("Không có dữ liệu chương trình khung trong storage");
+              //console.log("Không có dữ liệu chương trình khung trong storage");
             }
           }
         );
@@ -1013,7 +1025,7 @@ function OverviewPageContent() {
 
           const transformedSubjects = parsedData;
 
-          console.log("Result: ", transformedSubjects);
+          //console.log("Result: ", transformedSubjects);
           // console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
 
           setSubjects(transformedSubjects);
@@ -1087,7 +1099,9 @@ function OverviewPageContent() {
           React.createElement(
             "div",
             { className: "card" },
-            React.createElement(SubjectGradeStatistic, { subjects: subjects })
+            React.createElement(SubjectGradeStatistic, {
+              subjects: subjects,
+            })
           )
         )
   );
