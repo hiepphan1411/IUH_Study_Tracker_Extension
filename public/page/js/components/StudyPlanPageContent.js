@@ -889,7 +889,7 @@ function StudyPlanPageContent() {
     {
       className: "page-content",
       style: {
-        color: "#fff",
+        color: "#ffffff",
         minHeight: "100vh",
         padding: 24,
       },
@@ -1252,7 +1252,7 @@ function StudyPlanPageContent() {
       React.createElement(
         "div",
         {
-          className: "card-title",
+          className: "card-title-plan",
           style: {
             fontSize: 22,
             fontWeight: 700,
@@ -1261,19 +1261,22 @@ function StudyPlanPageContent() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+
           },
         },
         React.createElement(
           "span",
-          null,
-          "Lập kế hoạch học tập (Các môn chưa học)"
+          {
+            className: "card-title",
+          },
+
+          "Lập kế hoạch học tập (Các môn chưa học)",
         ),
 
         React.createElement(
           "button",
           {
             type: "button",
-            className: "reset-button",
             onClick: function () {
               var shouldReset = window.confirm("Bạn có chắc chắn muốn xóa toàn bộ kế hoạch học tập đã lưu không?");
               if (shouldReset) {
@@ -1288,12 +1291,16 @@ function StudyPlanPageContent() {
               padding: "10px 18px",
               backgroundColor: "#dc2626",
               color: "#ffffff",
+              border: "none",
               borderRadius: "8px",
               cursor: "pointer",
               textAlign: "center",
               textDecoration: "none",
               minWidth: "140px",
-              boxShadow: "0 2px 4px rgba(220, 38, 38, 0.2)"
+              inlineSize: "140px",
+              boxShadow: "0 2px 4px rgba(220, 38, 38, 0.2)",
+              outline: "none",
+              transition: "all 0.2s ease"
             }
           },
           "Xóa Kế Hoạch"
