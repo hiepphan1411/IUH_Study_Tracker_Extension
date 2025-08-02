@@ -2,11 +2,11 @@ const customConfirm = (message, options = {}) => {
   const {
     confirmText = "Tiếp tục",
     cancelText = "Hủy bỏ",
-    confirmColor = "#dc2626"
+    confirmColor = "#dc2626",
   } = options;
 
   return new Promise((resolve) => {
-    const modal = document.createElement('div');
+    const modal = document.createElement("div");
     modal.style.cssText = `
       position: fixed;
       top: 0;
@@ -73,12 +73,12 @@ const customConfirm = (message, options = {}) => {
       document.body.removeChild(modal);
     };
 
-    modal.querySelector('#confirm-btn').onclick = () => {
+    modal.querySelector("#confirm-btn").onclick = () => {
       cleanup();
       resolve(true);
     };
 
-    modal.querySelector('#cancel-btn').onclick = () => {
+    modal.querySelector("#cancel-btn").onclick = () => {
       cleanup();
       resolve(false);
     };
@@ -187,9 +187,6 @@ function StudyPlanPageContent() {
 
               if (res.curriculum_json) {
                 const curriculumData = JSON.parse(res.curriculum_json);
-
-                //console.log("DỮ LIỆU CHƯƠNG TRÌNH KHUNG");
-                //console.log(curriculumData);
               } else {
                 console.log(
                   "Không có dữ liệu chương trình khung trong storage"
@@ -204,24 +201,16 @@ function StudyPlanPageContent() {
         if (curriculumJson) {
           const parsedData = JSON.parse(curriculumJson);
 
-          //const transformedSubjects = parsedData.flatMap((item) => item.monHoc);
-
-          //console.log("Result: ", transformedSubjects);
-
           setFrameSubjects(parsedData);
           setHasCurriculumData(true);
         } else {
           setFrameSubjects([]);
           setHasCurriculumData(false);
-
-          // alert("⚠️ CẢNH BÁO\n\nVui lòng đăng nhập vào trang sv.iuh để lấy dữ liệu chương trình khung và thử lại.");
         }
       } catch (error) {
         console.log("Error loading data:", error);
         setFrameSubjects([]);
         setHasCurriculumData(false);
-
-        // alert("⚠️ CẢNH BÁO\n\nVui lòng đăng nhập vào trang sv.iuh để lấy dữ liệu chương trình khung và thử lại.");
       } finally {
         setLoading(false);
       }
@@ -736,18 +725,20 @@ function StudyPlanPageContent() {
         if (newTotalCredits > semesterData.soTCTC) {
           const shouldContinue = await customConfirm(
             `⚠️ CẢNH BÁO: VƯỢT QUÁ SỐ TÍN CHỈ YÊU CẦU!\n\n` +
-            `Thông tin nhóm tự chọn ${selectedSubject.nhomTC}:\n` +
-            `• Yêu cầu: ${semesterData.soTCTC} tín chỉ\n` +
-            `• Đã chọn: ${currentGroupCredits} tín chỉ\n` +
-            `• Môn này: ${selectedSubject.soTC} tín chỉ\n` +
-            `• Tổng sau khi chọn: ${newTotalCredits} tín chỉ\n` +
-            `• Vượt quá: ${newTotalCredits - semesterData.soTCTC} tín chỉ\n\n` +
-            `Lưu ý: Việc chọn học cùng môn trong cùng một nhóm tự chọn, kết quả chỉ được chọn một trong các môn có điểm tb cao nhất.\n\n` +
-            `❓ Bạn có chắc chắn muốn tiếp tục chọn môn "${selectedSubject.tenMon}" không?`,
+              `Thông tin nhóm tự chọn ${selectedSubject.nhomTC}:\n` +
+              `• Yêu cầu: ${semesterData.soTCTC} tín chỉ\n` +
+              `• Đã chọn: ${currentGroupCredits} tín chỉ\n` +
+              `• Môn này: ${selectedSubject.soTC} tín chỉ\n` +
+              `• Tổng sau khi chọn: ${newTotalCredits} tín chỉ\n` +
+              `• Vượt quá: ${
+                newTotalCredits - semesterData.soTCTC
+              } tín chỉ\n\n` +
+              `Lưu ý: Việc chọn học cùng môn trong cùng một nhóm tự chọn, kết quả chỉ được chọn một trong các môn có điểm tb cao nhất.\n\n` +
+              `❓ Bạn có chắc chắn muốn tiếp tục chọn môn "${selectedSubject.tenMon}" không?`,
             {
               confirmText: "Hủy bỏ",
               cancelText: "Vẫn tiếp tục",
-              confirmColor: "#059669"
+              confirmColor: "#059669",
             }
           );
 
@@ -1029,7 +1020,33 @@ function StudyPlanPageContent() {
       displayValue
     );
   };
-
+  if (isLoading) {
+    return React.createElement(
+      "div",
+      {
+        className: "page-content",
+        style: {
+          color: "#fff",
+          minHeight: "100vh",
+          padding: 24,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      },
+      React.createElement(
+        "div",
+        {
+          style: {
+            fontSize: 22,
+            color: "#059669",
+            fontWeight: 700,
+          },
+        },
+        "Đang tải dữ liệu chương trình khung..."
+      )
+    );
+  }
   if (!hasCurriculumData) {
     return React.createElement(
       "div",
@@ -2391,4 +2408,3 @@ function StudyPlanPageContent() {
 }
 
 window.StudyPlanPageContent = StudyPlanPageContent;
-          

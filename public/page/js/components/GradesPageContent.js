@@ -2206,7 +2206,7 @@ function GradesPageContent({ keyValue }) {
                     // Sau 3 giây, reload trang để kiểm tra lại
                     setTimeout(() => {
                       window.location.reload();
-                    }, 3000);
+                    }, 4000);
                   },
                   style: {
                     backgroundColor: "#007bff",
