@@ -170,6 +170,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                 WebkitUserSelect: "none",
                 MozUserSelect: "none",
                 msUserSelect: "none",
+                outline: "none",
                 ...(currentPage === item.page
                   ? {
                       backgroundColor: `${item.color}20`,

@@ -127,9 +127,9 @@ function GradesPageContent({ keyValue }) {
                         const curriculumIsCertificate =
                           curriculumName.includes("chứng chỉ");
 
-                        console.log(
-                          `  🔍 Tiếng Anh analysis - Search: "${searchName}" (hasNumber: ${searchHasNumber}, isCert: ${searchIsCertificate}), Curriculum: "${curriculumName}" (hasNumber: ${curriculumHasNumber}, isCert: ${curriculumIsCertificate})`
-                        );
+                        // console.log(
+                        //   `  🔍 Tiếng Anh analysis - Search: "${searchName}" (hasNumber: ${searchHasNumber}, isCert: ${searchIsCertificate}), Curriculum: "${curriculumName}" (hasNumber: ${curriculumHasNumber}, isCert: ${curriculumIsCertificate})`
+                        // );
                         // Nếu cả hai đều có số (Tiếng Anh 1, Tiếng Anh 2)
                         if (searchHasNumber && curriculumHasNumber) {
                           const searchNumber =
@@ -154,9 +154,9 @@ function GradesPageContent({ keyValue }) {
                               soTTH: soTTH ? parseInt(soTTH) : null,
                             };
                           } else {
-                            console.log(
-                              `  ❌ Number mismatch: search=${searchNumber?.[1]} vs curriculum=${curriculumNumber?.[1]}`
-                            );
+                            // console.log(
+                            //   `  ❌ Number mismatch: search=${searchNumber?.[1]} vs curriculum=${curriculumNumber?.[1]}`
+                            // );
                           }
                         }
 
@@ -178,16 +178,16 @@ function GradesPageContent({ keyValue }) {
                           (searchHasNumber && curriculumIsCertificate) ||
                           (searchIsCertificate && curriculumHasNumber)
                         ) {
-                          console.log(
-                            `  ❌ Skipping cross-match between numbered and certificate Tiếng Anh`
-                          );
+                          // console.log(
+                          //   `  ❌ Skipping cross-match between numbered and certificate Tiếng Anh`
+                          // );
                           continue;
                         }
 
                         // Skip any other Tiếng Anh matching to avoid confusion
-                        console.log(
-                          `  ❌ Skipping other Tiếng Anh matching to avoid confusion`
-                        );
+                        // console.log(
+                        //   `  ❌ Skipping other Tiếng Anh matching to avoid confusion`
+                        // );
                         continue;
                       } // Partial matching
                       if (
