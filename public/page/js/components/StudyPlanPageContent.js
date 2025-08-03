@@ -1358,236 +1358,236 @@ function StudyPlanPageContent() {
       ),
       currentSubj.length === 0
         ? React.createElement(
-            "div",
+          "div",
+          {
+            style: {
+              borderRadius: 10,
+              border: "1px solid #22304a",
+              padding: 40,
+              textAlign: "center",
+              color: "#ffffff",
+              background: "linear-gradient(135deg, #065f46 0%, #10b981 100%)",
+            },
+          },
+          React.createElement(
+            "p",
             {
               style: {
-                borderRadius: 10,
-                border: "1px solid #22304a",
-                padding: 40,
-                textAlign: "center",
-                color: "#ffffff",
-                background: "linear-gradient(135deg, #065f46 0%, #10b981 100%)",
+                fontSize: 16,
+                margin: 0,
               },
             },
-            React.createElement(
-              "p",
-              {
-                style: {
-                  fontSize: 16,
-                  margin: 0,
-                },
-              },
-              "Không có môn ở trạng thái đang học"
-            )
+            "Không có môn ở trạng thái đang học"
           )
+        )
         : React.createElement(
-            "div",
+          "div",
+          {
+            className: "table-responsive",
+            style: {
+              overflowX: "auto",
+              borderRadius: "8px",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              marginBottom: "20px",
+            },
+          },
+          React.createElement(
+            "table",
             {
-              className: "table-responsive",
+              className: "grades-table",
               style: {
-                overflowX: "auto",
-                borderRadius: "8px",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-                marginBottom: "20px",
+                width: "100%",
+                borderCollapse: "collapse",
+                background: "white",
+                fontSize: 13,
+                minWidth: "800px",
               },
             },
             React.createElement(
-              "table",
+              "thead",
               {
-                className: "grades-table",
                 style: {
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  background: "white",
-                  fontSize: 13,
-                  minWidth: "800px",
+                  background:
+                    "linear-gradient(135deg, #065f46 0%, #059669 100%)",
+                  color: "#ffffff",
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 10,
                 },
               },
               React.createElement(
-                "thead",
-                {
-                  style: {
-                    background:
-                      "linear-gradient(135deg, #065f46 0%, #059669 100%)",
-                    color: "#ffffff",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 10,
-                  },
-                },
-                React.createElement(
-                  "tr",
-                  null,
-                  [
-                    "STT",
-                    "MÃ HỌC PHẦN",
-                    "TÊN MÔN",
-                    "TÍN CHỈ",
-                    "ĐIỂM TỔNG KẾT",
-                    "THANG 4",
-                    "XẾP LOẠI",
-                  ].map((header, idx) =>
-                    React.createElement(
-                      "th",
-                      {
-                        key: idx,
-                        style: {
-                          border: "1px solid #d1d5db",
-                          padding: "8px 4px",
-                          textAlign: idx === 0 ? "center" : "left",
-                          fontWeight: 600,
-                          fontSize: 13,
-                          lineHeight: 1.2,
-                          verticalAlign: "middle",
-                          whiteSpace: "nowrap",
-                          color: "#ffffff",
-                        },
-                      },
-                      header
-                    )
-                  )
-                )
-              ),
-              React.createElement(
-                "tbody",
+                "tr",
                 null,
-                currentSubj.map((subj, idx) =>
+                [
+                  "STT",
+                  "MÃ HỌC PHẦN",
+                  "TÊN MÔN",
+                  "TÍN CHỈ",
+                  "ĐIỂM TỔNG KẾT",
+                  "THANG 4",
+                  "XẾP LOẠI",
+                ].map((header, idx) =>
                   React.createElement(
-                    "tr",
+                    "th",
                     {
                       key: idx,
-                      className: "subject-row",
                       style: {
-                        transition: "all 0.15s ease",
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 13,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
                       },
                     },
-                    React.createElement(
-                      "td",
-                      {
-                        className: "td-stt",
-                        style: {
-                          textAlign: "center",
-                          border: "1px solid #e5e7eb",
-                          padding: "6px 4px",
-                          fontSize: 13,
-                          lineHeight: 1.3,
-                          verticalAlign: "middle",
-                          fontWeight: 600,
-                          color: "#6b7280",
-                          background: "rgba(249, 250, 251, 0.5)",
-                        },
+                    header
+                  )
+                )
+              )
+            ),
+            React.createElement(
+              "tbody",
+              null,
+              currentSubj.map((subj, idx) =>
+                React.createElement(
+                  "tr",
+                  {
+                    key: idx,
+                    className: "subject-row",
+                    style: {
+                      transition: "all 0.15s ease",
+                    },
+                  },
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-stt",
+                      style: {
+                        textAlign: "center",
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        fontWeight: 600,
+                        color: "#6b7280",
+                        background: "rgba(249, 250, 251, 0.5)",
                       },
-                      subj["STT"]
-                    ),
-                    React.createElement(
-                      "td",
-                      {
-                        className: "td-ma-lhp",
-                        style: {
-                          border: "1px solid #e5e7eb",
-                          padding: "6px 4px",
-                          fontSize: 12,
-                          lineHeight: 1.3,
-                          verticalAlign: "middle",
-                          fontFamily: "'Courier New', monospace",
-                          color: "#4b5563",
-                          background: "rgba(249, 250, 251, 0.3)",
-                          fontWeight: 600,
-                        },
+                    },
+                    subj["STT"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-ma-lhp",
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 12,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        fontFamily: "'Courier New', monospace",
+                        color: "#4b5563",
+                        background: "rgba(249, 250, 251, 0.3)",
+                        fontWeight: 600,
                       },
-                      subj["Mã lớp học phần"]
-                    ),
-                    React.createElement(
-                      "td",
-                      {
-                        className: "td-ten-mon",
-                        style: {
-                          border: "1px solid #e5e7eb",
-                          padding: "6px 4px",
-                          fontSize: 13,
-                          lineHeight: 1.3,
-                          verticalAlign: "middle",
-                          textAlign: "left",
-                          paddingLeft: "5px",
-                          fontWeight: 500,
-                          color: "#111827",
-                          minWidth: "160px",
-                          maxWidth: "180px",
-                          wordWrap: "break-word",
-                        },
+                    },
+                    subj["Mã lớp học phần"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-ten-mon",
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "center",
+                        paddingLeft: "5px",
+                        fontWeight: 500,
+                        color: "#111827",
+                        minWidth: "160px",
+                        maxWidth: "180px",
+                        wordWrap: "break-word",
                       },
-                      subj["Tên môn học"]
-                    ),
-                    React.createElement(
-                      "td",
-                      {
-                        className: "td-tin-chi",
-                        style: {
-                          border: "1px solid #e5e7eb",
-                          padding: "6px 4px",
-                          fontSize: 13,
-                          lineHeight: 1.3,
-                          verticalAlign: "middle",
-                          textAlign: "center",
-                          fontWeight: 600,
-                          color: "#059669",
-                        },
+                    },
+                    subj["Tên môn học"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-tin-chi",
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        color: "#059669",
                       },
-                      subj["Tín chỉ"]
-                    ),
-                    React.createElement(
-                      "td",
-                      {
-                        style: {
-                          border: "1px solid #e5e7eb",
-                          padding: "6px 4px",
-                          fontSize: 13,
-                          lineHeight: 1.3,
-                          verticalAlign: "middle",
-                          textAlign: "center",
-                          fontWeight: 600,
-                          color: "#2546eb",
-                        },
+                    },
+                    subj["Tín chỉ"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        color: "#2546eb",
                       },
-                      subj["Điểm tổng kết"]
-                    ),
-                    React.createElement(
-                      "td",
-                      {
-                        className: "td-thang-diem-4",
-                        style: {
-                          border: "1px solid #e5e7eb",
-                          padding: "6px 4px",
-                          fontSize: 13,
-                          lineHeight: 1.3,
-                          verticalAlign: "middle",
-                          textAlign: "center",
-                          fontWeight: 600,
-                          color: "#6366f1",
-                        },
+                    },
+                    subj["Điểm tổng kết"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      className: "td-thang-diem-4",
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        color: "#6366f1",
                       },
-                      subj["Thang điểm 4"]
-                    ),
-                    React.createElement(
-                      "td",
-                      {
-                        style: {
-                          border: "1px solid #e5e7eb",
-                          padding: "6px 4px",
-                          fontSize: 13,
-                          lineHeight: 1.3,
-                          verticalAlign: "middle",
-                          textAlign: "center",
-                          color: "#a5b4fc",
-                        },
+                    },
+                    subj["Thang điểm 4"]
+                  ),
+                  React.createElement(
+                    "td",
+                    {
+                      style: {
+                        border: "1px solid #e5e7eb",
+                        padding: "6px 4px",
+                        fontSize: 13,
+                        lineHeight: 1.3,
+                        verticalAlign: "middle",
+                        textAlign: "center",
+                        color: "#a5b4fc",
                       },
-                      subj["Xếp loại"]
-                    )
+                    },
+                    subj["Xếp loại"]
                   )
                 )
               )
             )
           )
+        )
     ),
 
     //Lập kế hoạch học tập
@@ -1617,7 +1617,9 @@ function StudyPlanPageContent() {
         },
         React.createElement(
           "span",
-          null,
+          {
+            className: "card-title"
+          },
           "Lập kế hoạch học tập (Các môn chưa học)"
         ),
 
@@ -2196,7 +2198,7 @@ function StudyPlanPageContent() {
                           fontSize: 12,
                           lineHeight: 1.3,
                           verticalAlign: "middle",
-                          textAlign: "left",
+                          textAlign: "center",
                           paddingLeft: "5px",
                           fontWeight: 500,
                           color: "#111827",
@@ -2432,4 +2434,3 @@ function StudyPlanPageContent() {
 }
 
 window.StudyPlanPageContent = StudyPlanPageContent;
-          
