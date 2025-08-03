@@ -784,7 +784,7 @@ function StudyPlanPageContent() {
             `• Môn này: ${selectedSubject.soTC} tín chỉ\n` +
             `• Tổng sau khi chọn: ${newTotalCredits} tín chỉ\n` +
             `• Vượt quá: ${newTotalCredits - semesterData.soTCTC} tín chỉ\n\n` +
-            `Lưu ý: Việc chọn học cùng môn trong cùng một nhóm tự chọn, kết quả chỉ được chọn một trong các môn có điểm tb cao nhất.\n\n` +
+            `Lưu ý: Việc chọn học cùng môn trong cùng một nhóm tự chọn, kết quả chỉ được chọn một trong các môn có điểm trung bình cao nhất.\n\n` +
             `❓ Bạn có chắc chắn muốn tiếp tục chọn môn "${selectedSubject.tenMon}" không?`,
             {
               confirmText: "Hủy bỏ",
