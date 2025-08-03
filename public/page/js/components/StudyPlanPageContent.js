@@ -2189,48 +2189,388 @@ function StudyPlanPageContent() {
                 React.createElement(
                   "tr",
                   null,
-                  [
-                    "STT",
-                    "DỰ ĐỊNH",
-                    "MÃ MÔN",
-                    "TÊN MÔN",
-                    "TÍN CHỈ",
-                    "LOẠI MÔN",
-                    "GK",
-                    "TX1",
-                    "TX2",
-                    "TX3",
-                    "TX4",
-                    "TH1",
-                    "TH2",
-                    "TH3",
-                    "TH4",
-                    "TH5",
-                    "CK",
-                    "TỔNG KẾT",
-                    "T4",
-                    "CHỮ",
-                    "XẾP LOẠI",
-                    "GHI CHÚ",
-                    "ĐẠT",
-                  ].map((header, idx) =>
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "40px",
+                        width: "40px",
+                      },
+                    },
+                    "STT"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "60px",
+                        width: "60px",
+                      },
+                    },
+                    "DỰ ĐỊNH"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "80px",
+                        width: "80px",
+                      },
+                    },
+                    "MÃ MÔN"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                      },
+                    },
+                    "TÊN MÔN"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "50px",
+                        width: "50px",
+                      },
+                    },
+                    "TÍN CHỈ"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "70px",
+                        width: "70px",
+                      },
+                    },
+                    "LOẠI MÔN"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      colSpan: 11,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                      },
+                    },
+                    "MỤC TIÊU"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "50px",
+                        width: "50px",
+                      },
+                    },
+                    "TỔNG KẾT"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "45px",
+                        width: "45px",
+                      },
+                    },
+                    "T4"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "40px",
+                        width: "40px",
+                      },
+                    },
+                    "CHỮ"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "65px",
+                        width: "65px",
+                      },
+                    },
+                    "XẾP LOẠI"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "70px",
+                        width: "70px",
+                      },
+                    },
+                    "GHI CHÚ"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 3,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "6px 2px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        minWidth: "35px",
+                        width: "35px",
+                      },
+                    },
+                    "ĐẠT"
+                  )
+                ),
+                React.createElement(
+                  "tr",
+                  null,
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 2,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                      },
+                    },
+                    "GK"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      colSpan: 4,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        background: "rgba(224, 242, 254, 0.2)",
+                      },
+                    },
+                    "THƯỜNG XUYÊN"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      colSpan: 5,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                        background: "rgba(243, 229, 245, 0.2)",
+                      },
+                    },
+                    "THỰC HÀNH"
+                  ),
+                  React.createElement(
+                    "th",
+                    {
+                      rowSpan: 2,
+                      style: {
+                        border: "1px solid #d1d5db",
+                        padding: "8px 4px",
+                        textAlign: "center",
+                        fontWeight: 600,
+                        fontSize: 12,
+                        lineHeight: 1.2,
+                        verticalAlign: "middle",
+                        whiteSpace: "nowrap",
+                        color: "#ffffff",
+                      },
+                    },
+                    "CK"
+                  )
+                ),
+                React.createElement(
+                  "tr",
+                  null,
+                  ["1", "2", "3", "4"].map((num) =>
                     React.createElement(
                       "th",
                       {
-                        key: idx,
+                        key: `tx${num}`,
                         style: {
                           border: "1px solid #d1d5db",
-                          padding: "8px 4px",
-                          textAlign: idx === 0 ? "center" : "left",
+                          padding: "6px 4px",
+                          textAlign: "center",
                           fontWeight: 600,
                           fontSize: 12,
                           lineHeight: 1.2,
                           verticalAlign: "middle",
                           whiteSpace: "nowrap",
                           color: "#ffffff",
+                          background: "rgba(224, 242, 254, 0.3)",
+                          minWidth: "50px",
+                          width: "50px",
                         },
                       },
-                      header
+                      num
+                    )
+                  ),
+                  ["1", "2", "3", "4", "5"].map((num) =>
+                    React.createElement(
+                      "th",
+                      {
+                        key: `th${num}`,
+                        style: {
+                          border: "1px solid #d1d5db",
+                          padding: "6px 4px",
+                          textAlign: "center",
+                          fontWeight: 600,
+                          fontSize: 12,
+                          lineHeight: 1.2,
+                          verticalAlign: "middle",
+                          whiteSpace: "nowrap",
+                          color: "#ffffff",
+                          background: "rgba(243, 229, 245, 0.3)",
+                          minWidth: "50px",
+                          width: "50px",
+                        },
+                      },
+                      num
                     )
                   )
                 )
@@ -2552,8 +2892,8 @@ function StudyPlanPageContent() {
                     )
                   );
                 })
-              ) //body
-            ), //table
+              )
+            ),
 
             renderSemesterPredictedStats(semesterData),
 

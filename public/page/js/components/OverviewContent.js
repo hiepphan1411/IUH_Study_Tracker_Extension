@@ -1001,7 +1001,7 @@ function OverviewPageContent() {
                   );
 
                   if (!shouldIgnoreWarning) {
-                    console.warn(
+                    console.log(
                       `No curriculum info found for "${subjectName}"`
                     );
                   }
@@ -1031,7 +1031,6 @@ function OverviewPageContent() {
           setSubjects(transformedSubjects);
           setResults(transformedSubjects);
         } else {
-          console.warn("Không có dữ liệu điểm được lưu.");
           setSubjects([]);
           setResults([]);
         }
