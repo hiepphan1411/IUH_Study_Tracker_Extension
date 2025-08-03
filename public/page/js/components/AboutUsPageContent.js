@@ -87,79 +87,60 @@ Gửi từ IUH Study Tracker Extension
         subject
       )}&body=${encodeURIComponent(emailBody)}`;
 
-      const newTab = window.open(gmailComposeUrl, "_blank");
+      window.open(gmailComposeUrl, "_blank");
 
-      if (newTab) {
-        setTimeout(() => {
-          const userConfirmed = confirm(
-            "Đã mở Gmail!\n\n" +
-              "📧 Vui lòng kiểm tra tab mới và nhấn 'Gửi' để hoàn tất.\n\n" +
-              "Nhấn 'OK' nếu bạn đã gửi email thành công."
-          );
-
-          if (userConfirmed) {
-            setRating(0);
-            setFeedback("");
-            alert(
-              "Cảm ơn bạn đã gửi phản hồi! Chúng tôi sẽ xem xét và cải thiện sản phẩm."
-            );
-          }
-        }, 1000);
-      } else {
-        throw new Error("Trình duyệt đã chặn việc mở tab Gmail.");
-      }
     } catch (error) {
-      console.error("Lỗi khi mở email:", error);
+      console.log("Lỗi khi mở email:", error);
 
-      const confirmManualSend = confirm(
-        "Không thể mở Gmail tự động.\n\n" +
-          "Bạn có muốn sao chép thông tin để gửi email thủ công không?\n\n" +
-          "Nhấn 'OK' để sao chép thông tin email vào clipboard."
-      );
+      // const confirmManualSend = confirm(
+      //   "Không thể mở Gmail tự động.\n\n" +
+      //     "Bạn có muốn sao chép thông tin để gửi email thủ công không?\n\n" +
+      //     "Nhấn 'OK' để sao chép thông tin email vào clipboard."
+      // );
 
-      if (confirmManualSend) {
-        const manualEmailContent = `
-Email: hgnd27811.dev@gmail.com
-Tiêu đề: ${subject}
+//       if (confirmManualSend) {
+//         const manualEmailContent = `
+// Email: hgnd27811.dev@gmail.com
+// Tiêu đề: ${subject}
 
-📄 Nội dung:
-${emailBody}
-      `.trim();
+// 📄 Nội dung:
+// ${emailBody}
+//       `.trim();
 
-        if (navigator.clipboard?.writeText) {
-          navigator.clipboard
-            .writeText(manualEmailContent)
-            .then(() => {
-              alert(
-                "📋 Đã sao chép thông tin email vào clipboard!\n\n" +
-                  "Bạn có thể mở Gmail hoặc ứng dụng email và dán (Ctrl+V) để gửi."
-              );
-              setRating(0);
-              setFeedback("");
-            })
-            .catch(() => {
-              showManualEmailInfo(manualEmailContent);
-            });
-        } else {
-          showManualEmailInfo(manualEmailContent);
-        }
-      }
+//         if (navigator.clipboard?.writeText) {
+//           navigator.clipboard
+//             .writeText(manualEmailContent)
+//             .then(() => {
+//               alert(
+//                 "📋 Đã sao chép thông tin email vào clipboard!\n\n" +
+//                   "Bạn có thể mở Gmail hoặc ứng dụng email và dán (Ctrl+V) để gửi."
+//               );
+//               setRating(0);
+//               setFeedback("");
+//             })
+//             .catch(() => {
+//               showManualEmailInfo(manualEmailContent);
+//             });
+//         } else {
+//           showManualEmailInfo(manualEmailContent);
+//         }
+//       }
     }
 
     // Hàm fallback nếu không sao chép được
-    function showManualEmailInfo(content) {
-      alert(
-        "Vui lòng sao chép thông tin sau để gửi email thủ công:\n\n" +
-          content +
-          "\n\n" +
-          "Bạn có thể select all (Ctrl+A) và copy (Ctrl+C) từ console log."
-      );
-      console.log("=== THÔNG TIN EMAIL FEEDBACK ===");
-      console.log(content);
-      console.log("=== KẾT THÚC ===");
-      setRating(0);
-      setFeedback("");
-    }
+    // function showManualEmailInfo(content) {
+    //   alert(
+    //     "Vui lòng sao chép thông tin sau để gửi email thủ công:\n\n" +
+    //       content +
+    //       "\n\n" +
+    //       "Bạn có thể select all (Ctrl+A) và copy (Ctrl+C) từ console log."
+    //   );
+    //   console.log("=== THÔNG TIN EMAIL FEEDBACK ===");
+    //   console.log(content);
+    //   console.log("=== KẾT THÚC ===");
+    //   setRating(0);
+    //   setFeedback("");
+    // }
   };
 
   const handleClearForm = () => {

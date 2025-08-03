@@ -2,11 +2,11 @@ const customConfirm = (message, options = {}) => {
   const {
     confirmText = "Tiếp tục",
     cancelText = "Hủy bỏ",
-    confirmColor = "#dc2626"
+    confirmColor = "#dc2626",
   } = options;
 
   return new Promise((resolve) => {
-    const modal = document.createElement('div');
+    const modal = document.createElement("div");
     modal.style.cssText = `
       position: fixed;
       top: 0;
@@ -73,12 +73,12 @@ const customConfirm = (message, options = {}) => {
       document.body.removeChild(modal);
     };
 
-    modal.querySelector('#confirm-btn').onclick = () => {
+    modal.querySelector("#confirm-btn").onclick = () => {
       cleanup();
       resolve(true);
     };
 
-    modal.querySelector('#cancel-btn').onclick = () => {
+    modal.querySelector("#cancel-btn").onclick = () => {
       cleanup();
       resolve(false);
     };
@@ -167,48 +167,6 @@ function StudyPlanPageContent() {
       );
     } catch (error) {
       console.error("Error saving subject goals to localStorage:", error);
-    }
-  }, [subjectGoals]);
-
-  // Load dữ liệu từ localStorage khi component mount
-  React.useEffect(() => {
-    const loadStudyPlanData = () => {
-      try {
-        const savedSelectedSubjects = localStorage.getItem('studyPlan_selectedSubjects');
-        const savedSubjectGoals = localStorage.getItem('studyPlan_subjectGoals');
-
-        if (savedSelectedSubjects) {
-          const parsedSelectedSubjects = JSON.parse(savedSelectedSubjects);
-          setSelectedSubjects(parsedSelectedSubjects);
-        }
-
-        if (savedSubjectGoals) {
-          const parsedSubjectGoals = JSON.parse(savedSubjectGoals);
-          setSubjectGoals(parsedSubjectGoals);
-        }
-      } catch (error) {
-        console.error('Error loading study plan data from localStorage:', error);
-      }
-    };
-
-    loadStudyPlanData();
-  }, []);
-
-  // Lưu selectedSubjects vào localStorage khi thay đổi
-  React.useEffect(() => {
-    try {
-      localStorage.setItem('studyPlan_selectedSubjects', JSON.stringify(selectedSubjects));
-    } catch (error) {
-      console.error('Error saving selected subjects to localStorage:', error);
-    }
-  }, [selectedSubjects]);
-
-  // Lưu subjectGoals vào localStorage khi thay đổi
-  React.useEffect(() => {
-    try {
-      localStorage.setItem('studyPlan_subjectGoals', JSON.stringify(subjectGoals));
-    } catch (error) {
-      console.error('Error saving subject goals to localStorage:', error);
     }
   }, [subjectGoals]);
 
@@ -337,28 +295,28 @@ function StudyPlanPageContent() {
           const cumulativeGPA =
             gpaSubjects.length > 0
               ? (
-                gpaSubjects.reduce(
-                  (sum, mh) =>
-                    sum +
-                    (parseFloat(mh["Điểm tổng kết"].replace(",", ".")) || 0) *
-                    (parseFloat(mh["Tín chỉ"]) || 0),
-                  0
-                ) / totalCreditsGPA
-              ).toFixed(2)
+                  gpaSubjects.reduce(
+                    (sum, mh) =>
+                      sum +
+                      (parseFloat(mh["Điểm tổng kết"].replace(",", ".")) || 0) *
+                        (parseFloat(mh["Tín chỉ"]) || 0),
+                    0
+                  ) / totalCreditsGPA
+                ).toFixed(2)
               : "---";
 
           // Trung bình điểm tích lũy (4)
           const cumulativeGPA4 =
             gpaSubjects.length > 0
               ? (
-                gpaSubjects.reduce(
-                  (sum, mh) =>
-                    sum +
-                    (parseFloat(mh["Thang điểm 4"].replace(",", ".")) || 0) *
-                    (parseFloat(mh["Tín chỉ"]) || 0),
-                  0
-                ) / totalCreditsGPA
-              ).toFixed(2)
+                  gpaSubjects.reduce(
+                    (sum, mh) =>
+                      sum +
+                      (parseFloat(mh["Thang điểm 4"].replace(",", ".")) || 0) *
+                        (parseFloat(mh["Tín chỉ"]) || 0),
+                    0
+                  ) / totalCreditsGPA
+                ).toFixed(2)
               : "---";
 
           // Số môn đã học
@@ -398,7 +356,7 @@ function StudyPlanPageContent() {
           }
 
           const currentSubjects = allSubjects.filter(
-            (item) => item["Xếp loại"] === ""
+            (item) => item["Điểm tổng kết"] === ""
           );
 
           setCurrentSubj(currentSubjects);
@@ -778,18 +736,20 @@ function StudyPlanPageContent() {
         if (newTotalCredits > semesterData.soTCTC) {
           const shouldContinue = await customConfirm(
             `⚠️ CẢNH BÁO: VƯỢT QUÁ SỐ TÍN CHỈ YÊU CẦU!\n\n` +
-            `Thông tin nhóm tự chọn ${selectedSubject.nhomTC}:\n` +
-            `• Yêu cầu: ${semesterData.soTCTC} tín chỉ\n` +
-            `• Đã chọn: ${currentGroupCredits} tín chỉ\n` +
-            `• Môn này: ${selectedSubject.soTC} tín chỉ\n` +
-            `• Tổng sau khi chọn: ${newTotalCredits} tín chỉ\n` +
-            `• Vượt quá: ${newTotalCredits - semesterData.soTCTC} tín chỉ\n\n` +
-            `Lưu ý: Việc chọn học cùng môn trong cùng một nhóm tự chọn, kết quả chỉ được chọn một trong các môn có điểm trung bình cao nhất.\n\n` +
-            `❓ Bạn có chắc chắn muốn tiếp tục chọn môn "${selectedSubject.tenMon}" không?`,
+              `Thông tin nhóm tự chọn ${selectedSubject.nhomTC}:\n` +
+              `• Yêu cầu: ${semesterData.soTCTC} tín chỉ\n` +
+              `• Đã chọn: ${currentGroupCredits} tín chỉ\n` +
+              `• Môn này: ${selectedSubject.soTC} tín chỉ\n` +
+              `• Tổng sau khi chọn: ${newTotalCredits} tín chỉ\n` +
+              `• Vượt quá: ${
+                newTotalCredits - semesterData.soTCTC
+              } tín chỉ\n\n` +
+              `Lưu ý: Việc chọn học cùng môn trong cùng một nhóm tự chọn, kết quả chỉ được chọn một trong các môn có điểm tb cao nhất.\n\n` +
+              `❓ Bạn có chắc chắn muốn tiếp tục chọn môn "${selectedSubject.tenMon}" không?`,
             {
               confirmText: "Hủy bỏ",
               cancelText: "Vẫn tiếp tục",
-              confirmColor: "#059669"
+              confirmColor: "#059669",
             }
           );
 
@@ -901,7 +861,7 @@ function StudyPlanPageContent() {
         const diemTX =
           thuongXuyen.length > 0
             ? thuongXuyen.reduce((sum, score) => sum + score, 0) /
-            thuongXuyen.length
+              thuongXuyen.length
             : 0;
         diemTongKet = diemTX * 0.2 + diemGK * 0.3 + diemCK * 0.5;
       }
@@ -910,7 +870,7 @@ function StudyPlanPageContent() {
         const diemTX =
           thuongXuyen.length > 0
             ? thuongXuyen.reduce((sum, score) => sum + score, 0) /
-            thuongXuyen.length
+              thuongXuyen.length
             : 0;
         const diemLT = diemTX * 0.2 + diemGK * 0.3 + diemCK * 0.5;
 
@@ -1071,6 +1031,499 @@ function StudyPlanPageContent() {
       displayValue
     );
   };
+
+  // Sửa lại hàm tính toán thống kê học kỳ dự kiến
+  const calculateSemesterPredictedStats = React.useCallback(
+    (semesterData) => {
+      if (!semesterData || !semesterData.subjects) return null;
+
+      // Lấy các môn được chọn trong kỳ này và có điểm tổng kết
+      const selectedSubjectsWithScores = semesterData.subjects.filter(
+        (subject) => {
+          const subjectKey = subject.originalIndex;
+          const isSelected = selectedSubjects[subjectKey] || false;
+          const subjectType = getSubjectType(subject);
+          const goalScore = calculateGoalScore(subjectKey, subjectType);
+
+          return isSelected && goalScore !== null && goalScore > 0;
+        }
+      );
+
+      if (selectedSubjectsWithScores.length === 0) return null;
+
+      // 1. Tính thống kê học kỳ hiện tại (chỉ môn được chọn trong kỳ này)
+      let semesterCredits = 0;
+      let semesterWeightedScore10 = 0;
+      let semesterWeightedScore4 = 0;
+      let semesterPassedCredits = 0;
+      let semesterPassedSubjects = 0;
+      let totalSemesterSubjects = selectedSubjectsWithScores.length;
+
+      selectedSubjectsWithScores.forEach((subject) => {
+        const subjectKey = subject.originalIndex;
+        const subjectType = getSubjectType(subject);
+        const goalScore = calculateGoalScore(subjectKey, subjectType);
+        const score4 = goalScore ? convertScore10To4(goalScore) : 0;
+        const credits = subject.soTC || 0;
+
+        semesterCredits += credits;
+        semesterWeightedScore10 += goalScore * credits;
+        semesterWeightedScore4 += score4 * credits;
+
+        // Kiểm tra môn đạt (điểm >= 4.0 thang 10)
+        if (goalScore >= 4.0) {
+          semesterPassedCredits += credits;
+          semesterPassedSubjects++;
+        }
+      });
+
+      // 2. Tính toán điểm trung bình tích lũy (bao gồm môn đã học + môn dự định)
+      const excludedCodes = [
+        "4203003307", // GDTC 1
+        "4203003242", // GDQP 1
+        "4203003306", // GDTC 2
+        "4203015253", // TA1
+        "4203015216", // CCTA
+        "4203015254", // TA2
+        "4203003354", // GDQP 2
+      ];
+
+      // Lấy môn đã học (đã đạt)
+      const studiedSubjects = subjects.filter(
+        (item) =>
+          item["Đạt"] === "Đạt" &&
+          item["Tín chỉ"] &&
+          item["Điểm tổng kết"] &&
+          item["Thang điểm 4"] &&
+          !excludedCodes.includes((item["Mã lớp học phần"] || "").slice(0, -2))
+      );
+
+      // Tính tổng từ môn đã học
+      let cumulativeCredits = 0;
+      let cumulativeWeightedScore10 = 0;
+      let cumulativeWeightedScore4 = 0;
+
+      studiedSubjects.forEach((item) => {
+        const credits = parseFloat(item["Tín chỉ"]) || 0;
+        const score10 =
+          parseFloat(item["Điểm tổng kết"].replace(",", ".")) || 0;
+        const score4 = parseFloat(item["Thang điểm 4"].replace(",", ".")) || 0;
+
+        cumulativeCredits += credits;
+        cumulativeWeightedScore10 += score10 * credits;
+        cumulativeWeightedScore4 += score4 * credits;
+      });
+
+      // Cộng thêm môn dự định học trong kỳ này
+      cumulativeCredits += semesterCredits;
+      cumulativeWeightedScore10 += semesterWeightedScore10;
+      cumulativeWeightedScore4 += semesterWeightedScore4;
+
+      // Tính điểm trung bình
+      const semesterAverage10 =
+        semesterCredits > 0 ? semesterWeightedScore10 / semesterCredits : 0;
+      const semesterAverage4 =
+        semesterCredits > 0 ? semesterWeightedScore4 / semesterCredits : 0;
+
+      const cumulativeAverage10 =
+        cumulativeCredits > 0
+          ? cumulativeWeightedScore10 / cumulativeCredits
+          : 0;
+      const cumulativeAverage4 =
+        cumulativeCredits > 0
+          ? cumulativeWeightedScore4 / cumulativeCredits
+          : 0;
+
+      // Xếp loại học lực
+      const getClassification = (score4) => {
+        if (score4 >= 3.6) return "Xuất sắc";
+        if (score4 >= 3.2) return "Giỏi";
+        if (score4 >= 2.5) return "Khá";
+        if (score4 >= 2.0) return "Trung bình";
+        if (score4 >= 1.0) return "Trung bình yếu";
+        return "Kém";
+      };
+
+      return {
+        // Thống kê học kỳ
+        totalSubjects: totalSemesterSubjects,
+        totalCredits: semesterCredits,
+        passedSubjects: semesterPassedSubjects,
+        passedCredits: semesterPassedCredits,
+        failedSubjects: totalSemesterSubjects - semesterPassedSubjects,
+        failedCredits: semesterCredits - semesterPassedCredits,
+        averageScore10: Math.round(semesterAverage10 * 100) / 100,
+        averageScore4: Math.round(semesterAverage4 * 100) / 100,
+        classification: getClassification(semesterAverage4),
+        passRate:
+          totalSemesterSubjects > 0
+            ? Math.round((semesterPassedSubjects / totalSemesterSubjects) * 100)
+            : 0,
+
+        // Thống kê tích lũy (bao gồm môn đã học + môn dự định)
+        cumulativeCredits: Math.round(cumulativeCredits),
+        cumulativeAverage10: Math.round(cumulativeAverage10 * 100) / 100,
+        cumulativeAverage4: Math.round(cumulativeAverage4 * 100) / 100,
+        cumulativeClassification: getClassification(cumulativeAverage4),
+      };
+    },
+    [selectedSubjects, subjectGoals, subjects]
+  );
+
+  // Component hiển thị thống kê học kỳ dự kiến
+  const renderSemesterPredictedStats = (semesterData) => {
+    const stats = calculateSemesterPredictedStats(semesterData);
+
+    if (!stats) return null;
+
+    return React.createElement(
+      "div",
+      {
+        className: "semester-predicted-stats",
+        style: {
+          marginTop: "16px",
+          marginBottom: "16px",
+          padding: "16px",
+          backgroundColor: "#f8fafc",
+          border: "2px solid",
+          borderRadius: "12px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        },
+      },
+      React.createElement(
+        "h4",
+        {
+          style: {
+            width: "100%",
+            fontSize: "16px",
+            fontWeight: 700,
+            color: "#1e293b",
+            marginBottom: "16px",
+            textAlign: "center",
+            borderBottom: "2px solid",
+            borderImage: "linear-gradient(135deg, #065f46 0%, #059669 100%) 1",
+            paddingBottom: "8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "start",
+            gap: "8px",
+          },
+        },
+        "📊 Thống kê học kỳ dự kiến"
+      ),
+
+      // Bảng thống kê học kỳ
+      React.createElement(
+        "div",
+        {
+          style: {
+            marginBottom: "16px",
+          },
+        },
+        React.createElement(
+          "div",
+          {
+            className: "semester-summary-table",
+            style: {
+              overflowX: "auto",
+              borderRadius: "8px",
+              marginBottom: "12px",
+            },
+          },
+          React.createElement(
+            "table",
+            {
+              className: "summary-table",
+            },
+            React.createElement(
+              "tbody",
+              null,
+              React.createElement(
+                "tr",
+                { className: "summary-row" },
+                null,
+                React.createElement(
+                  "td",
+                  {
+                    className: "summary-label",
+                    colSpan: 2,
+                  },
+                  `Điểm trung bình học kỳ hệ 10: ${stats.averageScore10
+                    .toFixed(2)
+                    .replace(".", ",")}`
+                ),
+                React.createElement(
+                  "td",
+                  {
+                    className: "summary-label",
+                    colSpan: 2,
+                  },
+                  `Điểm trung bình học kỳ hệ 10: ${stats.averageScore4
+                    .toFixed(2)
+                    .replace(".", ",")}`
+                )
+              ),
+              React.createElement(
+                "tr",
+                { className: "summary-row" },
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Điểm trung bình tích lũy hệ 10: ${stats.cumulativeAverage10
+                    .toFixed(2)
+                    .replace(".", ",")}`
+                ),
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Điểm trung bình tích lũy hệ 4: ${stats.cumulativeAverage4
+                    .toFixed(2)
+                    .replace(".", ",")}`
+                )
+              ),
+
+              // Tổng số tín chỉ
+              React.createElement(
+                "tr",
+                { className: "summary-row" },
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Tổng số tín chỉ đã đăng ký: ${stats.totalCredits}`
+                ),
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Tổng số tín chỉ tích lũy: ${stats.cumulativeCredits}`
+                )
+              ),
+
+              // Tổng số tín chỉ đạt và nợ
+              React.createElement(
+                "tr",
+                { className: "summary-row" },
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Tổng số tín chỉ đạt: ${stats.passedCredits}`
+                ),
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Tổng số tín chỉ nợ tính đến hiện tại: ${
+                    stats.cumulativeCredits - stats.passedCredits
+                  }`
+                )
+              ),
+
+              // Xếp loại học lực
+              React.createElement(
+                "tr",
+                { className: "summary-row" },
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Xếp loại học lực tích lũy: ${stats.cumulativeClassification}`
+                ),
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Xếp loại học lực học kỳ: ${stats.classification}`
+                )
+              )
+            )
+          )
+        )
+      ),
+
+      React.createElement(
+        "div",
+        {
+          style: {
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: "12px",
+            marginTop: "12px",
+          },
+        },
+        React.createElement(
+          "div",
+          {
+            style: {
+              padding: "12px",
+              backgroundColor: "#f0fdf4",
+              borderRadius: "8px",
+              border: "1px solid #86efac",
+              textAlign: "center",
+            },
+          },
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontWeight: 700,
+                color: "#15803d",
+                fontSize: "14px",
+                marginBottom: "4px",
+              },
+            },
+            `✅ Môn đạt: ${stats.passedSubjects}`
+          ),
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontSize: "12px",
+                color: "#166534",
+              },
+            },
+            `${stats.passedCredits} tín chỉ`
+          )
+        ),
+        React.createElement(
+          "div",
+          {
+            style: {
+              padding: "12px",
+              backgroundColor: "#fef2f2",
+              borderRadius: "8px",
+              border: "1px solid #fca5a5",
+              textAlign: "center",
+            },
+          },
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontWeight: 700,
+                color: "#dc2626",
+                fontSize: "14px",
+                marginBottom: "4px",
+              },
+            },
+            `❌ Môn không đạt: ${stats.failedSubjects}`
+          ),
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontSize: "12px",
+                color: "#dc2626",
+              },
+            },
+            `${stats.failedCredits} tín chỉ`
+          )
+        ),
+        React.createElement(
+          "div",
+          {
+            style: {
+              padding: "12px",
+              backgroundColor: "#eff6ff",
+              borderRadius: "8px",
+              border: "1px solid #93c5fd",
+              textAlign: "center",
+            },
+          },
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontWeight: 700,
+                color: "#2563eb",
+                fontSize: "14px",
+                marginBottom: "4px",
+              },
+            },
+            `📊 Tỷ lệ đạt`
+          ),
+          React.createElement(
+            "div",
+            {
+              style: {
+                fontSize: "12px",
+                color: "#1d4ed8",
+              },
+            },
+            `${stats.passRate}%`
+          )
+        )
+      )
+    );
+  };
+
+  // Thêm hàm tính tổng thống kê tất cả các học kỳ
+  const calculateOverallPredictedStats = React.useCallback(() => {
+    if (!plannedSubjectsBySemester.length) return null;
+
+    let totalSubjects = 0;
+    let totalCredits = 0;
+    let totalWeightedScore10 = 0;
+    let totalWeightedScore4 = 0;
+    let totalPassedSubjects = 0;
+    let totalPassedCredits = 0;
+
+    plannedSubjectsBySemester.forEach((semesterData) => {
+      const selectedSubjectsWithScores = semesterData.subjects.filter(
+        (subject) => {
+          const subjectKey = subject.originalIndex;
+          const isSelected = selectedSubjects[subjectKey] || false;
+          const subjectType = getSubjectType(subject);
+          const goalScore = calculateGoalScore(subjectKey, subjectType);
+
+          return isSelected && goalScore !== null && goalScore > 0;
+        }
+      );
+
+      selectedSubjectsWithScores.forEach((subject) => {
+        const subjectKey = subject.originalIndex;
+        const subjectType = getSubjectType(subject);
+        const goalScore = calculateGoalScore(subjectKey, subjectType);
+        const score4 = goalScore ? convertScore10To4(goalScore) : 0;
+        const credits = subject.soTC || 0;
+
+        totalSubjects++;
+        totalCredits += credits;
+        totalWeightedScore10 += goalScore * credits;
+        totalWeightedScore4 += score4 * credits;
+
+        if (goalScore >= 4.0) {
+          totalPassedSubjects++;
+          totalPassedCredits += credits;
+        }
+      });
+    });
+
+    if (totalSubjects === 0) return null;
+
+    const overallAverage10 =
+      totalCredits > 0 ? totalWeightedScore10 / totalCredits : 0;
+    const overallAverage4 =
+      totalCredits > 0 ? totalWeightedScore4 / totalCredits : 0;
+
+    const getClassification = (score4) => {
+      if (score4 >= 3.6) return "Xuất sắc";
+      if (score4 >= 3.2) return "Giỏi";
+      if (score4 >= 2.5) return "Khá";
+      if (score4 >= 2.0) return "Trung bình";
+      if (score4 >= 1.0) return "Trung bình yếu";
+      return "Kém";
+    };
+
+    return {
+      totalSubjects,
+      totalCredits,
+      totalPassedSubjects,
+      totalPassedCredits,
+      overallAverage10: Math.round(overallAverage10 * 100) / 100,
+      overallAverage4: Math.round(overallAverage4 * 100) / 100,
+      overallPassRate:
+        totalSubjects > 0
+          ? Math.round((totalPassedSubjects / totalSubjects) * 100)
+          : 0,
+      classification: getClassification(overallAverage4),
+    };
+  }, [plannedSubjectsBySemester, selectedSubjects, subjectGoals]);
 
   if (!hasCurriculumData) {
     return React.createElement(
@@ -1358,236 +1811,236 @@ function StudyPlanPageContent() {
       ),
       currentSubj.length === 0
         ? React.createElement(
-          "div",
-          {
-            style: {
-              borderRadius: 10,
-              border: "1px solid #22304a",
-              padding: 40,
-              textAlign: "center",
-              color: "#ffffff",
-              background: "linear-gradient(135deg, #065f46 0%, #10b981 100%)",
-            },
-          },
-          React.createElement(
-            "p",
+            "div",
             {
               style: {
-                fontSize: 16,
-                margin: 0,
-              },
-            },
-            "Không có môn ở trạng thái đang học"
-          )
-        )
-        : React.createElement(
-          "div",
-          {
-            className: "table-responsive",
-            style: {
-              overflowX: "auto",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-              marginBottom: "20px",
-            },
-          },
-          React.createElement(
-            "table",
-            {
-              className: "grades-table",
-              style: {
-                width: "100%",
-                borderCollapse: "collapse",
-                background: "white",
-                fontSize: 13,
-                minWidth: "800px",
+                borderRadius: 10,
+                border: "1px solid #22304a",
+                padding: 40,
+                textAlign: "center",
+                color: "#ffffff",
+                background: "linear-gradient(135deg, #065f46 0%, #10b981 100%)",
               },
             },
             React.createElement(
-              "thead",
+              "p",
               {
                 style: {
-                  background:
-                    "linear-gradient(135deg, #065f46 0%, #059669 100%)",
-                  color: "#ffffff",
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 10,
+                  fontSize: 16,
+                  margin: 0,
+                },
+              },
+              "Không có môn ở trạng thái đang học"
+            )
+          )
+        : React.createElement(
+            "div",
+            {
+              className: "table-responsive",
+              style: {
+                overflowX: "auto",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+                marginBottom: "20px",
+              },
+            },
+            React.createElement(
+              "table",
+              {
+                className: "grades-table",
+                style: {
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  background: "white",
+                  fontSize: 13,
+                  minWidth: "800px",
                 },
               },
               React.createElement(
-                "tr",
-                null,
-                [
-                  "STT",
-                  "MÃ HỌC PHẦN",
-                  "TÊN MÔN",
-                  "TÍN CHỈ",
-                  "ĐIỂM TỔNG KẾT",
-                  "THANG 4",
-                  "XẾP LOẠI",
-                ].map((header, idx) =>
-                  React.createElement(
-                    "th",
-                    {
-                      key: idx,
-                      style: {
-                        border: "1px solid #d1d5db",
-                        padding: "8px 4px",
-                        textAlign: "center",
-                        fontWeight: 600,
-                        fontSize: 13,
-                        lineHeight: 1.2,
-                        verticalAlign: "middle",
-                        whiteSpace: "nowrap",
-                        color: "#ffffff",
-                      },
-                    },
-                    header
-                  )
-                )
-              )
-            ),
-            React.createElement(
-              "tbody",
-              null,
-              currentSubj.map((subj, idx) =>
+                "thead",
+                {
+                  style: {
+                    background:
+                      "linear-gradient(135deg, #065f46 0%, #059669 100%)",
+                    color: "#ffffff",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 10,
+                  },
+                },
                 React.createElement(
                   "tr",
-                  {
-                    key: idx,
-                    className: "subject-row",
-                    style: {
-                      transition: "all 0.15s ease",
-                    },
-                  },
+                  null,
+                  [
+                    "STT",
+                    "MÃ HỌC PHẦN",
+                    "TÊN MÔN",
+                    "TÍN CHỈ",
+                    "ĐIỂM TỔNG KẾT",
+                    "THANG 4",
+                    "XẾP LOẠI",
+                  ].map((header, idx) =>
+                    React.createElement(
+                      "th",
+                      {
+                        key: idx,
+                        style: {
+                          border: "1px solid #d1d5db",
+                          padding: "8px 4px",
+                          textAlign: idx === 0 ? "center" : "left",
+                          fontWeight: 600,
+                          fontSize: 13,
+                          lineHeight: 1.2,
+                          verticalAlign: "middle",
+                          whiteSpace: "nowrap",
+                          color: "#ffffff",
+                        },
+                      },
+                      header
+                    )
+                  )
+                )
+              ),
+              React.createElement(
+                "tbody",
+                null,
+                currentSubj.map((subj, idx) =>
                   React.createElement(
-                    "td",
+                    "tr",
                     {
-                      className: "td-stt",
+                      key: idx,
+                      className: "subject-row",
                       style: {
-                        textAlign: "center",
-                        border: "1px solid #e5e7eb",
-                        padding: "6px 4px",
-                        fontSize: 13,
-                        lineHeight: 1.3,
-                        verticalAlign: "middle",
-                        fontWeight: 600,
-                        color: "#6b7280",
-                        background: "rgba(249, 250, 251, 0.5)",
+                        transition: "all 0.15s ease",
                       },
                     },
-                    subj["STT"]
-                  ),
-                  React.createElement(
-                    "td",
-                    {
-                      className: "td-ma-lhp",
-                      style: {
-                        border: "1px solid #e5e7eb",
-                        padding: "6px 4px",
-                        fontSize: 12,
-                        lineHeight: 1.3,
-                        verticalAlign: "middle",
-                        fontFamily: "'Courier New', monospace",
-                        color: "#4b5563",
-                        background: "rgba(249, 250, 251, 0.3)",
-                        fontWeight: 600,
+                    React.createElement(
+                      "td",
+                      {
+                        className: "td-stt",
+                        style: {
+                          textAlign: "center",
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 13,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          fontWeight: 600,
+                          color: "#6b7280",
+                          background: "rgba(249, 250, 251, 0.5)",
+                        },
                       },
-                    },
-                    subj["Mã lớp học phần"]
-                  ),
-                  React.createElement(
-                    "td",
-                    {
-                      className: "td-ten-mon",
-                      style: {
-                        border: "1px solid #e5e7eb",
-                        padding: "6px 4px",
-                        fontSize: 13,
-                        lineHeight: 1.3,
-                        verticalAlign: "middle",
-                        textAlign: "center",
-                        paddingLeft: "5px",
-                        fontWeight: 500,
-                        color: "#111827",
-                        minWidth: "160px",
-                        maxWidth: "180px",
-                        wordWrap: "break-word",
+                      subj["STT"]
+                    ),
+                    React.createElement(
+                      "td",
+                      {
+                        className: "td-ma-lhp",
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 12,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          fontFamily: "'Courier New', monospace",
+                          color: "#4b5563",
+                          background: "rgba(249, 250, 251, 0.3)",
+                          fontWeight: 600,
+                        },
                       },
-                    },
-                    subj["Tên môn học"]
-                  ),
-                  React.createElement(
-                    "td",
-                    {
-                      className: "td-tin-chi",
-                      style: {
-                        border: "1px solid #e5e7eb",
-                        padding: "6px 4px",
-                        fontSize: 13,
-                        lineHeight: 1.3,
-                        verticalAlign: "middle",
-                        textAlign: "center",
-                        fontWeight: 600,
-                        color: "#059669",
+                      subj["Mã lớp học phần"]
+                    ),
+                    React.createElement(
+                      "td",
+                      {
+                        className: "td-ten-mon",
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 13,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "left",
+                          paddingLeft: "5px",
+                          fontWeight: 500,
+                          color: "#111827",
+                          minWidth: "160px",
+                          maxWidth: "180px",
+                          wordWrap: "break-word",
+                        },
                       },
-                    },
-                    subj["Tín chỉ"]
-                  ),
-                  React.createElement(
-                    "td",
-                    {
-                      style: {
-                        border: "1px solid #e5e7eb",
-                        padding: "6px 4px",
-                        fontSize: 13,
-                        lineHeight: 1.3,
-                        verticalAlign: "middle",
-                        textAlign: "center",
-                        fontWeight: 600,
-                        color: "#2546eb",
+                      subj["Tên môn học"]
+                    ),
+                    React.createElement(
+                      "td",
+                      {
+                        className: "td-tin-chi",
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 13,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "center",
+                          fontWeight: 600,
+                          color: "#059669",
+                        },
                       },
-                    },
-                    subj["Điểm tổng kết"]
-                  ),
-                  React.createElement(
-                    "td",
-                    {
-                      className: "td-thang-diem-4",
-                      style: {
-                        border: "1px solid #e5e7eb",
-                        padding: "6px 4px",
-                        fontSize: 13,
-                        lineHeight: 1.3,
-                        verticalAlign: "middle",
-                        textAlign: "center",
-                        fontWeight: 600,
-                        color: "#6366f1",
+                      subj["Tín chỉ"]
+                    ),
+                    React.createElement(
+                      "td",
+                      {
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 13,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "center",
+                          fontWeight: 600,
+                          color: "#2546eb",
+                        },
                       },
-                    },
-                    subj["Thang điểm 4"]
-                  ),
-                  React.createElement(
-                    "td",
-                    {
-                      style: {
-                        border: "1px solid #e5e7eb",
-                        padding: "6px 4px",
-                        fontSize: 13,
-                        lineHeight: 1.3,
-                        verticalAlign: "middle",
-                        textAlign: "center",
-                        color: "#a5b4fc",
+                      subj["Điểm tổng kết"]
+                    ),
+                    React.createElement(
+                      "td",
+                      {
+                        className: "td-thang-diem-4",
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 13,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "center",
+                          fontWeight: 600,
+                          color: "#6366f1",
+                        },
                       },
-                    },
-                    subj["Xếp loại"]
+                      subj["Thang điểm 4"]
+                    ),
+                    React.createElement(
+                      "td",
+                      {
+                        style: {
+                          border: "1px solid #e5e7eb",
+                          padding: "6px 4px",
+                          fontSize: 13,
+                          lineHeight: 1.3,
+                          verticalAlign: "middle",
+                          textAlign: "center",
+                          color: "#a5b4fc",
+                        },
+                      },
+                      subj["Xếp loại"]
+                    )
                   )
                 )
               )
             )
           )
-        )
     ),
 
     //Lập kế hoạch học tập
@@ -1617,17 +2070,13 @@ function StudyPlanPageContent() {
         },
         React.createElement(
           "span",
-          {
-            className: "card-title"
-          },
+          null,
           "Lập kế hoạch học tập (Các môn chưa học)"
         ),
-
         React.createElement(
           "button",
           {
             type: "button",
-            className: "reset-plan-button",
             onClick: function () {
               var shouldReset = window.confirm(
                 "Bạn có chắc chắn muốn xóa toàn bộ kế hoạch học tập đã lưu không?"
@@ -1636,6 +2085,24 @@ function StudyPlanPageContent() {
                 clearStudyPlanData();
                 window.alert("Đã xóa kế hoạch học tập thành công!");
               }
+            },
+            style: {
+              display: "inline-block",
+              fontSize: "14px",
+              fontWeight: "600",
+              padding: "10px 18px",
+              backgroundColor: "#dc2626",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              textAlign: "center",
+              textDecoration: "none",
+              minWidth: "140px",
+              inlineSize: "140px",
+              boxShadow: "0 2px 4px rgba(220, 38, 38, 0.2)",
+              outline: "none",
+              transition: "all 0.2s ease",
             },
           },
           "Xóa Kế Hoạch"
@@ -1666,22 +2133,23 @@ function StudyPlanPageContent() {
                 gap: "8px",
               },
             },
-            `${semesterData.semesterName} ${semesterData.soTCTC > 0
-              ? `(Tự chọn: ${semesterData.soTCTC} TC)`
-              : ""
+            `${semesterData.semesterName} ${
+              semesterData.soTCTC > 0
+                ? `(Tự chọn: ${semesterData.soTCTC} TC)`
+                : ""
             }`,
             isCompleted &&
-            React.createElement(
-              "span",
-              {
-                style: {
-                  fontSize: "16px",
-                  color: "#22c55e",
-                  fontWeight: "bold",
+              React.createElement(
+                "span",
+                {
+                  style: {
+                    fontSize: "16px",
+                    color: "#22c55e",
+                    fontWeight: "bold",
+                  },
                 },
-              },
-              "✓ DONE"
-            )
+                "✓ DONE"
+              )
           ),
           React.createElement(
             "div",
@@ -2243,8 +2711,8 @@ function StudyPlanPageContent() {
                       subjectType === "TICH_HOP"
                         ? "Tích hợp"
                         : subjectType === "TH"
-                          ? "Thực hành"
-                          : "Lý thuyết"
+                        ? "Thực hành"
+                        : "Lý thuyết"
                     ),
                     createGoalCell(
                       subjectKey,
@@ -2275,31 +2743,31 @@ function StudyPlanPageContent() {
                       subjectKey,
                       "th1",
                       isSelected &&
-                      (subjectType === "TH" || subjectType === "TICH_HOP")
+                        (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(
                       subjectKey,
                       "th2",
                       isSelected &&
-                      (subjectType === "TH" || subjectType === "TICH_HOP")
+                        (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(
                       subjectKey,
                       "th3",
                       isSelected &&
-                      (subjectType === "TH" || subjectType === "TICH_HOP")
+                        (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(
                       subjectKey,
                       "th4",
                       isSelected &&
-                      (subjectType === "TH" || subjectType === "TICH_HOP")
+                        (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(
                       subjectKey,
                       "th5",
                       isSelected &&
-                      (subjectType === "TH" || subjectType === "TICH_HOP")
+                        (subjectType === "TH" || subjectType === "TICH_HOP")
                     ),
                     createGoalCell(subjectKey, "diemCK", isSelected),
                     React.createElement(
@@ -2318,8 +2786,8 @@ function StudyPlanPageContent() {
                             ? goalScore >= 8
                               ? "#22c55e"
                               : goalScore >= 6.5
-                                ? "#f59e0b"
-                                : "#ef4444"
+                              ? "#f59e0b"
+                              : "#ef4444"
                             : "#9ca3af",
                           minWidth: "50px",
                           width: "50px",
@@ -2425,12 +2893,119 @@ function StudyPlanPageContent() {
                   );
                 })
               )
-            )
-          )
-        );
+            ),
+
+            renderSemesterPredictedStats(semesterData),
+
+            // Extended Semester Summary Table - chỉ hiển thị khi có điểm tổng kết
+            semesterData.summary &&
+              semesterData.subjects.some(
+                (subject) =>
+                  subject.diemTongKet !== null &&
+                  subject.diemTongKet !== undefined
+              ) &&
+              React.createElement(
+                "div",
+                { className: "semester-summary-table" },
+                React.createElement(
+                  "table",
+                  { className: "summary-table" },
+                  React.createElement(
+                    "tbody",
+                    null,
+                    // Điểm trung bình học kỳ
+                    React.createElement(
+                      "tr",
+                      { className: "summary-row" },
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Điểm trung bình học kỳ hệ 10: ${semesterData.summary.diemTrungBinhHocKy10
+                          .toFixed(2)
+                          .replace(".", ",")}`
+                      ),
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Điểm trung bình học kỳ hệ 4: ${semesterData.summary.diemTrungBinhHocKy4
+                          .toFixed(2)
+                          .replace(".", ",")}`
+                      )
+                    ),
+
+                    // Điểm trung bình tích lũy
+                    React.createElement(
+                      "tr",
+                      { className: "summary-row" },
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Điểm trung bình tích lũy hệ 10: ${semesterData.summary.diemTrungBinhTichLuy10
+                          .toFixed(2)
+                          .replace(".", ",")}`
+                      ),
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Điểm trung bình tích lũy hệ 4: ${semesterData.summary.diemTrungBinhTichLuy4
+                          .toFixed(2)
+                          .replace(".", ",")}`
+                      )
+                    ),
+
+                    // Tổng số tín chỉ
+                    React.createElement(
+                      "tr",
+                      { className: "summary-row" },
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Tổng số tín chỉ đã đăng ký: ${semesterData.summary.tongTinChiDangKy}`
+                      ),
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Tổng số tín chỉ tích lũy: ${semesterData.summary.tongTinChiTichLuy}`
+                      )
+                    ),
+
+                    // Tổng số tín chỉ đạt và nợ
+                    React.createElement(
+                      "tr",
+                      { className: "summary-row" },
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Tổng số tín chỉ đạt: ${semesterData.summary.tongTinChiDat}`
+                      ),
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Tổng số tín chỉ nợ tính đến hiện tại: ${semesterData.summary.tongTinChiNo}`
+                      )
+                    ),
+
+                    // Xếp loại học lực
+                    React.createElement(
+                      "tr",
+                      { className: "summary-row" },
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Xếp loại học lực học kỳ: ${semesterData.summary.xepLoaiHocKy}`
+                      ),
+                      React.createElement(
+                        "td",
+                        { className: "summary-label", colSpan: 2 },
+                        `Xếp loại học lực tích lũy: ${semesterData.summary.xepLoaiTichLuy}`
+                      )
+                    )
+                  )
+                )
+              )
+          ) //div
+        ); //div
       })
     )
   );
 }
-
-window.StudyPlanPageContent = StudyPlanPageContent;
