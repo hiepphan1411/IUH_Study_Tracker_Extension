@@ -2057,7 +2057,7 @@ function StudyPlanPageContent() {
       React.createElement(
         "div",
         {
-          className: "card-title",
+          className: "card-title-plan",
           style: {
             fontSize: 22,
             fontWeight: 700,
@@ -2073,26 +2073,10 @@ function StudyPlanPageContent() {
           null,
           "Lập kế hoạch học tập (Các môn chưa học)"
         ),
-
         React.createElement(
           "button",
           {
-            className: "reset-plan-button",
-            // style: {
-            //   display: "inline-block",
-            //   padding: "10px 18px !important",
-            //   fontSize: "14px",
-            //   fontWeight: 600,
-            //   backgroundColor: "#dc2626 !important",
-            //   color: "#ffffff !important",
-            //   border: "none",
-            //   borderRadius: "8px !important",
-            //   cursor: "pointer",
-            //   textAlign: "center",
-            //   textDecoration: "none",
-            //   minWidth: "140px",
-            //   boxShadow: "0 2px 4px rgba(220, 38, 38, 0.2)",
-            // },
+            type: "button",
             onClick: function () {
               var shouldReset = window.confirm(
                 "Bạn có chắc chắn muốn xóa toàn bộ kế hoạch học tập đã lưu không?"
@@ -2101,6 +2085,24 @@ function StudyPlanPageContent() {
                 clearStudyPlanData();
                 window.alert("Đã xóa kế hoạch học tập thành công!");
               }
+            },
+            style: {
+              display: "inline-block",
+              fontSize: "14px",
+              fontWeight: "600",
+              padding: "10px 18px",
+              backgroundColor: "#dc2626",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              textAlign: "center",
+              textDecoration: "none",
+              minWidth: "140px",
+              inlineSize: "140px",
+              boxShadow: "0 2px 4px rgba(220, 38, 38, 0.2)",
+              outline: "none",
+              transition: "all 0.2s ease",
             },
           },
           "Xóa Kế Hoạch"

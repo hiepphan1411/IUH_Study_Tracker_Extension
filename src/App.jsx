@@ -158,7 +158,7 @@ function App() {
         chrome.tabs.create({ url: mainPageUrl });
 
         setIsLoading(false);
-      }, 14000);
+      }, 8000);
     } catch (error) {
       console.error("Lỗi khi mở trang:", error);
       if (createdTabId) {

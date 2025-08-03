@@ -136,7 +136,7 @@
 
 //Lấy lịch học
 const MAX_RETRIES = 3;
-const MAX_CONCURRENT = 5;
+const MAX_CONCURRENT = 6;
 const POLL_INTERVAL = 500;
 if (window.location.href.includes("lich-hoc-theo-tuan.html")) {
   let loadAttempts = 0;
@@ -162,7 +162,7 @@ function loadScheduleData(token) {
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    loadWithBatchFetch(startDate.toISOString(), 10, 0, token, () => {
+    loadWithBatchFetch(startDate.toISOString(), 20, 0, token, () => {
       processAndSaveScheduleData();
     });
   } catch (error) {
@@ -234,7 +234,7 @@ async function fetchWithRetry(tuan, ngay, loaiLich, token) {
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000);
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const response = await fetch("/SinhVienTraCuu/GetDanhSachLichTheoTuan", {
         method: "POST",
@@ -413,7 +413,7 @@ function processAndSaveScheduleData() {
             if (chrome.runtime.lastError) {
               console.log("Lỗi", chrome.runtime.lastError.message);
             } else {
-              console.log("✅ Đã gửi message");
+              console.log("Đã gửi message");
             }
           }
         );
