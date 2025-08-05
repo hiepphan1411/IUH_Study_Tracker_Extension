@@ -127,9 +127,9 @@ function GradesPageContent({ keyValue }) {
                         const curriculumIsCertificate =
                           curriculumName.includes("chứng chỉ");
 
-                        console.log(
-                          `  🔍 Tiếng Anh analysis - Search: "${searchName}" (hasNumber: ${searchHasNumber}, isCert: ${searchIsCertificate}), Curriculum: "${curriculumName}" (hasNumber: ${curriculumHasNumber}, isCert: ${curriculumIsCertificate})`
-                        );
+                        // console.log(
+                        //   `  🔍 Tiếng Anh analysis - Search: "${searchName}" (hasNumber: ${searchHasNumber}, isCert: ${searchIsCertificate}), Curriculum: "${curriculumName}" (hasNumber: ${curriculumHasNumber}, isCert: ${curriculumIsCertificate})`
+                        // );
                         // Nếu cả hai đều có số (Tiếng Anh 1, Tiếng Anh 2)
                         if (searchHasNumber && curriculumHasNumber) {
                           const searchNumber =
@@ -154,9 +154,9 @@ function GradesPageContent({ keyValue }) {
                               soTTH: soTTH ? parseInt(soTTH) : null,
                             };
                           } else {
-                            console.log(
-                              `  ❌ Number mismatch: search=${searchNumber?.[1]} vs curriculum=${curriculumNumber?.[1]}`
-                            );
+                            // console.log(
+                            //   `  ❌ Number mismatch: search=${searchNumber?.[1]} vs curriculum=${curriculumNumber?.[1]}`
+                            // );
                           }
                         }
 
@@ -178,16 +178,16 @@ function GradesPageContent({ keyValue }) {
                           (searchHasNumber && curriculumIsCertificate) ||
                           (searchIsCertificate && curriculumHasNumber)
                         ) {
-                          console.log(
-                            `  ❌ Skipping cross-match between numbered and certificate Tiếng Anh`
-                          );
+                          // console.log(
+                          //   `  ❌ Skipping cross-match between numbered and certificate Tiếng Anh`
+                          // );
                           continue;
                         }
 
                         // Skip any other Tiếng Anh matching to avoid confusion
-                        console.log(
-                          `  ❌ Skipping other Tiếng Anh matching to avoid confusion`
-                        );
+                        // console.log(
+                        //   `  ❌ Skipping other Tiếng Anh matching to avoid confusion`
+                        // );
                         continue;
                       } // Partial matching
                       if (
@@ -274,7 +274,7 @@ function GradesPageContent({ keyValue }) {
 
               return { soTLT: null, soTTH: null };
             };
-            console.log("Curriculum data loaded in GradesPageContent");
+            // console.log("Curriculum data loaded in GradesPageContent");
             setCurriculumLoaded(true);
           } catch (error) {
             console.error("Lỗi parse curriculum data:", error);
@@ -527,20 +527,39 @@ function GradesPageContent({ keyValue }) {
           }
         } else {
           // Không tìm thấy thông tin trong chương trình khung, sử dụng logic dự phòng
-          console.log(
-            `No curriculum info found for "${subjectName}", defaulting to CHUA_XAC_DINH`
-          );
+          // Đặc biệt cho môn Tiếng Anh - mặc định là Lý thuyết
+          if (subjectName.toLowerCase().includes("tiếng anh")) {
+            // console.log(
+            //   `No curriculum info found for "${subjectName}", defaulting Tiếng Anh to LT`
+            // );
+            return "LT";
+          }
+          // console.log(
+          //   `No curriculum info found for "${subjectName}", defaulting to CHUA_XAC_DINH`
+          // );
           return "CHUA_XAC_DINH";
         }
       }
     } catch (error) {
       console.warn("Lỗi khi lấy thông tin từ chương trình khung:", error);
+      // Đặc biệt cho môn Tiếng Anh - mặc định là Lý thuyết
+      if (subjectName.toLowerCase().includes("tiếng anh")) {
+        return "LT";
+      }
       return "CHUA_XAC_DINH";
     }
 
-    console.log(
-      `→ Default to CHƯA XÁC ĐỊNH for "${subjectName}" (no curriculum data or fallback)`
-    );
+    // Đặc biệt cho môn Tiếng Anh - mặc định là Lý thuyết
+    if (subjectName.toLowerCase().includes("tiếng anh")) {
+      // console.log(
+      //   `→ Default Tiếng Anh to LÝ THUYẾT for "${subjectName}"`
+      // );
+      return "LT";
+    }
+
+    // console.log(
+    //   `→ Default to CHƯA XÁC ĐỊNH for "${subjectName}" (no curriculum data or fallback)`
+    // );
     // Mặc định là chưa xác định nếu không có chương trình khung
     return "CHUA_XAC_DINH";
   }; // Hàm lấy loại môn học hiện tại
@@ -644,7 +663,7 @@ function GradesPageContent({ keyValue }) {
 
       if (totalRows <= 3) {
         return false;
-      } else if (totalRows <= 5){
+      } else if (totalRows <= 5) {
         return currentIndex >= totalRows - 2;
       } else {
         return currentIndex >= totalRows - 4;
@@ -751,11 +770,10 @@ function GradesPageContent({ keyValue }) {
               justifyContent: "space-between",
             },
             title: isManuallyChanged
-              ? `${
-                  currentOption?.title || "Loại môn"
-                } (Đã thay đổi thủ công - Click để xem tùy chọn Reset)`
+              ? `${currentOption?.title || "Loại môn"
+              } (Đã thay đổi thủ công - Click để xem tùy chọn Reset)`
               : currentOption?.title ||
-                "Loại môn được xác định tự động từ chương trình khung",
+              "Loại môn được xác định tự động từ chương trình khung",
           },
           React.createElement(
             "span",
@@ -789,88 +807,88 @@ function GradesPageContent({ keyValue }) {
         ),
         // Custom dropdown menu with dynamic positioning
         isOpen &&
-          React.createElement(
-            "div",
-            {
-              ref: (el) => {
-                if (el) {
-                  const button = el.parentElement.querySelector(
-                    '[data-dropdown-key="' + dropdownKey + '"]'
-                  );
-                  const openUpward = shouldOpenUpward(button);
+        React.createElement(
+          "div",
+          {
+            ref: (el) => {
+              if (el) {
+                const button = el.parentElement.querySelector(
+                  '[data-dropdown-key="' + dropdownKey + '"]'
+                );
+                const openUpward = shouldOpenUpward(button);
 
-                  if (openUpward) {
-                    el.style.bottom = "100%";
-                    el.style.top = "auto";
-                    el.style.marginBottom = "1px";
-                    el.style.marginTop = "0";
-                  } else {
-                    el.style.top = "100%";
-                    el.style.bottom = "auto";
-                    el.style.marginTop = "1px";
-                    el.style.marginBottom = "0";
-                  }
-
-                  el.style.opacity = "0";
-                  el.style.transform = openUpward
-                    ? "translateY(5px)"
-                    : "translateY(-5px)";
-
-                  requestAnimationFrame(() => {
-                    el.style.transition =
-                      "opacity 0.15s ease, transform 0.15s ease";
-                    el.style.opacity = "1";
-                    el.style.transform = "translateY(0)";
-                  });
+                if (openUpward) {
+                  el.style.bottom = "100%";
+                  el.style.top = "auto";
+                  el.style.marginBottom = "1px";
+                  el.style.marginTop = "0";
+                } else {
+                  el.style.top = "100%";
+                  el.style.bottom = "auto";
+                  el.style.marginTop = "1px";
+                  el.style.marginBottom = "0";
                 }
-              },
-              style: {
-                position: "absolute",
-                left: "0",
-                right: "0",
-                backgroundColor: "#ffffff",
-                border: "1px solid #d1d5db",
-                borderRadius: "4px",
-                boxShadow:
-                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                zIndex: 1000,
-                overflow: "hidden",
-                maxHeight: "200px",
-                overflowY: "auto",
-              },
+
+                el.style.opacity = "0";
+                el.style.transform = openUpward
+                  ? "translateY(5px)"
+                  : "translateY(-5px)";
+
+                requestAnimationFrame(() => {
+                  el.style.transition =
+                    "opacity 0.15s ease, transform 0.15s ease";
+                  el.style.opacity = "1";
+                  el.style.transform = "translateY(0)";
+                });
+              }
             },
-            options.map((option, index) =>
-              React.createElement(
-                "div",
-                {
-                  key: option.value,
-                  onClick: () => handleOptionClick(option.value),
-                  style: {
-                    padding: "8px 10px",
-                    fontSize: "13px",
-                    fontWeight: option.isReset ? "bold" : "500",
-                    cursor: "pointer",
-                    backgroundColor:
-                      option.value === currentType
-                        ? "#eff6ff"
-                        : option.isReset
+            style: {
+              position: "absolute",
+              left: "0",
+              right: "0",
+              backgroundColor: "#ffffff",
+              border: "1px solid #d1d5db",
+              borderRadius: "4px",
+              boxShadow:
+                "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+              zIndex: 1000,
+              overflow: "hidden",
+              maxHeight: "200px",
+              overflowY: "auto",
+            },
+          },
+          options.map((option, index) =>
+            React.createElement(
+              "div",
+              {
+                key: option.value,
+                onClick: () => handleOptionClick(option.value),
+                style: {
+                  padding: "8px 10px",
+                  fontSize: "13px",
+                  fontWeight: option.isReset ? "bold" : "500",
+                  cursor: "pointer",
+                  backgroundColor:
+                    option.value === currentType
+                      ? "#eff6ff"
+                      : option.isReset
                         ? "#f0f9ff"
                         : "#ffffff",
-                    color:
-                      option.value === currentType
-                        ? "#1d4ed8"
-                        : option.isReset
+                  color:
+                    option.value === currentType
+                      ? "#1d4ed8"
+                      : option.isReset
                         ? "#0369a1"
                         : "#374151",
-                    transition: "background-color 0.1s ease",
-                    borderTop: option.isReset ? "1px solid #e5e7eb" : "none",
-                  },
-                  title: option.title,
+                  transition: "background-color 0.1s ease",
+                  borderTop: option.isReset ? "1px solid #e5e7eb" : "none",
                 },
-                option.label
-              )
+                title: option.title,
+              },
+              option.label
             )
           )
+        )
       )
     );
   };
@@ -1123,76 +1141,76 @@ function GradesPageContent({ keyValue }) {
       name: semester.hocKy || `Học kỳ ${index + 1}`,
       subjects: semester.monHoc
         ? semester.monHoc
-            .filter((subject, subIndex) => {
-              // Only take actual subjects (usually index 0-6), skip summary rows
-              // Summary rows have STT like "Điểm trung bình học kỳ hệ 10: ..."
-              const stt = subject["STT"];
-              return (
-                stt &&
-                !stt.includes("Điểm trung bình") &&
-                !stt.includes("Tổng số") &&
-                !stt.includes("Xếp loại học lực")
-              );
-            })
-            .map((subject, subIndex) => {
-              // Parse scores from IUH format
-              const parseScore = (scoreStr) => {
-                if (!scoreStr || scoreStr === "") {
-                  return null;
-                }
-                // Convert Vietnamese decimal format (8,50) to JS format (8.50)
-                const normalizedStr = scoreStr.toString().replace(",", ".");
-                const parsed = parseFloat(normalizedStr);
-                if (isNaN(parsed)) {
-                  return null;
-                }
-                // Làm tròn đến 1 chữ số thập phân
-                return Math.round(parsed * 10) / 10;
-              };
+          .filter((subject, subIndex) => {
+            // Only take actual subjects (usually index 0-6), skip summary rows
+            // Summary rows have STT like "Điểm trung bình học kỳ hệ 10: ..."
+            const stt = subject["STT"];
+            return (
+              stt &&
+              !stt.includes("Điểm trung bình") &&
+              !stt.includes("Tổng số") &&
+              !stt.includes("Xếp loại học lực")
+            );
+          })
+          .map((subject, subIndex) => {
+            // Parse scores from IUH format
+            const parseScore = (scoreStr) => {
+              if (!scoreStr || scoreStr === "") {
+                return null;
+              }
+              // Convert Vietnamese decimal format (8,50) to JS format (8.50)
+              const normalizedStr = scoreStr.toString().replace(",", ".");
+              const parsed = parseFloat(normalizedStr);
+              if (isNaN(parsed)) {
+                return null;
+              }
+              // Làm tròn đến 1 chữ số thập phân
+              return Math.round(parsed * 10) / 10;
+            };
 
-              const subjectName =
-                subject["Tên môn học"] || subject["Tên môn học/học phần"] || "";
+            const subjectName =
+              subject["Tên môn học"] || subject["Tên môn học/học phần"] || "";
 
-              // Tạm thời đặt loại mặc định, sẽ được cập nhật sau khi curriculum load xong
-              const key = `${index}-${subIndex}`;
+            // Tạm thời đặt loại mặc định, sẽ được cập nhật sau khi curriculum load xong
+            const key = `${index}-${subIndex}`;
 
-              // Lưu loại môn mặc định vào state (sẽ được cập nhật sau)
-              setSubjectTypes((prev) => ({
-                ...prev,
-                [key]: "CHUA_XAC_DINH", // Default to chưa xác định, will be updated after curriculum loads
-              }));
+            // Lưu loại môn mặc định vào state (sẽ được cập nhật sau)
+            setSubjectTypes((prev) => ({
+              ...prev,
+              [key]: "CHUA_XAC_DINH", // Default to chưa xác định, will be updated after curriculum loads
+            }));
 
-              return {
-                stt: subIndex + 1,
-                maLhp: subject["Mã lớp học phần"] || "",
-                name: subjectName,
-                credits:
-                  parseInt(subject["Số tín chỉ"] || subject["Tín chỉ"]) || 0,
-                diemGiuaKy: parseScore(subject["Giữa kỳ"]),
-                // Parse Thường xuyên columns (4 columns)
-                thuongXuyen: [
-                  parseScore(subject["Thường xuyên LT Hệ số 1 1"]),
-                  parseScore(subject["Thường xuyên LT Hệ số 1 2"]),
-                  parseScore(subject["Thường xuyên LT Hệ số 1 3"]),
-                  parseScore(subject["Thường xuyên LT Hệ số 1 4"]),
-                ],
-                // Parse Thực hành columns (5 columns)
-                thucHanh: [
-                  parseScore(subject["Thực hành 1"]),
-                  parseScore(subject["Thực hành 2"]),
-                  parseScore(subject["Thực hành 3"]),
-                  parseScore(subject["Thực hành 4"]),
-                  parseScore(subject["Thực hành 5"]),
-                ],
-                diemCuoiKy: parseScore(subject["Cuối kỳ"]),
-                diemTongKet: parseScore(subject["Điểm tổng kết"]),
-                thangDiem4: parseScore(subject["Thang điểm 4"]),
-                diemChu: subject["Điểm chữ"] || "",
-                xepLoai: subject["Xếp loại"] || "",
-                ghiChu: subject["Ghi chú"] || "",
-                dat: subject["Đạt"] || "",
-              };
-            })
+            return {
+              stt: subIndex + 1,
+              maLhp: subject["Mã lớp học phần"] || "",
+              name: subjectName,
+              credits:
+                parseInt(subject["Số tín chỉ"] || subject["Tín chỉ"]) || 0,
+              diemGiuaKy: parseScore(subject["Giữa kỳ"]),
+              // Parse Thường xuyên columns (4 columns)
+              thuongXuyen: [
+                parseScore(subject["Thường xuyên LT Hệ số 1 1"]),
+                parseScore(subject["Thường xuyên LT Hệ số 1 2"]),
+                parseScore(subject["Thường xuyên LT Hệ số 1 3"]),
+                parseScore(subject["Thường xuyên LT Hệ số 1 4"]),
+              ],
+              // Parse Thực hành columns (5 columns)
+              thucHanh: [
+                parseScore(subject["Thực hành 1"]),
+                parseScore(subject["Thực hành 2"]),
+                parseScore(subject["Thực hành 3"]),
+                parseScore(subject["Thực hành 4"]),
+                parseScore(subject["Thực hành 5"]),
+              ],
+              diemCuoiKy: parseScore(subject["Cuối kỳ"]),
+              diemTongKet: parseScore(subject["Điểm tổng kết"]),
+              thangDiem4: parseScore(subject["Thang điểm 4"]),
+              diemChu: subject["Điểm chữ"] || "",
+              xepLoai: subject["Xếp loại"] || "",
+              ghiChu: subject["Ghi chú"] || "",
+              dat: subject["Đạt"] || "",
+            };
+          })
         : [],
     }));
 
@@ -1261,11 +1279,11 @@ function GradesPageContent({ keyValue }) {
       const diemTongKetLT =
         slDiemLTKhacKhong > 0
           ? ((dsDiemTK.reduce((prev, curr) => prev + curr, 0) /
-              slDiemLTKhacKhong) *
-              20 +
-              giuaKy * 30 +
-              cuoiKy * 50) /
-            100
+            slDiemLTKhacKhong) *
+            20 +
+            giuaKy * 30 +
+            cuoiKy * 50) /
+          100
           : (giuaKy * 30 + cuoiKy * 70) / 100;
 
       const validThucHanhScores = dsDiemTH.filter(
@@ -1673,14 +1691,14 @@ function GradesPageContent({ keyValue }) {
       xepLoaiHocKy:
         tongTinChiHocKy > 0
           ? convertScore4ToClassificationHK(
-              Math.round((tong4HocKy / tongTinChiHocKy) * 100) / 100
-            )
+            Math.round((tong4HocKy / tongTinChiHocKy) * 100) / 100
+          )
           : "",
       xepLoaiTichLuy:
         tongTinChiTichLuy > 0
           ? convertScore4ToClassificationHK(
-              Math.round((tong4TichLuy / tongTinChiTichLuy) * 100) / 100
-            )
+            Math.round((tong4TichLuy / tongTinChiTichLuy) * 100) / 100
+          )
           : "",
     };
   };
@@ -1719,7 +1737,7 @@ function GradesPageContent({ keyValue }) {
     const diemThuongXuyen =
       thuongXuyen.length > 0
         ? thuongXuyen.reduce((sum, score) => sum + (score || 0), 0) /
-          thuongXuyen.length
+        thuongXuyen.length
         : 0;
 
     if (subjectType === "TH") {
@@ -1956,9 +1974,8 @@ function GradesPageContent({ keyValue }) {
     return React.createElement(
       "td",
       {
-        className: `${isLowScore ? "low-score" : ""} ${
-          isDisabled ? "disabled-cell" : ""
-        }`,
+        className: `${isLowScore ? "low-score" : ""} ${isDisabled ? "disabled-cell" : ""
+          }`,
         contentEditable: !isDisabled,
         suppressContentEditableWarning: true,
         style: {
@@ -2013,10 +2030,10 @@ function GradesPageContent({ keyValue }) {
           ? selectedType === "SPECIAL"
             ? "Môn đặc biệt - chỉ nhập điểm cuối kỳ"
             : selectedType === "LT" && isThucHanhColumn
-            ? "Môn lý thuyết - không có điểm thực hành"
-            : selectedType === "TH" && (isLyThuyetColumn || scoreType === "ck")
-            ? "Môn thực hành - chỉ nhập điểm thực hành"
-            : "Ô nhập bị vô hiệu hóa"
+              ? "Môn lý thuyết - không có điểm thực hành"
+              : selectedType === "TH" && (isLyThuyetColumn || scoreType === "ck")
+                ? "Môn thực hành - chỉ nhập điểm thực hành"
+                : "Ô nhập bị vô hiệu hóa"
           : "Nhập điểm từ 0-10. Điểm sẽ được làm tròn theo quy định IUH.",
         onInput: (e) => {
           if (!isDisabled) {
@@ -2497,7 +2514,7 @@ function GradesPageContent({ keyValue }) {
                           subject.diemTongKet !== undefined &&
                           subject.diemTongKet >= 0 &&
                           subject.diemTongKet <= 5) ||
-                        subject.diemTongKet === 0
+                          subject.diemTongKet === 0
                           ? { color: "#dc2626", fontWeight: "bold" }
                           : {},
                     },
@@ -2544,109 +2561,109 @@ function GradesPageContent({ keyValue }) {
 
         // Extended Semester Summary Table - chỉ hiển thị khi có điểm tổng kết
         semester.summary &&
-          semester.subjects.some(
-            (subject) =>
-              subject.diemTongKet !== null && subject.diemTongKet !== undefined
-          ) &&
+        semester.subjects.some(
+          (subject) =>
+            subject.diemTongKet !== null && subject.diemTongKet !== undefined
+        ) &&
+        React.createElement(
+          "div",
+          { className: "semester-summary-table" },
           React.createElement(
-            "div",
-            { className: "semester-summary-table" },
+            "table",
+            { className: "summary-table" },
             React.createElement(
-              "table",
-              { className: "summary-table" },
+              "tbody",
+              null,
+              // Điểm trung bình học kỳ
               React.createElement(
-                "tbody",
-                null,
-                // Điểm trung bình học kỳ
+                "tr",
+                { className: "summary-row" },
                 React.createElement(
-                  "tr",
-                  { className: "summary-row" },
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Điểm trung bình học kỳ hệ 10: ${semester.summary.diemTrungBinhHocKy10
-                      .toFixed(2)
-                      .replace(".", ",")}`
-                  ),
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Điểm trung bình học kỳ hệ 4: ${semester.summary.diemTrungBinhHocKy4
-                      .toFixed(2)
-                      .replace(".", ",")}`
-                  )
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Điểm trung bình học kỳ hệ 10: ${semester.summary.diemTrungBinhHocKy10
+                    .toFixed(2)
+                    .replace(".", ",")}`
                 ),
-
-                // Điểm trung bình tích lũy
                 React.createElement(
-                  "tr",
-                  { className: "summary-row" },
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Điểm trung bình tích lũy hệ 10: ${semester.summary.diemTrungBinhTichLuy10
-                      .toFixed(2)
-                      .replace(".", ",")}`
-                  ),
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Điểm trung bình tích lũy hệ 4: ${semester.summary.diemTrungBinhTichLuy4
-                      .toFixed(2)
-                      .replace(".", ",")}`
-                  )
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Điểm trung bình học kỳ hệ 4: ${semester.summary.diemTrungBinhHocKy4
+                    .toFixed(2)
+                    .replace(".", ",")}`
+                )
+              ),
+
+              // Điểm trung bình tích lũy
+              React.createElement(
+                "tr",
+                { className: "summary-row" },
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Điểm trung bình tích lũy hệ 10: ${semester.summary.diemTrungBinhTichLuy10
+                    .toFixed(2)
+                    .replace(".", ",")}`
                 ),
-
-                // Tổng số tín chỉ
                 React.createElement(
-                  "tr",
-                  { className: "summary-row" },
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Tổng số tín chỉ đã đăng ký: ${semester.summary.tongTinChiDangKy}`
-                  ),
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Tổng số tín chỉ tích lũy: ${semester.summary.tongTinChiTichLuy}`
-                  )
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Điểm trung bình tích lũy hệ 4: ${semester.summary.diemTrungBinhTichLuy4
+                    .toFixed(2)
+                    .replace(".", ",")}`
+                )
+              ),
+
+              // Tổng số tín chỉ
+              React.createElement(
+                "tr",
+                { className: "summary-row" },
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Tổng số tín chỉ đã đăng ký: ${semester.summary.tongTinChiDangKy}`
                 ),
-
-                // Tổng số tín chỉ đạt và nợ
                 React.createElement(
-                  "tr",
-                  { className: "summary-row" },
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Tổng số tín chỉ đạt: ${semester.summary.tongTinChiDat}`
-                  ),
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Tổng số tín chỉ nợ tính đến hiện tại: ${semester.summary.tongTinChiNo}`
-                  )
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Tổng số tín chỉ tích lũy: ${semester.summary.tongTinChiTichLuy}`
+                )
+              ),
+
+              // Tổng số tín chỉ đạt và nợ
+              React.createElement(
+                "tr",
+                { className: "summary-row" },
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Tổng số tín chỉ đạt: ${semester.summary.tongTinChiDat}`
                 ),
-
-                // Xếp loại học lực
                 React.createElement(
-                  "tr",
-                  { className: "summary-row" },
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Xếp loại học lực tích lũy: ${semester.summary.xepLoaiTichLuy}`
-                  ),
-                  React.createElement(
-                    "td",
-                    { className: "summary-label", colSpan: 2 },
-                    `Xếp loại học lực học kỳ: ${semester.summary.xepLoaiHocKy}`
-                  )
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Tổng số tín chỉ nợ tính đến hiện tại: ${semester.summary.tongTinChiNo}`
+                )
+              ),
+
+              // Xếp loại học lực
+              React.createElement(
+                "tr",
+                { className: "summary-row" },
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Xếp loại học lực tích lũy: ${semester.summary.xepLoaiTichLuy}`
+                ),
+                React.createElement(
+                  "td",
+                  { className: "summary-label", colSpan: 2 },
+                  `Xếp loại học lực học kỳ: ${semester.summary.xepLoaiHocKy}`
                 )
               )
             )
           )
+        )
       )
     )
   );
