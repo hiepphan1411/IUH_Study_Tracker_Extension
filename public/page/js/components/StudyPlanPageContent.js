@@ -1225,7 +1225,7 @@ function StudyPlanPageContent() {
             gap: "8px",
           },
         },
-        "📊 Thống kê học kỳ dự kiến"
+        "Thống kê học kỳ dự kiến"
       ),
 
       // Bảng thống kê học kỳ

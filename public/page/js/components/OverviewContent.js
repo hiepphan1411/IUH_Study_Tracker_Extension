@@ -293,11 +293,12 @@ function SubjectGradeStatistic({ subjects }) {
               }),
               React.createElement(Tooltip, {
                 contentStyle: {
-                  backgroundColor: "rgba(31, 41, 55, 0.8)",
-                  borderColor: "#4B5563",
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  borderColor: "#d1d5db",
                   borderRadius: "8px",
+                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)"
                 },
-                itemStyle: { color: "#E5E7EB" },
+                itemStyle: { color: "#374151" },
                 formatter: getTooltipFormatter(),
               }),
               React.createElement(Legend),
@@ -330,7 +331,7 @@ function SubjectGradeStatistic({ subjects }) {
                   opacity: 0.5,
                 },
               },
-              "📊"
+              ""
             ),
             React.createElement(
               "h3",
@@ -592,11 +593,12 @@ function StatisticsResultsBySemester({ results }) {
               }),
               React.createElement(Tooltip, {
                 contentStyle: {
-                  backgroundColor: "rgba(31, 41, 55, 0.8)",
-                  borderColor: "#4B5563",
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  borderColor: "#d1d5db",
                   borderRadius: "8px",
+                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
                 },
-                itemStyle: { color: "#E5E7EB" },
+                itemStyle: { color: "#374151" },
                 formatter: getTooltipFormatter(),
               }),
               React.createElement(Line, {
@@ -849,7 +851,7 @@ function OverviewPageContent() {
             ["diem_json", "diem_timestamp"],
             function (res) {
               if (chrome.runtime.lastError) {
-                console.error("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
+                console.log("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
                 resolve({ diem_json: null });
                 return;
               }
@@ -857,7 +859,7 @@ function OverviewPageContent() {
             }
           );
         });
-        //console.log(result);
+        // console.log(result);
         //Lấy chương trình khung và lưu vào state
         chrome.storage.local.get(
           ["curriculum_json", "curriculum_timestamp"],
@@ -1025,7 +1027,7 @@ function OverviewPageContent() {
 
           const transformedSubjects = parsedData;
 
-          //console.log("Result: ", transformedSubjects);
+          console.log("Result: ", transformedSubjects);
           // console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
 
           setSubjects(transformedSubjects);

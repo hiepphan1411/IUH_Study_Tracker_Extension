@@ -166,6 +166,7 @@ function App() {
 
             if (scheduleJson) {
                 const parsedData = JSON.parse(scheduleJson);
+                console.log(parsedData);
                 const lichHoc = parsedData.lichHoc || [];
                 const lichThi = parsedData.lichThi || [];
 

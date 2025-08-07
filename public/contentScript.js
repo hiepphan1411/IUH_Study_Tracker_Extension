@@ -113,7 +113,7 @@
       chrome.storage.local.set(
         {
           diem_json: JSON.stringify(result, null, 2),
-          diem_timestamp: Date.now(),
+          diem_timestamp: new Date().toISOString(),
         },
         function () {
           chrome.runtime.sendMessage({
@@ -162,7 +162,7 @@ function loadScheduleData(token) {
     const now = new Date();
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    loadWithBatchFetch(startDate.toISOString(), 20, 0, token, () => {
+    loadWithBatchFetch(startDate.toISOString(), 10, 0, token, () => {
       processAndSaveScheduleData();
     });
   } catch (error) {
@@ -214,7 +214,7 @@ async function loadWithBatchFetch(
         .map(async (w) => {
           const res = await fetchWithRetry(w.tuan, w.ngay, loaiLich, token);
           if (res) ketQuaMang.push(res);
-          else console.error(`❌ Tuần ${w.tuan} retry vẫn lỗi`);
+          else console.error(` Tuần ${w.tuan} retry vẫn lỗi`);
         })
     );
   }
@@ -362,58 +362,7 @@ function processAndSaveScheduleData() {
             if (chrome.runtime.lastError) {
               console.log("Lỗi gửi message:", chrome.runtime.lastError.message);
             } else {
-              console.log("✅ Dữ liệu đã lưu & gửi message");
-            }
-          }
-        );
-      }
-    );
-  } catch (error) {
-    console.error("Lỗi trong processAndSaveScheduleData:", error);
-  }
-}
-
-function processAndSaveScheduleData() {
-  try {
-    if (!window.ketQuaMang || window.ketQuaMang.length === 0) return;
-
-    const tatCaTietHoc = window.ketQuaMang.flatMap((tuan) =>
-      parseLichHocFromHTML(tuan.duLieu)
-    );
-
-    const lichHoc = tatCaTietHoc.filter((t) => t.type === "lich_hoc");
-    const lichThi = tatCaTietHoc.filter((t) => t.type === "lich_thi");
-
-    const scheduleData = {
-      lichHoc: lichHoc,
-      lichThi: lichThi,
-      tongSo: tatCaTietHoc.length,
-      capNhatLuc: new Date().toISOString(),
-    };
-
-    console.log(scheduleData);
-
-    chrome.storage.local.set(
-      {
-        schedule_json: JSON.stringify(scheduleData),
-        schedule_timestamp: Date.now(),
-      },
-      function () {
-        if (chrome.runtime.lastError) {
-          console.error("Lỗi lưu dữ liệu:", chrome.runtime.lastError);
-          return;
-        }
-
-        chrome.runtime.sendMessage(
-          {
-            type: "SCHEDULE_SAVED",
-            data: scheduleData,
-          },
-          (response) => {
-            if (chrome.runtime.lastError) {
-              console.log("Lỗi", chrome.runtime.lastError.message);
-            } else {
-              console.log("Đã gửi message");
+              console.log("Dữ liệu đã lưu & gửi message");
             }
           }
         );
@@ -423,6 +372,7 @@ function processAndSaveScheduleData() {
     console.log("Lỗi trong processAndSaveScheduleData:", error);
   }
 }
+
 
 //Lấy chương tình khung trong trang sv.iuh
 //Chuyển trang sang chương trình khung khi người dùng đăng nhập sv.iuh
