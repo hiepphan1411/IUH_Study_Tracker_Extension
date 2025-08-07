@@ -45,13 +45,57 @@ function App() {
     }
   };
 
+  //Xử lý xem lịch học
   const handleViewSchedule = async () => {
     if (!validateKey(key)) return;
 
     setIsLoading(true);
-    let createdTabId = null;
 
     try {
+      // Kiểm tra dữ liệu đã lưu
+      const result = await new Promise((resolve) => {
+        chrome.storage.local.get(
+          ["schedule_json", "schedule_timestamp"],
+          function (res) {
+            if (chrome.runtime.lastError) {
+              console.error("Lỗi Chrome Storage:", chrome.runtime.lastError);
+              resolve({ schedule_json: null });
+              return;
+            }
+            resolve(res);
+          }
+        );
+      });
+
+      // Nếu có dữ liệu lịch học và timestamp
+      if (result.schedule_json && result.schedule_timestamp) {
+        try {
+          const scheduleData = JSON.parse(result.schedule_json);
+          if (scheduleData.capNhatLuc) {
+            const updateTime = new Date(scheduleData.capNhatLuc);
+            const currentTime = new Date();
+
+            const diffTime = currentTime - updateTime;
+
+            const diffHours = diffTime / (1000 * 60 * 60);
+
+            if (diffHours < 24) {
+              const schedulePageUrl = chrome.runtime.getURL(
+                `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
+              );
+              chrome.tabs.create({ url: schedulePageUrl });
+              setIsLoading(false);
+              return;
+            }
+          }
+        } catch (parseError) {
+          console.log("Lỗi khi phân tích dữ liệu lịch học:", parseError);
+        }
+      }
+
+      let createdTabId = null;
+      let tabClosed = false;
+
       const messageListener = (message, sender, sendResponse) => {
         if (message.type === "SCHEDULE_SAVED") {
           const schedulePageUrl = chrome.runtime.getURL(
@@ -59,8 +103,8 @@ function App() {
           );
           chrome.tabs.create({ url: schedulePageUrl });
 
-          if (sender.tab?.id) {
-            chrome.tabs.remove(sender.tab.id);
+          if (sender.tab?.id === createdTabId) {
+            tabClosed = true;
           }
 
           chrome.runtime.onMessage.removeListener(messageListener);
@@ -82,37 +126,97 @@ function App() {
 
       createdTabId = createdTab.id;
 
+      // Gửi yêu cầu cho background
+      chrome.runtime.sendMessage({
+        type: "AUTO_CLOSE_TAB",
+        tabId: createdTabId,
+        timeout: 35000,
+      });
+
       setTimeout(() => {
         chrome.runtime.onMessage.removeListener(messageListener);
 
-        if (createdTabId) {
-          chrome.tabs.remove(createdTabId).catch((error) => {
-            console.log("Tab đã được đóng hoặc không tồn tại:", error);
-          });
+        if (createdTabId && !tabClosed) {
+          chrome.tabs
+            .get(createdTabId)
+            .then(() => {
+              chrome.tabs.remove(createdTabId).catch((error) => {
+                console.log("Tab đã được đóng hoặc không tồn tại:", error);
+              });
+            })
+            .catch(() => {
+              console.log("Tab không tồn tại, có thể đã được đóng trước đó");
+            });
         }
 
-        const schedulePageUrl = chrome.runtime.getURL(
-          `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
-        );
-        chrome.tabs.create({ url: schedulePageUrl });
+        if (!tabClosed) {
+          const schedulePageUrl = chrome.runtime.getURL(
+            `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
+          );
+          chrome.tabs.create({ url: schedulePageUrl });
+        }
+
         setIsLoading(false);
-      }, 20000);
+      }, 37000);
     } catch (error) {
+      console.log("Lỗi khi xử lý:", error);
+
       if (createdTabId) {
-        chrome.tabs.remove(createdTabId).catch(() => {});
+        chrome.tabs
+          .get(createdTabId)
+          .then(() => chrome.tabs.remove(createdTabId))
+          .catch(() => {});
       }
 
       setIsLoading(false);
     }
   };
-
+  //Xử lý xem điểm
   const handleViewGrades = async () => {
     if (!validateKey(key)) return;
 
     setIsLoading(true);
-    let createdTabId = null;
 
     try {
+      // Kiểm tra dữ liệu điểm đã lưu
+      const result = await new Promise((resolve) => {
+        chrome.storage.local.get(
+          ["diem_json", "diem_timestamp"],
+          function (res) {
+            if (chrome.runtime.lastError) {
+              console.log("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
+              resolve({ diem_json: null });
+              return;
+            }
+            resolve(res);
+          }
+        );
+      });
+
+      if (result.diem_json && result.diem_timestamp) {
+        try {
+          const currentTime = new Date();
+          const updateTime = new Date(result.diem_timestamp);
+
+          const diffTime = currentTime - updateTime;
+          const diffHours = diffTime / (1000 * 60 * 60);
+
+          if (diffHours < 24) {
+            const mainPageUrl = chrome.runtime.getURL(
+              `page/MainPage.html?k=${encodeURIComponent(key)}`
+            );
+            chrome.tabs.create({ url: mainPageUrl });
+            setIsLoading(false);
+            return;
+          }
+        } catch (parseError) {
+          console.log("Lỗi khi phân tích dữ liệu điểm:", parseError);
+        }
+      }
+
+      let createdTabId = null;
+      let tabClosed = false;
+
       const messageListener = (message, sender, sendResponse) => {
         if (message.type === "GRADES_SAVED") {
           const mainPageUrl = chrome.runtime.getURL(
@@ -122,6 +226,9 @@ function App() {
 
           if (sender.tab?.id) {
             chrome.tabs.remove(sender.tab.id);
+            if (sender.tab.id === createdTabId) {
+              tabClosed = true;
+            }
           }
 
           chrome.runtime.onMessage.removeListener(messageListener);
@@ -140,30 +247,50 @@ function App() {
         pinned: true,
       });
       createdTabId = createdTab.id;
+
       chrome.runtime.sendMessage({
         type: "AUTO_CLOSE_TAB",
         tabId: createdTabId,
-        timeout: 15000, 
+        timeout: 15000,
       });
+
       setTimeout(() => {
         chrome.runtime.onMessage.removeListener(messageListener);
-        if (createdTabId) {
-          chrome.tabs.remove(createdTabId).catch((error) => {
-            console.log("Tab đã được đóng hoặc không tồn tại:", error);
-          });
+
+        if (createdTabId && !tabClosed) {
+          chrome.tabs
+            .get(createdTabId)
+            .then(() => {
+              chrome.tabs.remove(createdTabId).catch((error) => {
+                console.log("Tab đã được đóng hoặc không tồn tại:", error);
+              });
+            })
+            .catch(() => {
+              console.log("Tab không tồn tại, có thể đã được đóng trước đó");
+            });
         }
-        const mainPageUrl = chrome.runtime.getURL(
-          `page/MainPage.html?k=${encodeURIComponent(key)}`
-        );
-        chrome.tabs.create({ url: mainPageUrl });
+
+        if (!tabClosed) {
+          const mainPageUrl = chrome.runtime.getURL(
+            `page/MainPage.html?k=${encodeURIComponent(key)}`
+          );
+          chrome.tabs.create({ url: mainPageUrl });
+        }
 
         setIsLoading(false);
-      }, 8000);
+      }, 17000);
     } catch (error) {
       console.error("Lỗi khi mở trang:", error);
+
       if (createdTabId) {
-        chrome.tabs.remove(createdTabId).catch(() => {});
+        chrome.tabs
+          .get(createdTabId)
+          .then(() => chrome.tabs.remove(createdTabId))
+          .catch(() => {
+            console.log("Tab không tồn tại, có thể đã được đóng trước đó");
+          });
       }
+
       setIsLoading(false);
     }
   };
@@ -437,7 +564,7 @@ function App() {
                         d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                       />
                     </svg>
-                    <strong>Email:</strong> support@iuh-tracker.com
+                    <strong>Email:</strong> hgnd27811.dev@gmail.com
                   </p>
                   <p className="flex items-center p-2 bg-purple-50 rounded-lg">
                     <svg
@@ -453,7 +580,15 @@ function App() {
                         d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                       />
                     </svg>
-                    <strong>Hotline:</strong> 0123-456-789
+                    <strong>Chính sách bảo mật:</strong>&nbsp;
+                    <a
+                      href="https://hiepphan1411.github.io/iuh-grade-guard-privacy/html/index.html"
+                      className="text-blue-600 underline hover:text-blue-800"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      click here
+                    </a>
                   </p>
                 </div>
               </div>
