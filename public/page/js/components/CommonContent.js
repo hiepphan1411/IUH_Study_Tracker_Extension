@@ -259,6 +259,39 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
 
 // Header Component
 function Header({ title }) {
+  const [lastUpdated, setLastUpdated] = React.useState(null);
+
+  React.useEffect(() => {
+    const fetchLastUpdated = async () => {
+      try {
+        const result = await new Promise((resolve) => {
+          chrome.storage.local.get(["diem_timestamp"], function (res) {
+            if (chrome.runtime.lastError) {
+              console.log("Lỗi khi lấy thời gian cập nhật:", chrome.runtime.lastError);
+              resolve({ diem_timestamp: null });
+              return;
+            }
+            resolve(res);
+          });
+        });
+
+        if (result.diem_timestamp) {
+          const updateTime = new Date(result.diem_timestamp);
+          setLastUpdated(updateTime);
+        }
+      } catch (error) {
+        console.log("Lỗi khi lấy thời gian cập nhật:", error);
+      }
+    };
+
+    fetchLastUpdated();
+  }, []);
+
+
+  const formattedTime = lastUpdated 
+    ? `${lastUpdated.getDate()}/${lastUpdated.getMonth() + 1}/${lastUpdated.getFullYear()} ${lastUpdated.getHours()}:${String(lastUpdated.getMinutes()).padStart(2, '0')}`
+    : "Chưa cập nhật";
+
   return React.createElement(
     "header",
     { className: "header" },
@@ -284,7 +317,46 @@ function Header({ title }) {
           })
         )
       ),
-      React.createElement("h1", { className: "header-title" }, title)
+      React.createElement("h1", { className: "header-title" }, title),
+      React.createElement(
+        "div", 
+        { 
+          className: "header-timestamp",
+          style: {
+            fontSize: "0.8rem",
+            color: "rgb(255, 255, 255)",
+            marginLeft: "auto",
+            display: "flex",
+            alignItems: "center"
+          }
+        },
+        React.createElement(
+          "span",
+          { 
+            style: { 
+              marginRight: "5px",
+              display: "flex",
+              alignItems: "center"
+            } 
+          },
+          React.createElement(
+            "svg",
+            {
+              width: "14",
+              height: "14",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+              style: { marginRight: "5px" }
+            },
+            React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
+            React.createElement("polyline", { points: "12 6 12 12 16 14" })
+          ),
+          "Dữ liệu cập nhật lúc:"
+        ),
+        React.createElement("span", { style: { fontWeight: "500" } }, formattedTime)
+      )
     )
   );
 }
