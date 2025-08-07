@@ -49,7 +49,7 @@ function App() {
     if (!validateKey(key)) return;
 
     setIsLoading(true);
-    let createdTabId = null; 
+    let createdTabId = null;
 
     try {
       const messageListener = (message, sender, sendResponse) => {
@@ -106,10 +106,11 @@ function App() {
     }
   };
 
-const handleViewGrades = async () => {
-  if (!validateKey(key)) return;
+  const handleViewGrades = async () => {
+    if (!validateKey(key)) return;
 
-  setIsLoading(true);
+    setIsLoading(true);
+    let createdTabId = null;
 
     try {
       const messageListener = (message, sender, sendResponse) => {
@@ -119,7 +120,9 @@ const handleViewGrades = async () => {
           );
           chrome.tabs.create({ url: mainPageUrl });
 
-          chrome.tabs.remove(sender.tab.id);
+          if (sender.tab?.id) {
+            chrome.tabs.remove(sender.tab.id);
+          }
 
           chrome.runtime.onMessage.removeListener(messageListener);
           setIsLoading(false);
@@ -131,12 +134,21 @@ const handleViewGrades = async () => {
       const gradesUrl = `https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html?k=${encodeURIComponent(
         key
       )}`;
-      await chrome.tabs.create({ url: gradesUrl, active: false, pinned: true });
-
+      const createdTab = await chrome.tabs.create({
+        url: gradesUrl,
+        active: false,
+        pinned: true,
+      });
+      createdTabId = createdTab.id;
+      chrome.runtime.sendMessage({
+        type: "AUTO_CLOSE_TAB",
+        tabId: createdTabId,
+        timeout: 15000, 
+      });
       setTimeout(() => {
         chrome.runtime.onMessage.removeListener(messageListener);
-        if (tabId) {
-          chrome.tabs.remove(tabId).catch((error) => {
+        if (createdTabId) {
+          chrome.tabs.remove(createdTabId).catch((error) => {
             console.log("Tab đã được đóng hoặc không tồn tại:", error);
           });
         }
@@ -146,9 +158,12 @@ const handleViewGrades = async () => {
         chrome.tabs.create({ url: mainPageUrl });
 
         setIsLoading(false);
-      }, 15000);
+      }, 8000);
     } catch (error) {
       console.error("Lỗi khi mở trang:", error);
+      if (createdTabId) {
+        chrome.tabs.remove(createdTabId).catch(() => {});
+      }
       setIsLoading(false);
     }
   };

@@ -12,7 +12,8 @@
   "permissions": [
     "tabs",
     "scripting",
-    "storage"
+    "storage",
+    "activeTab"
   ],
   "host_permissions": [
     "https://sv.iuh.edu.vn/*"
