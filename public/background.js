@@ -38,7 +38,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "AUTO_CLOSE_TAB") {
     const { tabId, timeout } = message;
     setTimeout(() => {
-      chrome.tabs.remove(tabId, () => {
+      chrome.tabs.get(tabId, (tab) => {
+        if (chrome.runtime.lastError) {
+          return;
+        }
+        chrome.tabs.remove(tabId, () => {
+          if (chrome.runtime.lastError) {
+            console.log(
+              `Không thể đóng tab ${tabId}:`,
+              chrome.runtime.lastError.message
+            );
+          }
+        });
       });
     }, timeout);
   }

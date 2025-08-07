@@ -76,7 +76,6 @@ function App() {
             const currentTime = new Date();
 
             const diffTime = currentTime - updateTime;
-
             const diffHours = diffTime / (1000 * 60 * 60);
 
             if (diffHours < 24) {
@@ -103,8 +102,11 @@ function App() {
           );
           chrome.tabs.create({ url: schedulePageUrl });
 
-          if (sender.tab?.id === createdTabId) {
-            tabClosed = true;
+          if (sender.tab?.id) {
+            chrome.tabs.remove(sender.tab.id);
+            if (sender.tab.id === createdTabId) {
+              tabClosed = true;
+            }
           }
 
           chrome.runtime.onMessage.removeListener(messageListener);
@@ -126,7 +128,6 @@ function App() {
 
       createdTabId = createdTab.id;
 
-      // Gửi yêu cầu cho background
       chrome.runtime.sendMessage({
         type: "AUTO_CLOSE_TAB",
         tabId: createdTabId,
@@ -165,7 +166,9 @@ function App() {
         chrome.tabs
           .get(createdTabId)
           .then(() => chrome.tabs.remove(createdTabId))
-          .catch(() => {});
+          .catch(() => {
+            console.log("Tab không tồn tại, có thể đã được đóng trước đó");
+          });
       }
 
       setIsLoading(false);
@@ -195,7 +198,6 @@ function App() {
 
       if (result.diem_json && result.diem_timestamp) {
         try {
-
           const currentTime = new Date();
           const updateTime = new Date(result.diem_timestamp);
 
@@ -208,7 +210,7 @@ function App() {
             );
             chrome.tabs.create({ url: mainPageUrl });
             setIsLoading(false);
-            return; 
+            return;
           }
         } catch (parseError) {
           console.log("Lỗi khi phân tích dữ liệu điểm:", parseError);
@@ -311,24 +313,14 @@ function App() {
       <div className="w-full h-full flex flex-col">
         <div className="bg-white rounded-xl shadow-lg p-4 mb-3 flex-shrink-0 transform transition-all duration-300 hover:shadow-xl">
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-500 to-slate-600 p-2 rounded-full shadow-md transition-transform duration-300 hover:scale-110">
-              <svg
-                className="w-6 h-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
+            <div className="rounded-full shadow-md transition-transform duration-300 hover:scale-110">
+              <img
+                src="../public/image/icon128.jpg"
+                alt="IUH Grade Guard Logo"
+                className="w-10 h-10 object-cover rounded-full"
+              />
             </div>
-            <h1 className="text-lg font-bold text-gray-800">
-              IUH Study Tracker
-            </h1>
+            <h1 className="text-lg font-bold text-gray-800">IUH Grade Guard</h1>
           </div>
         </div>
 
@@ -565,7 +557,7 @@ function App() {
                         d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                       />
                     </svg>
-                    <strong>Email:</strong> support@iuh-tracker.com
+                    <strong>Email:</strong> hgnd27811.dev@gmail.com
                   </p>
                   <p className="flex items-center p-2 bg-purple-50 rounded-lg">
                     <svg
@@ -581,7 +573,15 @@ function App() {
                         d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                       />
                     </svg>
-                    <strong>Hotline:</strong> 0123-456-789
+                    <strong>Chính sách bảo mật:</strong>&nbsp;
+                    <a
+                      href="https://hiepphan1411.github.io/iuh-grade-guard-privacy/html/index.html"
+                      className="text-blue-600 underline hover:text-blue-800"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      click here
+                    </a>
                   </p>
                 </div>
               </div>
