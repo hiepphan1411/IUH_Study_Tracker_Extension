@@ -340,8 +340,7 @@ function processAndSaveScheduleData() {
       capNhatLuc: new Date().toISOString(),
     };
 
-    console.log(scheduleData);
-
+    console.log(scheduleData)
     chrome.storage.local.set(
       {
         schedule_json: JSON.stringify(scheduleData),
@@ -349,7 +348,7 @@ function processAndSaveScheduleData() {
       },
       () => {
         if (chrome.runtime.lastError) {
-          console.error("Lỗi lưu dữ liệu:", chrome.runtime.lastError);
+          console.log("Lỗi lưu dữ liệu:", chrome.runtime.lastError);
           return;
         }
 

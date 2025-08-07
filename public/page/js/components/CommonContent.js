@@ -146,7 +146,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                 whiteSpace: "nowrap",
               },
             },
-            "IUH Study Tracker"
+            "IUH Grade Guard"
           )
       ),
 
