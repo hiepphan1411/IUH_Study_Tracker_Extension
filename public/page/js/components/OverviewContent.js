@@ -851,7 +851,7 @@ function OverviewPageContent() {
             ["diem_json", "diem_timestamp"],
             function (res) {
               if (chrome.runtime.lastError) {
-                console.error("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
+                console.log("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
                 resolve({ diem_json: null });
                 return;
               }
@@ -859,7 +859,7 @@ function OverviewPageContent() {
             }
           );
         });
-        //console.log(result);
+        // console.log(result);
         //Lấy chương trình khung và lưu vào state
         chrome.storage.local.get(
           ["curriculum_json", "curriculum_timestamp"],
@@ -1027,7 +1027,7 @@ function OverviewPageContent() {
 
           const transformedSubjects = parsedData;
 
-          //console.log("Result: ", transformedSubjects);
+          console.log("Result: ", transformedSubjects);
           // console.log("Thống kê: ", countGradesByLetter(transformedSubjects));
 
           setSubjects(transformedSubjects);

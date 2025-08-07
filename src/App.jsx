@@ -45,13 +45,57 @@ function App() {
     }
   };
 
+  //Xử lý xem lịch học
   const handleViewSchedule = async () => {
     if (!validateKey(key)) return;
 
     setIsLoading(true);
-    let createdTabId = null;
 
     try {
+      // Kiểm tra dữ liệu đã lưu
+      const result = await new Promise((resolve) => {
+        chrome.storage.local.get(
+          ["schedule_json", "schedule_timestamp"],
+          function (res) {
+            if (chrome.runtime.lastError) {
+              console.error("Lỗi Chrome Storage:", chrome.runtime.lastError);
+              resolve({ schedule_json: null });
+              return;
+            }
+            resolve(res);
+          }
+        );
+      });
+
+      // Nếu có dữ liệu lịch học và timestamp
+      if (result.schedule_json && result.schedule_timestamp) {
+        try {
+          const scheduleData = JSON.parse(result.schedule_json);
+          if (scheduleData.capNhatLuc) {
+            const updateTime = new Date(scheduleData.capNhatLuc);
+            const currentTime = new Date();
+
+            const diffTime = currentTime - updateTime;
+
+            const diffHours = diffTime / (1000 * 60 * 60);
+
+            if (diffHours < 24) {
+              const schedulePageUrl = chrome.runtime.getURL(
+                `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
+              );
+              chrome.tabs.create({ url: schedulePageUrl });
+              setIsLoading(false);
+              return;
+            }
+          }
+        } catch (parseError) {
+          console.log("Lỗi khi phân tích dữ liệu lịch học:", parseError);
+        }
+      }
+
+      let createdTabId = null;
+      let tabClosed = false;
+
       const messageListener = (message, sender, sendResponse) => {
         if (message.type === "SCHEDULE_SAVED") {
           const schedulePageUrl = chrome.runtime.getURL(
@@ -59,8 +103,8 @@ function App() {
           );
           chrome.tabs.create({ url: schedulePageUrl });
 
-          if (sender.tab?.id) {
-            chrome.tabs.remove(sender.tab.id);
+          if (sender.tab?.id === createdTabId) {
+            tabClosed = true;
           }
 
           chrome.runtime.onMessage.removeListener(messageListener);
@@ -81,43 +125,99 @@ function App() {
       });
 
       createdTabId = createdTab.id;
-            chrome.runtime.sendMessage({
+
+      // Gửi yêu cầu cho background
+      chrome.runtime.sendMessage({
         type: "AUTO_CLOSE_TAB",
         tabId: createdTabId,
-        timeout: 20000, 
+        timeout: 35000,
       });
 
       setTimeout(() => {
-        // chrome.runtime.onMessage.removeListener(messageListener);
+        chrome.runtime.onMessage.removeListener(messageListener);
 
-        // if (createdTabId) {
-        //   chrome.tabs.remove(createdTabId).catch((error) => {
-        //     console.log("Tab đã được đóng hoặc không tồn tại:", error);
-        //   });
-        // }
+        if (createdTabId && !tabClosed) {
+          chrome.tabs
+            .get(createdTabId)
+            .then(() => {
+              chrome.tabs.remove(createdTabId).catch((error) => {
+                console.log("Tab đã được đóng hoặc không tồn tại:", error);
+              });
+            })
+            .catch(() => {
+              console.log("Tab không tồn tại, có thể đã được đóng trước đó");
+            });
+        }
 
-        const schedulePageUrl = chrome.runtime.getURL(
-          `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
-        );
-        chrome.tabs.create({ url: schedulePageUrl });
+        if (!tabClosed) {
+          const schedulePageUrl = chrome.runtime.getURL(
+            `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
+          );
+          chrome.tabs.create({ url: schedulePageUrl });
+        }
+
         setIsLoading(false);
-      }, 22000);
+      }, 37000);
     } catch (error) {
-      // if (createdTabId) {
-      //   chrome.tabs.remove(createdTabId).catch(() => {});
-      // }
+      console.log("Lỗi khi xử lý:", error);
+
+      if (createdTabId) {
+        chrome.tabs
+          .get(createdTabId)
+          .then(() => chrome.tabs.remove(createdTabId))
+          .catch(() => {});
+      }
 
       setIsLoading(false);
     }
   };
-
+  //Xử lý xem điểm
   const handleViewGrades = async () => {
     if (!validateKey(key)) return;
 
     setIsLoading(true);
-    let createdTabId = null;
 
     try {
+      // Kiểm tra dữ liệu điểm đã lưu
+      const result = await new Promise((resolve) => {
+        chrome.storage.local.get(
+          ["diem_json", "diem_timestamp"],
+          function (res) {
+            if (chrome.runtime.lastError) {
+              console.log("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
+              resolve({ diem_json: null });
+              return;
+            }
+            resolve(res);
+          }
+        );
+      });
+
+      if (result.diem_json && result.diem_timestamp) {
+        try {
+
+          const currentTime = new Date();
+          const updateTime = new Date(result.diem_timestamp);
+
+          const diffTime = currentTime - updateTime;
+          const diffHours = diffTime / (1000 * 60 * 60);
+
+          if (diffHours < 24) {
+            const mainPageUrl = chrome.runtime.getURL(
+              `page/MainPage.html?k=${encodeURIComponent(key)}`
+            );
+            chrome.tabs.create({ url: mainPageUrl });
+            setIsLoading(false);
+            return; 
+          }
+        } catch (parseError) {
+          console.log("Lỗi khi phân tích dữ liệu điểm:", parseError);
+        }
+      }
+
+      let createdTabId = null;
+      let tabClosed = false;
+
       const messageListener = (message, sender, sendResponse) => {
         if (message.type === "GRADES_SAVED") {
           const mainPageUrl = chrome.runtime.getURL(
@@ -127,6 +227,9 @@ function App() {
 
           if (sender.tab?.id) {
             chrome.tabs.remove(sender.tab.id);
+            if (sender.tab.id === createdTabId) {
+              tabClosed = true;
+            }
           }
 
           chrome.runtime.onMessage.removeListener(messageListener);
@@ -145,30 +248,50 @@ function App() {
         pinned: true,
       });
       createdTabId = createdTab.id;
+
       chrome.runtime.sendMessage({
         type: "AUTO_CLOSE_TAB",
         tabId: createdTabId,
-        timeout: 15000, 
+        timeout: 15000,
       });
+
       setTimeout(() => {
-        // chrome.runtime.onMessage.removeListener(messageListener);
-        // if (createdTabId) {
-        //   chrome.tabs.remove(createdTabId).catch((error) => {
-        //     console.log("Tab đã được đóng hoặc không tồn tại:", error);
-        //   });
-        // }
-        const mainPageUrl = chrome.runtime.getURL(
-          `page/MainPage.html?k=${encodeURIComponent(key)}`
-        );
-        chrome.tabs.create({ url: mainPageUrl });
+        chrome.runtime.onMessage.removeListener(messageListener);
+
+        if (createdTabId && !tabClosed) {
+          chrome.tabs
+            .get(createdTabId)
+            .then(() => {
+              chrome.tabs.remove(createdTabId).catch((error) => {
+                console.log("Tab đã được đóng hoặc không tồn tại:", error);
+              });
+            })
+            .catch(() => {
+              console.log("Tab không tồn tại, có thể đã được đóng trước đó");
+            });
+        }
+
+        if (!tabClosed) {
+          const mainPageUrl = chrome.runtime.getURL(
+            `page/MainPage.html?k=${encodeURIComponent(key)}`
+          );
+          chrome.tabs.create({ url: mainPageUrl });
+        }
 
         setIsLoading(false);
       }, 17000);
     } catch (error) {
       console.error("Lỗi khi mở trang:", error);
+
       if (createdTabId) {
-        chrome.tabs.remove(createdTabId).catch(() => {});
+        chrome.tabs
+          .get(createdTabId)
+          .then(() => chrome.tabs.remove(createdTabId))
+          .catch(() => {
+            console.log("Tab không tồn tại, có thể đã được đóng trước đó");
+          });
       }
+
       setIsLoading(false);
     }
   };
