@@ -293,11 +293,12 @@ function SubjectGradeStatistic({ subjects }) {
               }),
               React.createElement(Tooltip, {
                 contentStyle: {
-                  backgroundColor: "rgba(31, 41, 55, 0.8)",
-                  borderColor: "#4B5563",
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  borderColor: "#d1d5db",
                   borderRadius: "8px",
+                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)"
                 },
-                itemStyle: { color: "#E5E7EB" },
+                itemStyle: { color: "#374151" },
                 formatter: getTooltipFormatter(),
               }),
               React.createElement(Legend),
@@ -330,7 +331,7 @@ function SubjectGradeStatistic({ subjects }) {
                   opacity: 0.5,
                 },
               },
-              "📊"
+              ""
             ),
             React.createElement(
               "h3",
@@ -592,11 +593,12 @@ function StatisticsResultsBySemester({ results }) {
               }),
               React.createElement(Tooltip, {
                 contentStyle: {
-                  backgroundColor: "rgba(31, 41, 55, 0.8)",
-                  borderColor: "#4B5563",
+                  backgroundColor: "rgba(255, 255, 255, 0.95)",
+                  borderColor: "#d1d5db",
                   borderRadius: "8px",
+                  boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
                 },
-                itemStyle: { color: "#E5E7EB" },
+                itemStyle: { color: "#374151" },
                 formatter: getTooltipFormatter(),
               }),
               React.createElement(Line, {

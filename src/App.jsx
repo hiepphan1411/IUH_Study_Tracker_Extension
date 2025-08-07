@@ -81,26 +81,31 @@ function App() {
       });
 
       createdTabId = createdTab.id;
+            chrome.runtime.sendMessage({
+        type: "AUTO_CLOSE_TAB",
+        tabId: createdTabId,
+        timeout: 20000, 
+      });
 
       setTimeout(() => {
-        chrome.runtime.onMessage.removeListener(messageListener);
+        // chrome.runtime.onMessage.removeListener(messageListener);
 
-        if (createdTabId) {
-          chrome.tabs.remove(createdTabId).catch((error) => {
-            console.log("Tab đã được đóng hoặc không tồn tại:", error);
-          });
-        }
+        // if (createdTabId) {
+        //   chrome.tabs.remove(createdTabId).catch((error) => {
+        //     console.log("Tab đã được đóng hoặc không tồn tại:", error);
+        //   });
+        // }
 
         const schedulePageUrl = chrome.runtime.getURL(
           `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
         );
         chrome.tabs.create({ url: schedulePageUrl });
         setIsLoading(false);
-      }, 20000);
+      }, 22000);
     } catch (error) {
-      if (createdTabId) {
-        chrome.tabs.remove(createdTabId).catch(() => {});
-      }
+      // if (createdTabId) {
+      //   chrome.tabs.remove(createdTabId).catch(() => {});
+      // }
 
       setIsLoading(false);
     }
@@ -146,19 +151,19 @@ function App() {
         timeout: 15000, 
       });
       setTimeout(() => {
-        chrome.runtime.onMessage.removeListener(messageListener);
-        if (createdTabId) {
-          chrome.tabs.remove(createdTabId).catch((error) => {
-            console.log("Tab đã được đóng hoặc không tồn tại:", error);
-          });
-        }
+        // chrome.runtime.onMessage.removeListener(messageListener);
+        // if (createdTabId) {
+        //   chrome.tabs.remove(createdTabId).catch((error) => {
+        //     console.log("Tab đã được đóng hoặc không tồn tại:", error);
+        //   });
+        // }
         const mainPageUrl = chrome.runtime.getURL(
           `page/MainPage.html?k=${encodeURIComponent(key)}`
         );
         chrome.tabs.create({ url: mainPageUrl });
 
         setIsLoading(false);
-      }, 8000);
+      }, 17000);
     } catch (error) {
       console.error("Lỗi khi mở trang:", error);
       if (createdTabId) {
