@@ -346,6 +346,15 @@ function MenuIcon(props) {
 
 function SidebarWithNavigation(props) {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+
+    const handleBackClick = () => {
+        setIsDialogOpen(true);
+        // Đặt timeout để tự động đóng dialog sau 5 giây
+        setTimeout(() => {
+            setIsDialogOpen(false);
+        }, 5000); // 5000 milliseconds = 5 giây
+    };
 
     return React.createElement(
         motion.div,
@@ -445,7 +454,7 @@ function SidebarWithNavigation(props) {
                 React.createElement(
                     motion.button,
                     {
-                        onClick: () => window.close(),
+                        onClick: handleBackClick,
                         className: 'back-button',
                         whileHover: { scale: 1.02 },
                         whileTap: { scale: 0.98 },
@@ -470,6 +479,71 @@ function SidebarWithNavigation(props) {
                                 },
                                 'Quay lại',
                             ),
+                    ),
+                ),
+            ),
+        ),
+        React.createElement(ConfirmationDialog, {
+            isOpen: isDialogOpen,
+            onClose: () => setIsDialogOpen(false),
+            onConfirm: () => {
+                setIsDialogOpen(false);
+                window.close();
+            },
+        }),
+    );
+}
+
+function ConfirmationDialog({ isOpen, onClose, onConfirm }) {
+    if (!isOpen) return null;
+
+    return React.createElement(
+        'div',
+        { className: 'dialog-overlay' },
+        React.createElement(
+            motion.div,
+            {
+                className: 'dialog-container',
+                initial: { opacity: 0, scale: 0.8 },
+                animate: { opacity: 1, scale: 1 },
+                exit: { opacity: 0, scale: 0.8 },
+                transition: { duration: 0.2 },
+            },
+            React.createElement(
+                'div',
+                { className: 'dialog-content' },
+                React.createElement(
+                    'h3',
+                    { className: 'dialog-title' },
+                    'Xác nhận thoát',
+                ),
+                React.createElement(
+                    'p',
+                    { className: 'dialog-message' },
+                    'Bạn có chắc chắn muốn thoát khỏi ứng dụng?',
+                ),
+                React.createElement(
+                    'div',
+                    { className: 'dialog-actions' },
+                    React.createElement(
+                        motion.button,
+                        {
+                            className: 'dialog-button cancel',
+                            onClick: onClose,
+                            whileHover: { scale: 1.05 },
+                            whileTap: { scale: 0.95 },
+                        },
+                        'Hủy',
+                    ),
+                    React.createElement(
+                        motion.button,
+                        {
+                            className: 'dialog-button confirm',
+                            onClick: onConfirm,
+                            whileHover: { scale: 1.05 },
+                            whileTap: { scale: 0.95 },
+                        },
+                        'Thoát',
                     ),
                 ),
             ),
@@ -665,14 +739,14 @@ function TimeSlotCell(props) {
             startTiet = item.startTime ? mapTimeToTiet(item.startTime) : 0;
         }
 
-        // console.log(
-        //     'Extracted startTiet for item:',
-        //     startTiet,
-        //     'isExam:',
-        //     item.isExam,
-        //     'original lesson:',
-        //     item.lesson,
-        // );
+        console.log(
+            'Extracted startTiet for item:',
+            startTiet,
+            'isExam:',
+            item.isExam,
+            'original lesson:',
+            item.lesson,
+        );
 
         switch (props.timeSlot) {
             case 'morning':
