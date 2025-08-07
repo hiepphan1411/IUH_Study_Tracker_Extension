@@ -96,7 +96,7 @@ function App() {
         );
         chrome.tabs.create({ url: schedulePageUrl });
         setIsLoading(false);
-      }, 20000);
+      }, 2000);
     } catch (error) {
       if (createdTabId) {
         chrome.tabs.remove(createdTabId).catch(() => {});
@@ -158,7 +158,7 @@ function App() {
         chrome.tabs.create({ url: mainPageUrl });
 
         setIsLoading(false);
-      }, 8000);
+      }, 30000);
     } catch (error) {
       console.error("Lỗi khi mở trang:", error);
       if (createdTabId) {
