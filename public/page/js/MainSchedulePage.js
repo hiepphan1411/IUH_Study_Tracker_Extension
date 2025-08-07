@@ -692,16 +692,28 @@ function WeekNavigation(props) {
   // Only show the current week button if we're not already on the current week
   const isCurrentWeek = props.currentWeek === currentWeekNumber && props.currentYear === currentYear;
 
+  // Styles for disabled buttons
+  const disabledButtonStyle = {
+    opacity: 0.4,
+    cursor: 'not-allowed',
+    backgroundColor: 'rgba(100, 100, 100, 0.1)',
+    color: '#999',
+    boxShadow: 'none'
+  };
+
   return React.createElement(
     "div",
     { className: "week-navigation" },
     React.createElement(
       motion.button,
       {
-        className: "nav-button",
-        onClick: () => props.onWeekChange("prev"),
-        whileHover: { scale: 1.05 },
-        whileTap: { scale: 0.95 },
+        className: `nav-button ${props.isPrevDisabled ? "disabled" : ""}`,
+        onClick: () => !props.isPrevDisabled && props.onWeekChange("prev"),
+        whileHover: !props.isPrevDisabled ? { scale: 1.05 } : {},
+        whileTap: !props.isPrevDisabled ? { scale: 0.95 } : {},
+        disabled: props.isPrevDisabled,
+        title: props.isPrevDisabled ? "Không có dữ liệu cho tuần trước" : "Xem tuần trước",
+        style: props.isPrevDisabled ? disabledButtonStyle : {}
       },
       React.createElement(ChevronLeftIcon, { size: 20 }),
       React.createElement("span", null, "Tuần trước")
@@ -746,15 +758,31 @@ function WeekNavigation(props) {
         "span",
         null,
         `Tháng ${props.currentMonth}, ${props.currentYear}`
-      )
+      ),
+      props.isPrevDisabled || props.isNextDisabled ? React.createElement(
+        "div",
+        { 
+          className: "data-range-notice",
+          style: {
+            fontSize: "0.75rem",
+            color: "#ff9800",
+            marginTop: "4px",
+            fontStyle: "italic"
+          }
+        },
+        "Đã đạt giới hạn dữ liệu"
+      ) : null
     ),
     React.createElement(
       motion.button,
       {
-        className: "nav-button",
-        onClick: () => props.onWeekChange("next"),
-        whileHover: { scale: 1.05 },
-        whileTap: { scale: 0.95 },
+        className: `nav-button ${props.isNextDisabled ? "disabled" : ""}`,
+        onClick: () => !props.isNextDisabled && props.onWeekChange("next"),
+        whileHover: !props.isNextDisabled ? { scale: 1.05 } : {},
+        whileTap: !props.isNextDisabled ? { scale: 0.95 } : {},
+        disabled: props.isNextDisabled,
+        title: props.isNextDisabled ? "Không có dữ liệu cho tuần sau" : "Xem tuần sau",
+        style: props.isNextDisabled ? disabledButtonStyle : {}
       },
       React.createElement("span", null, "Tuần sau"),
       React.createElement(ChevronRightIcon, { size: 20 })
@@ -967,6 +995,21 @@ function SchedulePageContent({ data }) {
     currentDate.getFullYear()
   );
 
+  // Calculate min and max dates for available data
+  const minDate = React.useMemo(() => {
+    const now = new Date();
+    const oneWeekBefore = new Date(now);
+    oneWeekBefore.setDate(now.getDate() - 7);
+    return oneWeekBefore;
+  }, []);
+
+  const maxDate = React.useMemo(() => {
+    const now = new Date();
+    const tenWeeksAfter = new Date(now);
+    tenWeeksAfter.setDate(now.getDate() + 9 * 7);
+    return tenWeeksAfter;
+  }, []);
+
   const handleWeekChange = (direction) => {
     if (direction === "current") {
       // Reset to current week and year
@@ -1003,6 +1046,14 @@ function SchedulePageContent({ data }) {
         .join("-")
     ).getMonth() + 1;
 
+  // Determine if we need to disable navigation buttons
+  const { days } = getWeekDates(currentWeek, currentYear);
+  const firstDayOfWeek = new Date(days[0].date.split("/").reverse().join("-"));
+  const lastDayOfWeek = new Date(days[6].date.split("/").reverse().join("-"));
+  
+  const isPrevDisabled = firstDayOfWeek < minDate;
+  const isNextDisabled = lastDayOfWeek > maxDate;
+
   return React.createElement(
     "div",
     { className: "page-content" },
@@ -1013,6 +1064,8 @@ function SchedulePageContent({ data }) {
         currentWeek,
         currentMonth,
         currentYear,
+        isPrevDisabled,
+        isNextDisabled,
         onWeekChange: handleWeekChange,
       }),
       data && data.length > 0
@@ -1039,12 +1092,27 @@ function SchedulePageContent({ data }) {
 }
 
 function ExamSchedulePageContent({ data }) {
-  const currentDate = new Date(); // 09:12 PM +07, 20/07/2025
-  const initialWeek = getWeekNumber(currentDate); // Tuần 30
+  const currentDate = new Date();
+  const initialWeek = getWeekNumber(currentDate);
   const [currentWeek, setCurrentWeek] = React.useState(initialWeek);
   const [currentYear, setCurrentYear] = React.useState(
     currentDate.getFullYear()
   );
+
+  // Calculate min and max dates for available data
+  const minDate = React.useMemo(() => {
+    const now = new Date();
+    const oneWeekBefore = new Date(now);
+    oneWeekBefore.setDate(now.getDate() - 7);
+    return oneWeekBefore;
+  }, []);
+
+  const maxDate = React.useMemo(() => {
+    const now = new Date();
+    const tenWeeksAfter = new Date(now);
+    tenWeeksAfter.setDate(now.getDate() + 10 * 7);
+    return tenWeeksAfter;
+  }, []);
 
   const handleWeekChange = (direction) => {
     if (direction === "current") {
@@ -1082,6 +1150,14 @@ function ExamSchedulePageContent({ data }) {
         .join("-")
     ).getMonth() + 1;
 
+  // Determine if we need to disable navigation buttons
+  const { days } = getWeekDates(currentWeek, currentYear);
+  const firstDayOfWeek = new Date(days[0].date.split("/").reverse().join("-"));
+  const lastDayOfWeek = new Date(days[6].date.split("/").reverse().join("-"));
+  
+  const isPrevDisabled = firstDayOfWeek < minDate;
+  const isNextDisabled = lastDayOfWeek > maxDate;
+
   return React.createElement(
     "div",
     { className: "page-content" },
@@ -1092,6 +1168,8 @@ function ExamSchedulePageContent({ data }) {
         currentWeek,
         currentMonth,
         currentYear,
+        isPrevDisabled,
+        isNextDisabled,
         onWeekChange: handleWeekChange,
       }),
       data && data.length > 0
@@ -1125,6 +1203,21 @@ function AllSchedulePageContent({ allData }) {
     currentDate.getFullYear()
   );
 
+  // Calculate min and max dates for available data
+  const minDate = React.useMemo(() => {
+    const now = new Date();
+    const oneWeekBefore = new Date(now);
+    oneWeekBefore.setDate(now.getDate() - 7);
+    return oneWeekBefore;
+  }, []);
+
+  const maxDate = React.useMemo(() => {
+    const now = new Date();
+    const tenWeeksAfter = new Date(now);
+    tenWeeksAfter.setDate(now.getDate() + 10 * 7);
+    return tenWeeksAfter;
+  }, []);
+
   const handleWeekChange = (direction) => {
     if (direction === "current") {
       // Reset to current week and year
@@ -1161,6 +1254,14 @@ function AllSchedulePageContent({ allData }) {
         .join("-")
     ).getMonth() + 1;
 
+  // Determine if we need to disable navigation buttons
+  const { days } = getWeekDates(currentWeek, currentYear);
+  const firstDayOfWeek = new Date(days[0].date.split("/").reverse().join("-"));
+  const lastDayOfWeek = new Date(days[6].date.split("/").reverse().join("-"));
+  
+  const isPrevDisabled = firstDayOfWeek < minDate;
+  const isNextDisabled = lastDayOfWeek > maxDate;
+
   return React.createElement(
     "div",
     { className: "page-content" },
@@ -1171,6 +1272,8 @@ function AllSchedulePageContent({ allData }) {
         currentWeek,
         currentMonth,
         currentYear,
+        isPrevDisabled,
+        isNextDisabled,
         onWeekChange: handleWeekChange,
       }),
       allData && allData.length > 0

@@ -160,13 +160,14 @@ function loadScheduleData(token) {
     window.ketQuaMang = [];
 
     const now = new Date();
-    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startDate = new Date(now);
+    startDate.setDate(now.getDate() - 7); 
 
     loadWithBatchFetch(startDate.toISOString(), 10, 0, token, () => {
       processAndSaveScheduleData();
     });
   } catch (error) {
-    console.error("Lỗi khi loadScheduleData:", error);
+    console.log("Lỗi khi loadScheduleData:", error);
   }
 }
 
