@@ -478,7 +478,7 @@ function SidebarWithNavigation(props) {
                                     exit: { opacity: 0, width: 0 },
                                     transition: { duration: 0.2, delay: 0.3 },
                                 },
-                                'Quay lại',
+                                'Thoát',
                             ),
                     ),
                 ),
