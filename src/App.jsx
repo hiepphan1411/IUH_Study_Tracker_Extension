@@ -195,7 +195,6 @@ function App() {
 
       if (result.diem_json && result.diem_timestamp) {
         try {
-
           const currentTime = new Date();
           const updateTime = new Date(result.diem_timestamp);
 
@@ -208,7 +207,7 @@ function App() {
             );
             chrome.tabs.create({ url: mainPageUrl });
             setIsLoading(false);
-            return; 
+            return;
           }
         } catch (parseError) {
           console.log("Lỗi khi phân tích dữ liệu điểm:", parseError);
@@ -565,7 +564,7 @@ function App() {
                         d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                       />
                     </svg>
-                    <strong>Email:</strong> support@iuh-tracker.com
+                    <strong>Email:</strong> hgnd27811.dev@gmail.com
                   </p>
                   <p className="flex items-center p-2 bg-purple-50 rounded-lg">
                     <svg
@@ -581,7 +580,15 @@ function App() {
                         d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                       />
                     </svg>
-                    <strong>Hotline:</strong> 0123-456-789
+                    <strong>Chính sách bảo mật:</strong>&nbsp;
+                    <a
+                      href="https://hiepphan1411.github.io/iuh-grade-guard-privacy/html/index.html"
+                      className="text-blue-600 underline hover:text-blue-800"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      click here
+                    </a>
                   </p>
                 </div>
               </div>
