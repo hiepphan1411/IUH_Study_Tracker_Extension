@@ -123,7 +123,6 @@ body {
     background: rgba(255, 255, 255, 0.15);
     transform: translateX(4px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    
 }
 
 .sidebar-item.active {
@@ -228,7 +227,6 @@ body {
     color: rgb(255, 255, 255);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 
 .content-area {
     flex: 1;
@@ -470,6 +468,11 @@ body {
     color: #4b5563;
 }
 
+.no-data-cell {
+    color: white;
+}
+
+/* Media Queries */
 @media (max-width: 768px) {
     .schedule-table {
         min-width: 760px;
@@ -525,33 +528,200 @@ body {
         font-size: 12px;
     }
 }
-.no-data-cell{
-  color: white;
-}
 
-/* Thêm vào file CSS của bạn */
+/* Table Responsive */
 .table-responsive {
-    /* Cho phép dropdown hiển thị ra ngoài table */
     overflow: visible !important;
 }
 
 .grades-table {
-    /* Đảm bảo table cells có thể chứa dropdown */
     overflow: visible;
 }
 
 .td-subject-type {
-    /* Đảm bảo cell có thể chứa dropdown */
     overflow: visible !important;
     position: relative;
 }
 
 .custom-dropdown {
-    /* Đảm bảo dropdown container không bị cắt */
     z-index: 1000;
 }
 
-/* Đảm bảo dropdown menu luôn hiển thị trên cùng */
-.custom-dropdown > div[style*="position: absolute"] {
+.custom-dropdown > div[style*='position: absolute'] {
     z-index: 9999 !important;
+}
+
+/* Dialog Styles - Modern Design */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.dialog-container {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 25vw;
+    max-width: 700px;
+    overflow: hidden;
+    position: absolute;
+    top: 40%;
+    left: 45vw;
+    transform: none;
+}
+
+.dialog-content {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
+}
+
+.dialog-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.dialog-message {
+    font-size: 16px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.6;
+    max-width: 650px;
+}
+
+.dialog-actions {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.dialog-button {
+    flex: 1;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.dialog-button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+.dialog-button.cancel {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.dialog-button.cancel:hover {
+    background: #e5e7eb;
+    transform: translateY(-1px);
+}
+
+.dialog-button.confirm {
+    background: #dc2626;
+    color: #ffffff;
+    box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.3);
+}
+
+.dialog-button.confirm:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px 0 rgba(220, 38, 38, 0.4);
+}
+
+.dialog-button:active {
+    transform: translateY(0);
+}
+
+/* Icon styles - nếu bạn muốn thêm icon */
+.dialog-title::before {
+    content: '⚠️';
+    display: block;
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.8;
+}
+
+/* Responsive design */
+@media (max-width: 700px) {
+    .dialog-overlay {
+        padding: 12px;
+    }
+
+    .dialog-content {
+        padding: 24px;
+        gap: 20px;
+    }
+
+    .dialog-title {
+        font-size: 20px;
+    }
+
+    .dialog-message {
+        font-size: 14px;
+    }
+
+    .dialog-actions {
+        flex-direction: column;
+    }
+
+    .dialog-button {
+        padding: 14px 20px;
+    }
+}
+
+/* Animation cho smooth entrance */
+@keyframes dialogFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.dialog-container {
+    animation: dialogFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+/* Focus trap styles */
+.dialog-button:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Loading state (optional) */
+.dialog-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.dialog-button:disabled:hover {
+    transform: none !important;
 }
