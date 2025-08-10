@@ -308,7 +308,7 @@ export const guideTemplate = `
       </svg>
       <div>
         <h3>Liên kết truy cập nhanh</h3>
-        <p>👉 Trang sinh viên IUH</p>
+        <a href="https://sv.iuh.edu.vn/sinh-vien-dang-nhap.html" style= "font-size: 0.875rem;">Trang sinh viên IUH</a>
       </div>
     </div>
 
