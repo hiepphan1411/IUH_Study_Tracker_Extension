@@ -159,11 +159,20 @@ function loadScheduleData(token) {
   try {
     window.ketQuaMang = [];
 
-    const now = new Date();
-    const startDate = new Date(now);
-    startDate.setDate(now.getDate() - 7); 
+    const nowTime = new Date();
 
-    loadWithBatchFetch(startDate.toISOString(), 10, 0, token, () => {
+    const currentDay = nowTime.getDay();
+
+    const daysToMondayLastWeek = currentDay + 6;
+    const mondayLastWeek = new Date(nowTime);
+    mondayLastWeek.setDate(nowTime.getDate() - daysToMondayLastWeek);
+    mondayLastWeek.setHours(0, 0, 0, 0);
+
+    // const now = new Date();
+    // const startDate = new Date(now);
+    // startDate.setDate(now.getDate() - 7);
+
+    loadWithBatchFetch(mondayLastWeek.toISOString(), 5, 0, token, () => {
       processAndSaveScheduleData();
     });
   } catch (error) {
@@ -208,7 +217,6 @@ async function loadWithBatchFetch(
   await Promise.all(Array.from({ length: MAX_CONCURRENT }, () => worker()));
 
   if (missingWeeks.length > 0) {
-
     await Promise.all(
       allWeeks
         .filter((w) => missingWeeks.includes(w.tuan))
@@ -259,7 +267,6 @@ async function fetchWithRetry(tuan, ngay, loaiLich, token) {
         loaiLich,
       };
     } catch (err) {
-    
       await new Promise((r) => setTimeout(r, 500 + Math.random() * 500));
     }
   }
@@ -341,7 +348,7 @@ function processAndSaveScheduleData() {
       capNhatLuc: new Date().toISOString(),
     };
 
-    console.log(scheduleData)
+    console.log(scheduleData);
     chrome.storage.local.set(
       {
         schedule_json: JSON.stringify(scheduleData),
@@ -372,7 +379,6 @@ function processAndSaveScheduleData() {
     console.log("Lỗi trong processAndSaveScheduleData:", error);
   }
 }
-
 
 //Lấy chương tình khung trong trang sv.iuh
 //Chuyển trang sang chương trình khung khi người dùng đăng nhập sv.iuh

@@ -131,7 +131,7 @@ function App() {
       chrome.runtime.sendMessage({
         type: "AUTO_CLOSE_TAB",
         tabId: createdTabId,
-        timeout: 35000,
+        timeout: 55000,
       });
 
       setTimeout(() => {
@@ -158,7 +158,7 @@ function App() {
         }
 
         setIsLoading(false);
-      }, 37000);
+      }, 57000);
     } catch (error) {
       console.log("Lỗi khi xử lý:", error);
 

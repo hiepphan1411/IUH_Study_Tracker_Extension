@@ -1214,7 +1214,7 @@ function AllSchedulePageContent({ allData }) {
   const maxDate = React.useMemo(() => {
     const now = new Date();
     const tenWeeksAfter = new Date(now);
-    tenWeeksAfter.setDate(now.getDate() + 10 * 7);
+    tenWeeksAfter.setDate(now.getDate() + 5 * 7);
     return tenWeeksAfter;
   }, []);
 
