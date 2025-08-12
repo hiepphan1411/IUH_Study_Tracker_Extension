@@ -159,20 +159,20 @@ function loadScheduleData(token) {
   try {
     window.ketQuaMang = [];
 
-    const nowTime = new Date();
+    const now = new Date();
+    const day = now.getDay();
+    const mondayThisWeek = new Date(now);
+    const diffToMonday = (day + 6) % 7;
+    mondayThisWeek.setDate(now.getDate() - diffToMonday);
+    mondayThisWeek.setHours(0, 0, 0, 0);
 
-    const currentDay = nowTime.getDay();
-
-    const daysToMondayLastWeek = currentDay + 6;
-    const mondayLastWeek = new Date(nowTime);
-    mondayLastWeek.setDate(nowTime.getDate() - daysToMondayLastWeek);
-    mondayLastWeek.setHours(0, 0, 0, 0);
+    mondayThisWeek.setDate(mondayThisWeek.getDate() - 7);
 
     // const now = new Date();
     // const startDate = new Date(now);
     // startDate.setDate(now.getDate() - 7);
 
-    loadWithBatchFetch(mondayLastWeek.toISOString(), 5, 0, token, () => {
+    loadWithBatchFetch(mondayThisWeek.toISOString(), 5, 0, token, () => {
       processAndSaveScheduleData();
     });
   } catch (error) {
