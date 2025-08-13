@@ -1,3 +1,4 @@
+/* eslint-disable */
 //Lấy điểm
 (function () {
   if (
