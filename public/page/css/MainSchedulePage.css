@@ -772,6 +772,7 @@ body {
   color: #334155;
   font-size: 0.95rem;
   cursor: pointer;
+  outline: none;
 }
 
 .last-updated {
