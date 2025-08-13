@@ -2,12 +2,14 @@
 import "./App.css";
 import { useState, useEffect } from "react";
 import { guideTemplate } from "./templates/guideTemplate";
+import { showLoadingPage } from "./utils/LoadingPage";
 
 function App() {
   const [activeTab, setActiveTab] = useState("main");
   const [key, setKey] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingWindow, setLoadingWindow] = useState(null);
 
   useEffect(() => {
     const savedKey = localStorage.getItem("iuh-tracker-key");
@@ -21,6 +23,15 @@ function App() {
       localStorage.setItem("iuh-tracker-key", key);
     }
   }, [key]);
+
+  // Cleanup loading window when component unmounts
+  useEffect(() => {
+    return () => {
+      if (loadingWindow && !loadingWindow.closed) {
+        loadingWindow.close();
+      }
+    };
+  }, [loadingWindow]);
 
   const validateKey = (inputKey) => {
     if (!inputKey.trim()) {
@@ -45,11 +56,13 @@ function App() {
     }
   };
 
-  //Xử lý xem lịch học
+  // Xử lý xem lịch học
   const handleViewSchedule = async () => {
     if (!validateKey(key)) return;
 
     setIsLoading(true);
+    const loadWindow = showLoadingPage("Đang tải thời khóa biểu...");
+    setLoadingWindow(loadWindow);
 
     try {
       // Kiểm tra dữ liệu đã lưu
@@ -83,6 +96,7 @@ function App() {
                 `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
               );
               chrome.tabs.create({ url: schedulePageUrl });
+              if (loadWindow && !loadWindow.closed) loadWindow.close();
               setIsLoading(false);
               return;
             }
@@ -110,6 +124,7 @@ function App() {
           }
 
           chrome.runtime.onMessage.removeListener(messageListener);
+          if (loadWindow && !loadWindow.closed) loadWindow.close();
           setIsLoading(false);
         }
       };
@@ -131,7 +146,7 @@ function App() {
       chrome.runtime.sendMessage({
         type: "AUTO_CLOSE_TAB",
         tabId: createdTabId,
-        timeout: 35000,
+        timeout: 15000,
       });
 
       setTimeout(() => {
@@ -157,28 +172,24 @@ function App() {
           chrome.tabs.create({ url: schedulePageUrl });
         }
 
+        if (loadWindow && !loadWindow.closed) loadWindow.close();
         setIsLoading(false);
-      }, 37000);
+      }, 17000);
     } catch (error) {
       console.log("Lỗi khi xử lý:", error);
 
-      if (createdTabId) {
-        chrome.tabs
-          .get(createdTabId)
-          .then(() => chrome.tabs.remove(createdTabId))
-          .catch(() => {
-            console.log("Tab không tồn tại, có thể đã được đóng trước đó");
-          });
-      }
-
+      if (loadWindow && !loadWindow.closed) loadWindow.close();
       setIsLoading(false);
     }
   };
+
   //Xử lý xem điểm
   const handleViewGrades = async () => {
     if (!validateKey(key)) return;
 
     setIsLoading(true);
+    const loadWindow = showLoadingPage("Đang tải điểm số...");
+    setLoadingWindow(loadWindow);
 
     try {
       // Kiểm tra dữ liệu điểm đã lưu
@@ -209,6 +220,7 @@ function App() {
               `page/MainPage.html?k=${encodeURIComponent(key)}`
             );
             chrome.tabs.create({ url: mainPageUrl });
+            if (loadWindow && !loadWindow.closed) loadWindow.close();
             setIsLoading(false);
             return;
           }
@@ -235,6 +247,7 @@ function App() {
           }
 
           chrome.runtime.onMessage.removeListener(messageListener);
+          if (loadWindow && !loadWindow.closed) loadWindow.close();
           setIsLoading(false);
         }
       };
@@ -280,20 +293,13 @@ function App() {
           chrome.tabs.create({ url: mainPageUrl });
         }
 
+        if (loadWindow && !loadWindow.closed) loadWindow.close();
         setIsLoading(false);
       }, 17000);
     } catch (error) {
       console.error("Lỗi khi mở trang:", error);
 
-      if (createdTabId) {
-        chrome.tabs
-          .get(createdTabId)
-          .then(() => chrome.tabs.remove(createdTabId))
-          .catch(() => {
-            console.log("Tab không tồn tại, có thể đã được đóng trước đó");
-          });
-      }
-
+      if (loadWindow && !loadWindow.closed) loadWindow.close();
       setIsLoading(false);
     }
   };
