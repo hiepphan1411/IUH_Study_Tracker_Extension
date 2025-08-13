@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<title>Logo Tech Loading</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root{
+    --bg1: #061218;
+    --bg2: #081827;
+    --accent: #26d0ff;
+    --accent-2: #6dd3ff;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: radial-gradient(circle at 50% 50%, var(--bg2) 0%, #02060a 100%);
+    color:#dfefff;
+    font-family: 'Inter', system-ui, Arial, sans-serif;
+    overflow:hidden;
+  }
+
+  .wrap{
+    text-align:center;
+    position:relative;
+    width:520px;
+    max-width:90%;
+    padding:40px 20px;
+  }
+
+  /* Logo container */
+  .logo-box{
+    width:160px;
+    height:160px;
+    margin:0 auto 18px;
+    position:relative;
+    filter: drop-shadow(0 8px 30px rgba(0,0,0,0.7));
+  }
+
+  svg.logo{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+
+  /* glow layer under logo */
+  .glow{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    pointer-events:none;
+    mix-blend-mode:screen;
+    opacity:0.15;
+    background: radial-gradient(circle at 40% 30%,
+      rgba(38,208,255,0.9) 0%,
+      rgba(109,211,255,0.6) 10%,
+      rgba(0,0,0,0) 50%);
+    transition:opacity .3s;
+  }
+
+  /* small orbiting particles */
+  .particle{
+    position:absolute;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--accent);
+    top:50%;
+    left:50%;
+    transform-origin:-70px 0;
+    opacity:0.9;
+    box-shadow:0 0 8px rgba(38,208,255,0.9);
+  }
+
+  .loading-text{
+    font-size:20px;
+    letter-spacing:0.6px;
+    color: #cfe6ff;
+    margin-top:4px;
+  }
+
+  /* background stars */
+  .star{
+    position:absolute;
+    background: rgba(255,255,255,0.85);
+    border-radius:50%;
+    opacity:0.85;
+  }
+
+  @media (max-width:420px){
+    .logo-box{width:120px;height:120px}
+    .glow{width:170px;height:170px}
+    .loading-text{font-size:16px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="logo-box" aria-hidden="true">
+    <div class="glow"></div>
+
+    <!-- Tech Logo SVG: lục giác + đường mạch -->
+    <svg class="logo" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" >
+      <defs>
+        <linearGradient id="g1" x1="0" x2="1">
+          <stop offset="0" stop-color="#26d0ff"/>
+          <stop offset="1" stop-color="#6dd3ff"/>
+        </linearGradient>
+        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- outer hexagon -->
+      <g transform="translate(100,100)">
+        <polygon id="hex" points="0,-72 62,-36 62,36 0,72 -62,36 -62,-36"
+                 fill="url(#g1)" opacity="0.95" filter="url(#soft)"/>
+        <!-- inner hex thin stroke to make layered look -->
+        <polygon points="0,-58 50,-30 50,30 0,58 -50,30 -50,-30"
+                 fill="#071722"/>
+
+        <!-- circuit lines (stylized) -->
+        <g stroke="url(#g1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <path d="M -10 -30 L 10 -10 L 20 10" opacity="0.95"/>
+          <circle cx="-10" cy="-30" r="4" fill="#09faff"/>
+          <circle cx="20" cy="10" r="4" fill="#09faff"/>
+          <path d="M -30 10 L -5 12 L 8 30" opacity="0.85"/>
+          <circle cx="-30" cy="10" r="3" fill="#6dd3ff"/>
+          <circle cx="8" cy="30" r="3" fill="#6dd3ff"/>
+        </g>
+
+        <!-- center chip -->
+        <rect x="-14" y="-14" width="28" height="28" rx="5" ry="5" fill="#04131a" stroke="url(#g1)" stroke-width="2"/>
+        <circle cx="0" cy="0" r="5" fill="#26d0ff" />
+      </g>
+    </svg>
+
+    <!-- orbiting particles -->
+    <div class="particle" id="p1" style="width:7px;height:7px; transform-origin:-86px 0;"></div>
+    <div class="particle" id="p2" style="width:6px;height:6px; transform-origin:-70px 0; background:var(--accent-2); box-shadow:0 0 6px rgba(109,211,255,0.8)"></div>
+    <div class="particle" id="p3" style="width:5px;height:5px; transform-origin:-98px 0; background:rgba(38,208,255,0.85); box-shadow:0 0 5px rgba(38,208,255,0.8)"></div>
+  </div>
+
+  <div class="loading-text" role="status" aria-live="polite">Đang tải dữ liệu...</div>
+</div>
+
+<script>
+  for (let i = 0; i < 30; i++) {
+    let star = document.createElement("div");
+    star.className = "star";
+    star.style.width = star.style.height = Math.random() * 6 + 2 + "px";
+    star.style.top = Math.random() * window.innerHeight + "px";
+    star.style.left = Math.random() * window.innerWidth + "px";
+    document.body.appendChild(star);
+
+    gsap.to(star, {
+      duration: Math.random() * 3 + 2,
+      x: -window.innerWidth,
+      repeat: -1,
+      ease: "linear",
+      delay: Math.random() * 5
+    });
+  }
+
+  // quay nhẹ logo
+  gsap.to('.logo-box svg', {
+    rotation: 12,
+    transformOrigin: '50% 50%',
+    yoyo: true,
+    repeat: -1,
+    duration: 2.6,
+    ease: 'sine.inOut'
+  });
+
+  // pulse glow
+  gsap.to('.glow', {
+    scale: 1.06,
+    opacity: 0.28,
+    yoyo: true,
+    repeat: -1,
+    duration: 1.6,
+    ease: 'sine.inOut'
+  });
+
+  // particles orbit
+  function orbit(id, dur, delay){
+    gsap.to(id, {
+      rotation: 360,
+      transformOrigin: '50% 50%',
+      repeat: -1,
+      duration: dur,
+      ease: 'linear',
+      delay: delay
+    });
+    // also translate along origin (so they appear around)
+    gsap.to(id, { 
+      x: 0, y: 0, // keep at center but rotation origin places them
+      repeat:-1,
+      duration: dur
+    });
+  }
+  orbit('#p1', 4.2, 0.1);
+  orbit('#p2', 5.1, 0.4);
+  orbit('#p3', 3.6, 0.7);
+
+  // small central blinking (like heartbeat)
+  gsap.to('.logo-box circle, .logo-box rect', {
+    scale: 1.08,
+    transformOrigin: '50% 50%',
+    yoyo: true,
+    repeat: -1,
+    duration: 0.9,
+    ease: 'sine.inOut'
+  });
+
+  // loading text subtle fade
+  gsap.to('.loading-text', {
+    opacity: 0.45,
+    yoyo: true,
+    repeat: -1,
+    duration: 1.2,
+    ease: 'sine.inOut'
+  });
+
+  // optional: reduce glow when user interacts (example)
+  window.addEventListener('mousemove', function(){
+    gsap.to('.glow', {opacity:0.12, duration:0.6});
+    clearTimeout(window._glowTimer);
+    window._glowTimer = setTimeout(()=> gsap.to('.glow', {opacity:0.18, duration:0.8}), 1200);
+  });
+</script>
+</body>
+</html>
