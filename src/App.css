@@ -1,1 +1,14 @@
 @import 'tailwindcss';
+body, html, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.loading-root {
+  width: 480px !important;
+  height: 380px !important;
+  min-width: 480px !important;
+  min-height: 380px !important;
+}

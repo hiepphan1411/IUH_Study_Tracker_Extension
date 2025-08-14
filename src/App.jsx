@@ -1,15 +1,23 @@
 /* eslint-disable */
 import "./App.css";
 import { useState, useEffect } from "react";
+import {
+  MemoryRouter as Router,
+  Route,
+  Routes,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import { guideTemplate } from "./templates/guideTemplate";
-import { showLoadingPage } from "./utils/LoadingPage";
+import LoadingPage from "./components/LoadingPage";
 
-function App() {
+function MainApp() {
   const [activeTab, setActiveTab] = useState("main");
   const [key, setKey] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingWindow, setLoadingWindow] = useState(null);
+  const [loadingMessage, setLoadingMessage] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedKey = localStorage.getItem("iuh-tracker-key");
@@ -23,15 +31,6 @@ function App() {
       localStorage.setItem("iuh-tracker-key", key);
     }
   }, [key]);
-
-  // Cleanup loading window when component unmounts
-  useEffect(() => {
-    return () => {
-      if (loadingWindow && !loadingWindow.closed) {
-        loadingWindow.close();
-      }
-    };
-  }, [loadingWindow]);
 
   const validateKey = (inputKey) => {
     if (!inputKey.trim()) {
@@ -60,9 +59,11 @@ function App() {
   const handleViewSchedule = async () => {
     if (!validateKey(key)) return;
 
+    const message = "Đang tải lịch...";
+    setLoadingMessage(message);
     setIsLoading(true);
-    const loadWindow = showLoadingPage("Đang tải thời khóa biểu...");
-    setLoadingWindow(loadWindow);
+
+    navigate("/loading", { state: { message } });
 
     try {
       // Kiểm tra dữ liệu đã lưu
@@ -96,7 +97,7 @@ function App() {
                 `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
               );
               chrome.tabs.create({ url: schedulePageUrl });
-              if (loadWindow && !loadWindow.closed) loadWindow.close();
+              navigate("/");
               setIsLoading(false);
               return;
             }
@@ -124,7 +125,7 @@ function App() {
           }
 
           chrome.runtime.onMessage.removeListener(messageListener);
-          if (loadWindow && !loadWindow.closed) loadWindow.close();
+          navigate("/");
           setIsLoading(false);
         }
       };
@@ -172,13 +173,12 @@ function App() {
           chrome.tabs.create({ url: schedulePageUrl });
         }
 
-        if (loadWindow && !loadWindow.closed) loadWindow.close();
+        navigate("/");
         setIsLoading(false);
       }, 17000);
     } catch (error) {
       console.log("Lỗi khi xử lý:", error);
-
-      if (loadWindow && !loadWindow.closed) loadWindow.close();
+      navigate("/");
       setIsLoading(false);
     }
   };
@@ -187,9 +187,12 @@ function App() {
   const handleViewGrades = async () => {
     if (!validateKey(key)) return;
 
+    const message = "Đang tải điểm...";
+    setLoadingMessage(message);
     setIsLoading(true);
-    const loadWindow = showLoadingPage("Đang tải điểm số...");
-    setLoadingWindow(loadWindow);
+
+    navigate("/loading", { state: { message } });
+
 
     try {
       // Kiểm tra dữ liệu điểm đã lưu
@@ -220,7 +223,7 @@ function App() {
               `page/MainPage.html?k=${encodeURIComponent(key)}`
             );
             chrome.tabs.create({ url: mainPageUrl });
-            if (loadWindow && !loadWindow.closed) loadWindow.close();
+            navigate("/");
             setIsLoading(false);
             return;
           }
@@ -247,7 +250,7 @@ function App() {
           }
 
           chrome.runtime.onMessage.removeListener(messageListener);
-          if (loadWindow && !loadWindow.closed) loadWindow.close();
+          navigate("/");
           setIsLoading(false);
         }
       };
@@ -293,13 +296,12 @@ function App() {
           chrome.tabs.create({ url: mainPageUrl });
         }
 
-        if (loadWindow && !loadWindow.closed) loadWindow.close();
+        navigate("/");
         setIsLoading(false);
       }, 17000);
     } catch (error) {
       console.error("Lỗi khi mở trang:", error);
-
-      if (loadWindow && !loadWindow.closed) loadWindow.close();
+      navigate("/");
       setIsLoading(false);
     }
   };
@@ -596,6 +598,28 @@ function App() {
         </div>
       </div>
     </div>
+  );
+}
+
+function LoadingScreen() {
+  const location = useLocation();
+  const message = location.state?.message || "Đang tải...";
+
+  return (
+    <div className="loading-root">
+      <LoadingPage message={message} />
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainApp />} />
+        <Route path="/loading" element={<LoadingScreen />} />
+      </Routes>
+    </Router>
   );
 }
 
