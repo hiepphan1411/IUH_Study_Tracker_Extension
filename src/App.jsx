@@ -321,7 +321,7 @@ function App() {
           <div className="flex items-center space-x-3">
             <div className="rounded-full shadow-md transition-transform duration-300 hover:scale-110">
               <img
-                src="../image/logo-extension.jpg"
+                src="../image/logo-extension.png"
                 alt="IUH Grade Guard Logo"
                 className="w-10 h-10 object-cover rounded-full"
               />
