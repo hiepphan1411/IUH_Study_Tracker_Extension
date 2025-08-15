@@ -17,7 +17,22 @@ function MainApp() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+
+  // const showCustomError = (message) => {
+  //   setErrorMessage(message);
+  //   setShowErrorModal(true);
+  //   setTimeout(() => {
+  //     setShowErrorModal(false);
+  //   }, 5000);
+  // };
+
+  // Close error modal
+  const closeErrorModal = () => {
+    setShowErrorModal(false);
+  };
 
   useEffect(() => {
     const savedKey = localStorage.getItem("iuh-tracker-key");
@@ -63,124 +78,131 @@ function MainApp() {
     setLoadingMessage(message);
     setIsLoading(true);
 
-    navigate("/loading", { state: { message } });
+    const loadScheduleData = async () => {
+      try {
+        const savedKey = localStorage.getItem("iuh-tracker-key");
+        if (savedKey && savedKey === key) {
+          // Kiểm tra dữ liệu đã lưu
+          const result = await new Promise((resolve) => {
+            chrome.storage.local.get(
+              ["schedule_json", "schedule_timestamp"],
+              function (res) {
+                if (chrome.runtime.lastError) {
+                  console.error(
+                    "Lỗi Chrome Storage:",
+                    chrome.runtime.lastError
+                  );
+                  resolve({ schedule_json: null });
+                  return;
+                }
+                resolve(res);
+              }
+            );
+          });
 
-    try {
-      // Kiểm tra dữ liệu đã lưu
-      const result = await new Promise((resolve) => {
-        chrome.storage.local.get(
-          ["schedule_json", "schedule_timestamp"],
-          function (res) {
-            if (chrome.runtime.lastError) {
-              console.error("Lỗi Chrome Storage:", chrome.runtime.lastError);
-              resolve({ schedule_json: null });
-              return;
-            }
-            resolve(res);
-          }
-        );
-      });
+          // Nếu có dữ liệu lịch học và timestamp
+          if (result.schedule_json && result.schedule_timestamp) {
+            try {
+              const scheduleData = JSON.parse(result.schedule_json);
+              if (scheduleData.capNhatLuc) {
+                const updateTime = new Date(scheduleData.capNhatLuc);
+                const currentTime = new Date();
 
-      // Nếu có dữ liệu lịch học và timestamp
-      if (result.schedule_json && result.schedule_timestamp) {
-        try {
-          const scheduleData = JSON.parse(result.schedule_json);
-          if (scheduleData.capNhatLuc) {
-            const updateTime = new Date(scheduleData.capNhatLuc);
-            const currentTime = new Date();
+                const diffTime = currentTime - updateTime;
+                const diffHours = diffTime / (1000 * 60 * 60);
 
-            const diffTime = currentTime - updateTime;
-            const diffHours = diffTime / (1000 * 60 * 60);
-
-            if (diffHours < 24) {
-              const schedulePageUrl = chrome.runtime.getURL(
-                `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
-              );
-              chrome.tabs.create({ url: schedulePageUrl });
-              navigate("/");
-              setIsLoading(false);
-              return;
-            }
-          }
-        } catch (parseError) {
-          console.log("Lỗi khi phân tích dữ liệu lịch học:", parseError);
-        }
-      }
-
-      let createdTabId = null;
-      let tabClosed = false;
-
-      const messageListener = (message, sender, sendResponse) => {
-        if (message.type === "SCHEDULE_SAVED") {
-          const schedulePageUrl = chrome.runtime.getURL(
-            `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
-          );
-          chrome.tabs.create({ url: schedulePageUrl });
-
-          if (sender.tab?.id) {
-            chrome.tabs.remove(sender.tab.id);
-            if (sender.tab.id === createdTabId) {
-              tabClosed = true;
+                if (diffHours < 24) {
+                  const schedulePageUrl = chrome.runtime.getURL(
+                    `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
+                  );
+                  chrome.tabs.create({ url: schedulePageUrl });
+                  navigate("/");
+                  setIsLoading(false);
+                  return;
+                }
+              }
+            } catch (parseError) {
+              console.log("Lỗi khi phân tích dữ liệu lịch học:", parseError);
             }
           }
-
-          chrome.runtime.onMessage.removeListener(messageListener);
-          navigate("/");
-          setIsLoading(false);
-        }
-      };
-
-      chrome.runtime.onMessage.addListener(messageListener);
-
-      const scheduleUrl = `https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html?k=${encodeURIComponent(
-        key
-      )}`;
-
-      const createdTab = await chrome.tabs.create({
-        url: scheduleUrl,
-        active: false,
-        pinned: true,
-      });
-
-      createdTabId = createdTab.id;
-
-      chrome.runtime.sendMessage({
-        type: "AUTO_CLOSE_TAB",
-        tabId: createdTabId,
-        timeout: 15000,
-      });
-
-      setTimeout(() => {
-        chrome.runtime.onMessage.removeListener(messageListener);
-
-        if (createdTabId && !tabClosed) {
-          chrome.tabs
-            .get(createdTabId)
-            .then(() => {
-              chrome.tabs.remove(createdTabId).catch((error) => {
-                console.log("Tab đã được đóng hoặc không tồn tại:", error);
-              });
-            })
-            .catch(() => {
-              console.log("Tab không tồn tại, có thể đã được đóng trước đó");
-            });
         }
 
-        if (!tabClosed) {
-          const schedulePageUrl = chrome.runtime.getURL(
-            `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
-          );
-          chrome.tabs.create({ url: schedulePageUrl });
-        }
+        let createdTabId = null;
+        let tabClosed = false;
 
+        const messageListener = (message, sender, sendResponse) => {
+          if (message.type === "SCHEDULE_SAVED") {
+            const schedulePageUrl = chrome.runtime.getURL(
+              `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
+            );
+            chrome.tabs.create({ url: schedulePageUrl });
+
+            if (sender.tab?.id) {
+              chrome.tabs.remove(sender.tab.id);
+              if (sender.tab.id === createdTabId) {
+                tabClosed = true;
+              }
+            }
+
+            chrome.runtime.onMessage.removeListener(messageListener);
+            navigate("/");
+            setIsLoading(false);
+          }
+        };
+
+        chrome.runtime.onMessage.addListener(messageListener);
+
+        const scheduleUrl = `https://sv.iuh.edu.vn/tra-cuu/lich-hoc-theo-tuan.html?k=${encodeURIComponent(
+          key
+        )}`;
+
+        const createdTab = await chrome.tabs.create({
+          url: scheduleUrl,
+          active: false,
+          pinned: true,
+        });
+
+        createdTabId = createdTab.id;
+
+        chrome.runtime.sendMessage({
+          type: "AUTO_CLOSE_TAB",
+          tabId: createdTabId,
+          timeout: 15000,
+        });
+
+        // setTimeout(() => {
+        //   chrome.runtime.onMessage.removeListener(messageListener);
+
+        //   if (createdTabId && !tabClosed) {
+        //     chrome.tabs
+        //       .get(createdTabId)
+        //       .then(() => {
+        //         chrome.tabs.remove(createdTabId).catch((error) => {
+        //           console.log("Tab đã được đóng hoặc không tồn tại:", error);
+        //         });
+        //       })
+        //       .catch(() => {
+        //         console.log("Tab không tồn tại, có thể đã được đóng trước đó");
+        //       });
+        //   }
+
+        //   setIsLoading(false);
+        //   // navigate("/");
+        // }, 15000);
+      } catch (error) {
+        console.log("Lỗi khi xử lý:", error);
         navigate("/");
         setIsLoading(false);
-      }, 17000);
-    } catch (error) {
-      console.log("Lỗi khi xử lý:", error);
-      navigate("/");
-      setIsLoading(false);
-    }
+      }
+    };
+
+    navigate("/loading", {
+      state: {
+        message,
+        loadingOperation: loadScheduleData,
+        timeoutDuration: 12,
+      },
+    });
   };
 
   //Xử lý xem điểm
@@ -191,119 +213,128 @@ function MainApp() {
     setLoadingMessage(message);
     setIsLoading(true);
 
-    navigate("/loading", { state: { message } });
+    const loadViewGrades = async () => {
+      try {
+        const savedKey = localStorage.getItem("iuh-tracker-key");
+        if (savedKey && savedKey === key) {
+          // Kiểm tra dữ liệu điểm đã lưu
+          const result = await new Promise((resolve) => {
+            chrome.storage.local.get(
+              ["diem_json", "diem_timestamp"],
+              function (res) {
+                if (chrome.runtime.lastError) {
+                  console.log("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
+                  resolve({ diem_json: null });
+                  return;
+                }
+                resolve(res);
+              }
+            );
+          });
 
+          if (result.diem_json && result.diem_timestamp) {
+            try {
+              const currentTime = new Date();
+              const updateTime = new Date(result.diem_timestamp);
 
-    try {
-      // Kiểm tra dữ liệu điểm đã lưu
-      const result = await new Promise((resolve) => {
-        chrome.storage.local.get(
-          ["diem_json", "diem_timestamp"],
-          function (res) {
-            if (chrome.runtime.lastError) {
-              console.log("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
-              resolve({ diem_json: null });
-              return;
+              const diffTime = currentTime - updateTime;
+              const diffHours = diffTime / (1000 * 60 * 60);
+
+              if (diffHours < 24) {
+                const mainPageUrl = chrome.runtime.getURL(
+                  `page/MainPage.html?k=${encodeURIComponent(key)}`
+                );
+                chrome.tabs.create({ url: mainPageUrl });
+                navigate("/");
+                setIsLoading(false);
+                return;
+              }
+            } catch (parseError) {
+              console.log("Lỗi khi phân tích dữ liệu điểm:", parseError);
             }
-            resolve(res);
           }
-        );
-      });
+        }
 
-      if (result.diem_json && result.diem_timestamp) {
-        try {
-          const currentTime = new Date();
-          const updateTime = new Date(result.diem_timestamp);
+        let createdTabId = null;
+        let tabClosed = false;
 
-          const diffTime = currentTime - updateTime;
-          const diffHours = diffTime / (1000 * 60 * 60);
-
-          if (diffHours < 24) {
+        const messageListener = (message, sender, sendResponse) => {
+          if (message.type === "GRADES_SAVED") {
             const mainPageUrl = chrome.runtime.getURL(
               `page/MainPage.html?k=${encodeURIComponent(key)}`
             );
             chrome.tabs.create({ url: mainPageUrl });
-            navigate("/");
-            setIsLoading(false);
-            return;
-          }
-        } catch (parseError) {
-          console.log("Lỗi khi phân tích dữ liệu điểm:", parseError);
-        }
-      }
 
-      let createdTabId = null;
-      let tabClosed = false;
-
-      const messageListener = (message, sender, sendResponse) => {
-        if (message.type === "GRADES_SAVED") {
-          const mainPageUrl = chrome.runtime.getURL(
-            `page/MainPage.html?k=${encodeURIComponent(key)}`
-          );
-          chrome.tabs.create({ url: mainPageUrl });
-
-          if (sender.tab?.id) {
-            chrome.tabs.remove(sender.tab.id);
-            if (sender.tab.id === createdTabId) {
-              tabClosed = true;
+            if (sender.tab?.id) {
+              chrome.tabs.remove(sender.tab.id);
+              if (sender.tab.id === createdTabId) {
+                tabClosed = true;
+              }
             }
+
+            chrome.runtime.onMessage.removeListener(messageListener);
+            // navigate("/");
+            setIsLoading(false);
           }
+        };
 
-          chrome.runtime.onMessage.removeListener(messageListener);
-          navigate("/");
-          setIsLoading(false);
-        }
-      };
+        chrome.runtime.onMessage.addListener(messageListener);
 
-      chrome.runtime.onMessage.addListener(messageListener);
+        const gradesUrl = `https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html?k=${encodeURIComponent(
+          key
+        )}`;
+        const createdTab = await chrome.tabs.create({
+          url: gradesUrl,
+          active: false,
+          pinned: true,
+        });
+        createdTabId = createdTab.id;
 
-      const gradesUrl = `https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html?k=${encodeURIComponent(
-        key
-      )}`;
-      const createdTab = await chrome.tabs.create({
-        url: gradesUrl,
-        active: false,
-        pinned: true,
-      });
-      createdTabId = createdTab.id;
+        chrome.runtime.sendMessage({
+          type: "AUTO_CLOSE_TAB",
+          tabId: createdTabId,
+          timeout: 5000,
+        });
 
-      chrome.runtime.sendMessage({
-        type: "AUTO_CLOSE_TAB",
-        tabId: createdTabId,
-        timeout: 15000,
-      });
+        // setTimeout(() => {
+        //   chrome.runtime.onMessage.removeListener(messageListener);
 
-      setTimeout(() => {
-        chrome.runtime.onMessage.removeListener(messageListener);
+        //   if (createdTabId && !tabClosed) {
+        //     chrome.tabs
+        //       .get(createdTabId)
+        //       .then(() => {
+        //         chrome.tabs.remove(createdTabId).catch((error) => {
+        //           console.log("Tab đã được đóng hoặc không tồn tại:", error);
+        //         });
+        //       })
+        //       .catch(() => {
+        //         console.log("Tab không tồn tại, có thể đã được đóng trước đó");
+        //       });
+        //   }
 
-        if (createdTabId && !tabClosed) {
-          chrome.tabs
-            .get(createdTabId)
-            .then(() => {
-              chrome.tabs.remove(createdTabId).catch((error) => {
-                console.log("Tab đã được đóng hoặc không tồn tại:", error);
-              });
-            })
-            .catch(() => {
-              console.log("Tab không tồn tại, có thể đã được đóng trước đó");
-            });
-        }
+        //   if (!tabClosed) {
+        //     // showCustomError(
+        //     //   "Đã xảy ra sự cố khi tải điểm! Vui lòng kiểm tra lại key, mạng internet hoặc thử lại sau."
+        //     // );
+        //   }
 
-        if (!tabClosed) {
-          const mainPageUrl = chrome.runtime.getURL(
-            `page/MainPage.html?k=${encodeURIComponent(key)}`
-          );
-          chrome.tabs.create({ url: mainPageUrl });
-        }
-
+        //   // navigate("/");
+        //   setIsLoading(false);
+        // }, 7000);
+      } catch (error) {
+        console.error("Lỗi khi mở trang:", error);
         navigate("/");
         setIsLoading(false);
-      }, 17000);
-    } catch (error) {
-      console.error("Lỗi khi mở trang:", error);
-      navigate("/");
-      setIsLoading(false);
-    }
+      }
+    };
+
+    navigate("/loading", {
+      state: {
+        message,
+        loadingOperation: loadViewGrades,
+        timeoutDuration: 7,
+      },
+    });
   };
 
   const handleTabClick = (tabId) => {
@@ -604,10 +635,18 @@ function MainApp() {
 function LoadingScreen() {
   const location = useLocation();
   const message = location.state?.message || "Đang tải...";
-
+  const loadingOperation = location.state?.loadingOperation;
+  const timeoutDuration = location.state?.timeoutDuration || 15;
   return (
     <div className="loading-root">
-      <LoadingPage message={message} />
+      <LoadingPage
+        message={message}
+        onLoading={loadingOperation}
+        timeoutDuration={timeoutDuration}
+        onTimeout={() => {
+          window.history.back();
+        }}
+      />
     </div>
   );
 }

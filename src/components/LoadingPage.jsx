@@ -1,20 +1,26 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const LoadingPage = ({ 
-  message = "Đang tải dữ liệu...", 
+const LoadingPage = ({
+  message = "Đang tải dữ liệu...",
   estimatedTime = 7,
-  timeoutDuration = null,
-  onTimeout = null 
+  timeoutDuration = 15,
+  onTimeout = 15,
+  onLoading = 15,
 }) => {
-  const [progress, setProgress] = useState(0);
   const [remainingTime, setRemainingTime] = useState(estimatedTime);
   const [particles, setParticles] = useState([]);
   const [isTimeout, setIsTimeout] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
-
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (onLoading && typeof onLoading === "function") {
+      onLoading();
+    }
+  }, []);
   useEffect(() => {
     const elapsedInterval = setInterval(() => {
-      setElapsedTime(prev => prev + 0.1);
+      setElapsedTime((prev) => prev + 0.1);
     }, 100);
 
     if (timeoutDuration && elapsedTime >= timeoutDuration && !isTimeout) {
@@ -26,21 +32,10 @@ const LoadingPage = ({
       return;
     }
 
-    // Progress animation
-    const progressInterval = setInterval(() => {
-      if (!isTimeout) {
-        setProgress(prev => {
-          const targetProgress = ((estimatedTime - remainingTime) / estimatedTime) * 100;
-          const newProgress = prev + (targetProgress - prev) * 0.1 + Math.random() * 2;
-          return Math.min(newProgress, 100);
-        });
-      }
-    }, 100);
-
     // Countdown timer
     const timeInterval = setInterval(() => {
       if (!isTimeout) {
-        setRemainingTime(prev => {
+        setRemainingTime((prev) => {
           const newTime = prev - 0.1;
           return newTime <= 0 ? 0 : newTime;
         });
@@ -56,22 +51,24 @@ const LoadingPage = ({
         size: Math.random() * 3 + 1,
         opacity: Math.random() * 0.8 + 0.2,
         speed: Math.random() * 2 + 1,
-        color: Math.random() > 0.5 ? '#10b981' : '#34d399'
+        color: Math.random() > 0.5 ? "#10b981" : "#34d399",
       };
-      
-      setParticles(prev => [...prev.slice(-20), particle]);
+
+      setParticles((prev) => [...prev.slice(-20), particle]);
     };
 
     const particleInterval = setInterval(createParticle, 150);
 
     // Animate particles
     const animateParticles = () => {
-      setParticles(prev => 
-        prev.map(p => ({
-          ...p,
-          y: p.y - p.speed,
-          opacity: p.opacity - 0.01
-        })).filter(p => p.y > -10 && p.opacity > 0)
+      setParticles((prev) =>
+        prev
+          .map((p) => ({
+            ...p,
+            y: p.y - p.speed,
+            opacity: p.opacity - 0.01,
+          }))
+          .filter((p) => p.y > -10 && p.opacity > 0)
       );
     };
 
@@ -79,12 +76,19 @@ const LoadingPage = ({
 
     return () => {
       clearInterval(elapsedInterval);
-      clearInterval(progressInterval);
       clearInterval(timeInterval);
       clearInterval(particleInterval);
       clearInterval(animationInterval);
     };
-  }, [remainingTime, estimatedTime, timeoutDuration, elapsedTime, isTimeout, onTimeout]);
+  }, [
+    remainingTime,
+    estimatedTime,
+    timeoutDuration,
+    elapsedTime,
+    isTimeout,
+    onTimeout,
+    onLoading,
+  ]);
 
   const styles = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -551,7 +555,7 @@ const LoadingPage = ({
         </div>
 
         <div className="floating-particles">
-          {particles.map(particle => (
+          {particles.map((particle) => (
             <div
               key={particle.id}
               className="particle"
@@ -562,7 +566,7 @@ const LoadingPage = ({
                 height: `${particle.size}px`,
                 backgroundColor: particle.color,
                 opacity: particle.opacity,
-                boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`
+                boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
               }}
             />
           ))}
@@ -570,24 +574,94 @@ const LoadingPage = ({
 
         <div className="content-wrapper">
           {isTimeout ? (
-            <div className="error-container">
-              <div className="error-spinner">
-                <div className="error-ring"></div>
-                <div className="error-ring"></div>
-                <div className="error-icon"></div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+              {/* Backdrop with blur effect */}
+              <div
+                className="absolute inset-0 backdrop-blur-sm"
+                // onClick={closeErrorModal}
+              ></div>
+
+              {/* Modal Container */}
+              <div className="relative z-10 w-full max-w-md transform transition-all duration-300 ease-out animate-fade-in-down">
+                {/* Main Modal */}
+                <div
+                  className="rounded-2xl shadow-2xl overflow-hidden border border-green-200/50"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%)",
+                  }}
+                >
+                  <div className="px-6 pt-6 pb-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-full bg-red-500/10 backdrop-blur-sm flex items-center justify-center ring-2 ring-red-500/20">
+                          <svg
+                            className="w-6 h-6 text-red-600 animate-pulse"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                            />
+                          </svg>
+                        </div>
+                        {/* Animated ring */}
+                        <div className="absolute inset-0 rounded-full border-2 border-red-500/30 animate-ping"></div>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-800 tracking-tight">
+                          Thông báo lỗi
+                        </h3>
+                        <p className="text-sm text-gray-600/80 mt-1">
+                          Có sự cố xảy ra
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="px-6 pb-2">
+                    <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/50 shadow-sm">
+                      <p className="text-gray-700 text-sm leading-relaxed">
+                        Vui lòng kiểm tra key, internet và thử lại sau.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="px-6 pb-6 pt-4">
+                    <button
+                      onClick={() => navigate("/")}
+                      className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-500/30 active:scale-[0.98]"
+                    >
+                      <span className="flex items-center justify-center space-x-2">
+                        <span>Đóng</span>
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Decorative elements */}
+                <div className="absolute -top-1 -right-1 w-20 h-20 bg-gradient-to-br from-green-300/20 to-emerald-400/20 rounded-full blur-xl"></div>
+                <div className="absolute -bottom-1 -left-1 w-16 h-16 bg-gradient-to-tr from-green-400/20 to-teal-300/20 rounded-full blur-lg"></div>
               </div>
-              
-              <div className="error-text">Đã xảy ra lỗi!</div>
-              <div className="error-message">
-                Vui lòng kiểm tra lại key và thử lại sau
-              </div>
-              
-              <button 
-                className="retry-button"
-                onClick={() => window.location.reload()}
-              >
-                Thử lại
-              </button>
             </div>
           ) : (
             <>
@@ -598,7 +672,7 @@ const LoadingPage = ({
                     <div className="ripple"></div>
                     <div className="ripple"></div>
                   </div>
-                  
+
                   <div className="sparkles">
                     <div className="sparkle"></div>
                     <div className="sparkle"></div>
@@ -607,14 +681,14 @@ const LoadingPage = ({
                     <div className="sparkle"></div>
                     <div className="sparkle"></div>
                   </div>
-                  
+
                   <div className="orbital-dots">
                     <div className="orbital-dot"></div>
                     <div className="orbital-dot"></div>
                     <div className="orbital-dot"></div>
                     <div className="orbital-dot"></div>
                   </div>
-                  
+
                   <div className="spinner-ring spinner-outer"></div>
                   <div className="spinner-ring spinner-middle"></div>
                   <div className="spinner-ring spinner-inner"></div>
@@ -623,7 +697,7 @@ const LoadingPage = ({
               </div>
 
               <div className="progress-text">{message}</div>
-              
+
               {/* <div className="circular-progress">
                 <div className="circle-glow"></div>
                 <svg viewBox="0 0 100 100">
