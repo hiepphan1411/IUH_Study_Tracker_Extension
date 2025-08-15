@@ -1,19 +1,661 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
 
-const LoadingPage = ({ message = "Loading..." }) => {
+const LoadingPage = ({ 
+  message = "Đang tải dữ liệu...", 
+  estimatedTime = 7,
+  timeoutDuration = null,
+  onTimeout = null 
+}) => {
+  const [progress, setProgress] = useState(0);
+  const [remainingTime, setRemainingTime] = useState(estimatedTime);
+  const [particles, setParticles] = useState([]);
+  const [isTimeout, setIsTimeout] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    const elapsedInterval = setInterval(() => {
+      setElapsedTime(prev => prev + 0.1);
+    }, 100);
+
+    if (timeoutDuration && elapsedTime >= timeoutDuration && !isTimeout) {
+      setIsTimeout(true);
+      if (onTimeout) {
+        onTimeout();
+      }
+      clearInterval(elapsedInterval);
+      return;
+    }
+
+    // Progress animation
+    const progressInterval = setInterval(() => {
+      if (!isTimeout) {
+        setProgress(prev => {
+          const targetProgress = ((estimatedTime - remainingTime) / estimatedTime) * 100;
+          const newProgress = prev + (targetProgress - prev) * 0.1 + Math.random() * 2;
+          return Math.min(newProgress, 100);
+        });
+      }
+    }, 100);
+
+    // Countdown timer
+    const timeInterval = setInterval(() => {
+      if (!isTimeout) {
+        setRemainingTime(prev => {
+          const newTime = prev - 0.1;
+          return newTime <= 0 ? 0 : newTime;
+        });
+      }
+    }, 100);
+
+    // Create floating particles
+    const createParticle = () => {
+      const particle = {
+        id: Date.now() + Math.random(),
+        x: Math.random() * 100,
+        y: 100,
+        size: Math.random() * 3 + 1,
+        opacity: Math.random() * 0.8 + 0.2,
+        speed: Math.random() * 2 + 1,
+        color: Math.random() > 0.5 ? '#10b981' : '#34d399'
+      };
+      
+      setParticles(prev => [...prev.slice(-20), particle]);
+    };
+
+    const particleInterval = setInterval(createParticle, 150);
+
+    // Animate particles
+    const animateParticles = () => {
+      setParticles(prev => 
+        prev.map(p => ({
+          ...p,
+          y: p.y - p.speed,
+          opacity: p.opacity - 0.01
+        })).filter(p => p.y > -10 && p.opacity > 0)
+      );
+    };
+
+    const animationInterval = setInterval(animateParticles, 50);
+
+    return () => {
+      clearInterval(elapsedInterval);
+      clearInterval(progressInterval);
+      clearInterval(timeInterval);
+      clearInterval(particleInterval);
+      clearInterval(animationInterval);
+    };
+  }, [remainingTime, estimatedTime, timeoutDuration, elapsedTime, isTimeout, onTimeout]);
+
+  const styles = `
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    @keyframes wave {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    @keyframes glow {
+      0%, 100% { 
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4),
+                   0 0 40px rgba(16, 185, 129, 0.2),
+                   inset 0 0 20px rgba(16, 185, 129, 0.1);
+      }
+      50% { 
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.6),
+                   0 0 60px rgba(16, 185, 129, 0.3),
+                   inset 0 0 30px rgba(16, 185, 129, 0.2);
+      }
+    }
+
+    @keyframes float-bg {
+      0% { transform: translateY(0px) rotate(0deg) scale(1); opacity: 0.05; }
+      33% { transform: translateY(-15px) rotate(120deg) scale(1.1); opacity: 0.1; }
+      66% { transform: translateY(10px) rotate(240deg) scale(0.9); opacity: 0.15; }
+      100% { transform: translateY(0px) rotate(360deg) scale(1); opacity: 0.05; }
+    }
+
+    @keyframes progress-shine {
+      0% { left: -100%; opacity: 0; }
+      50% { opacity: 1; }
+      100% { left: 100%; opacity: 0; }
+    }
+
+    @keyframes dot-bounce {
+      0%, 80%, 100% { transform: scale(1) translateY(0); opacity: 0.7; }
+      40% { transform: scale(1.4) translateY(-8px); opacity: 1; }
+    }
+
+    @keyframes ripple {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 0.4; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+
+    @keyframes orbitalSpin {
+      0% { transform: rotate(0deg) translateX(60px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(60px) rotate(-360deg); }
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes errorPulse {
+      0%, 100% { background-color: #ef4444; }
+      50% { background-color: #dc2626; }
+    }
+
+    @keyframes circleProgress {
+      0% {
+        stroke-dasharray: 0 283;
+      }
+      100% {
+        stroke-dasharray: 283 0;
+      }
+    }
+    
+    @keyframes circleSpin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 50%, #a7f3d0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      z-index: 9999;
+    }
+
+    .background-elements {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(45deg, rgba(16, 185, 129, 0.08), rgba(52, 211, 153, 0.05));
+      border: 1px solid rgba(16, 185, 129, 0.1);
+      animation: float-bg 20s infinite ease-in-out;
+    }
+
+    .bg-circle:nth-child(1) {
+      width: 400px;
+      height: 400px;
+      top: -100px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+
+    .bg-circle:nth-child(2) {
+      width: 300px;
+      height: 300px;
+      top: 50%;
+      right: -80px;
+      animation-delay: -7s;
+    }
+
+    .bg-circle:nth-child(3) {
+      width: 200px;
+      height: 200px;
+      top: 20%;
+      left: 75%;
+      animation-delay: -14s;
+    }
+
+    .bg-circle:nth-child(4) {
+      width: 150px;
+      height: 150px;
+      bottom: 20%;
+      left: 10%;
+      animation-delay: -3s;
+    }
+
+    .bg-circle:nth-child(5) {
+      width: 100px;
+      height: 100px;
+      top: 10%;
+      left: 20%;
+      animation-delay: -10s;
+    }
+
+    .floating-particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .content-wrapper {
+      position: relative;
+      text-align: center;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 32px;
+      padding: 60px 50px;
+      box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      min-width: 400px;
+    }
+
+    .spinner-section {
+      position: relative;
+      margin-bottom: 50px;
+    }
+
+    .spinner-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto;
+    }
+
+    .spinner-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 4px solid transparent;
+    }
+
+    .spinner-outer {
+      width: 140px;
+      height: 140px;
+      border-top: 4px solid #059669;
+      border-right: 4px solid rgba(5, 150, 105, 0.3);
+      border-bottom: 4px solid rgba(5, 150, 105, 0.1);
+      animation: spin 3s linear infinite;
+      filter: drop-shadow(0 0 10px rgba(5, 150, 105, 0.3));
+    }
+
+    .spinner-middle {
+      width: 100px;
+      height: 100px;
+      top: 20px;
+      left: 20px;
+      border-top: 4px solid #10b981;
+      border-right: 4px solid rgba(16, 185, 129, 0.4);
+      border-bottom: 4px solid rgba(16, 185, 129, 0.1);
+      animation: spin 2s linear infinite reverse;
+      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+    }
+
+    .spinner-inner {
+      width: 60px;
+      height: 60px;
+      top: 40px;
+      left: 40px;
+      border-top: 4px solid #34d399;
+      border-right: 4px solid rgba(52, 211, 153, 0.5);
+      border-bottom: 4px solid rgba(52, 211, 153, 0.2);
+      animation: spin 1.5s linear infinite;
+      filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.5));
+    }
+
+    .spinner-center {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 60px;
+      left: 60px;
+      background: linear-gradient(45deg, #059669, #10b981, #34d399);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
+    }
+
+    .orbital-dots {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+    }
+
+    .orbital-dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: linear-gradient(45deg, #10b981, #34d399);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+      animation: orbitalSpin 4s linear infinite;
+    }
+
+    .orbital-dot:nth-child(1) { animation-delay: 0s; }
+    .orbital-dot:nth-child(2) { animation-delay: -1s; }
+    .orbital-dot:nth-child(3) { animation-delay: -2s; }
+    .orbital-dot:nth-child(4) { animation-delay: -3s; }
+
+    .ripple-effects {
+      position: absolute;
+      width: 140px;
+      height: 140px;
+    }
+
+    .ripple {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid rgba(16, 185, 129, 0.4);
+      border-radius: 50%;
+      animation: ripple 3s infinite;
+    }
+
+    .ripple:nth-child(2) { animation-delay: 1s; }
+    .ripple:nth-child(3) { animation-delay: 2s; }
+
+    .sparkles {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      top: -30px;
+      left: -30px;
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #34d399;
+      border-radius: 50%;
+      animation: sparkle 2s infinite;
+    }
+
+    .sparkle:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+    .sparkle:nth-child(2) { top: 30%; right: 15%; animation-delay: 0.5s; }
+    .sparkle:nth-child(3) { bottom: 25%; left: 20%; animation-delay: 1s; }
+    .sparkle:nth-child(4) { bottom: 30%; right: 10%; animation-delay: 1.5s; }
+    .sparkle:nth-child(5) { top: 15%; left: 50%; animation-delay: 0.3s; }
+    .sparkle:nth-child(6) { bottom: 15%; left: 50%; animation-delay: 0.8s; }
+
+    .progress-text {
+      color: #047857;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      animation: textGlow 3s infinite;
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .circular-progress {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .circular-progress svg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+      animation: circleSpin 4s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+    }
+    
+    .progress-circle {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+    }
+    
+    .progress-circle-bg {
+      stroke: rgba(255, 255, 255, 0.3);
+    }
+    
+    .progress-circle-value {
+      stroke: #10b981;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 0;
+      animation: circleProgress 3s ease-in-out infinite alternate;
+    }
+    
+    .circle-glow {
+      position: absolute;
+      width: 85%;
+      height: 85%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+      animation: pulse 2s infinite;
+    }
+
+    .status-dots {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      background: linear-gradient(45deg, #10b981, #34d399);
+      border-radius: 50%;
+      animation: dot-bounce 1.8s infinite;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+    }
+
+    .status-dot:nth-child(1) { animation-delay: -0.4s; }
+    .status-dot:nth-child(2) { animation-delay: -0.3s; }
+    .status-dot:nth-child(3) { animation-delay: -0.2s; }
+    .status-dot:nth-child(4) { animation-delay: -0.1s; }
+    .status-dot:nth-child(5) { animation-delay: 0s; }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        padding: 40px 30px;
+        margin: 20px;
+        min-width: 320px;
+      }
+      
+      .loading-text {
+        font-size: 1.5rem;
+      }
+      
+      .progress-container {
+        width: 280px;
+      }
+      
+      .spinner-container {
+        width: 120px;
+        height: 120px;
+      }
+      
+      .spinner-outer {
+        width: 120px;
+        height: 120px;
+      }
+      
+      .spinner-middle {
+        width: 85px;
+        height: 85px;
+        top: 17.5px;
+        left: 17.5px;
+      }
+      
+      .spinner-inner {
+        width: 50px;
+        height: 50px;
+        top: 35px;
+        left: 35px;
+      }
+      
+      .spinner-center {
+        top: 52px;
+        left: 52px;
+      }
+
+      .circular-progress {
+        width: 100px;
+        height: 100px;
+      }
+    }
+  `;
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 z-50">
-      <div className="bg-white p-8 rounded-xl shadow-xl text-center max-w-md w-full">
-        <div className="flex flex-col items-center">
-          <div className="w-16 h-16 mb-4 relative">
-            <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
-          </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-2">{message}</h2>
-          <p className="text-gray-500 text-sm">Vui lòng đợi trong giây lát...</p>
+    <>
+      <style>{styles}</style>
+      <div className="loading-container">
+        <div className="background-elements">
+          <div className="bg-circle"></div>
+          <div className="bg-circle"></div>
+          <div className="bg-circle"></div>
+          <div className="bg-circle"></div>
+          <div className="bg-circle"></div>
+        </div>
+
+        <div className="floating-particles">
+          {particles.map(particle => (
+            <div
+              key={particle.id}
+              className="particle"
+              style={{
+                left: `${particle.x}%`,
+                bottom: `${particle.y}%`,
+                width: `${particle.size}px`,
+                height: `${particle.size}px`,
+                backgroundColor: particle.color,
+                opacity: particle.opacity,
+                boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="content-wrapper">
+          {isTimeout ? (
+            <div className="error-container">
+              <div className="error-spinner">
+                <div className="error-ring"></div>
+                <div className="error-ring"></div>
+                <div className="error-icon"></div>
+              </div>
+              
+              <div className="error-text">Đã xảy ra lỗi!</div>
+              <div className="error-message">
+                Vui lòng kiểm tra lại key và thử lại sau
+              </div>
+              
+              <button 
+                className="retry-button"
+                onClick={() => window.location.reload()}
+              >
+                Thử lại
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="spinner-section">
+                <div className="spinner-container">
+                  <div className="ripple-effects">
+                    <div className="ripple"></div>
+                    <div className="ripple"></div>
+                    <div className="ripple"></div>
+                  </div>
+                  
+                  <div className="sparkles">
+                    <div className="sparkle"></div>
+                    <div className="sparkle"></div>
+                    <div className="sparkle"></div>
+                    <div className="sparkle"></div>
+                    <div className="sparkle"></div>
+                    <div className="sparkle"></div>
+                  </div>
+                  
+                  <div className="orbital-dots">
+                    <div className="orbital-dot"></div>
+                    <div className="orbital-dot"></div>
+                    <div className="orbital-dot"></div>
+                    <div className="orbital-dot"></div>
+                  </div>
+                  
+                  <div className="spinner-ring spinner-outer"></div>
+                  <div className="spinner-ring spinner-middle"></div>
+                  <div className="spinner-ring spinner-inner"></div>
+                  <div className="spinner-center"></div>
+                </div>
+              </div>
+
+              <div className="progress-text">{message}</div>
+              
+              {/* <div className="circular-progress">
+                <div className="circle-glow"></div>
+                <svg viewBox="0 0 100 100">
+                  <circle 
+                    className="progress-circle progress-circle-bg" 
+                    cx="50" 
+                    cy="50" 
+                    r="45"
+                  />
+                  <circle 
+                    className="progress-circle progress-circle-value" 
+                    cx="50" 
+                    cy="50" 
+                    r="45"
+                  />
+                </svg>
+              </div> */}
+
+              <div className="status-dots">
+                <div className="status-dot"></div>
+                <div className="status-dot"></div>
+                <div className="status-dot"></div>
+                <div className="status-dot"></div>
+                <div className="status-dot"></div>
+              </div>
+            </>
+          )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
 export default LoadingPage;
+//test
