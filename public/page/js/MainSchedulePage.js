@@ -1,3 +1,5 @@
+// const { i } = require("framer-motion/client");
+
 /* eslint-disable */
 const { motion, AnimatePresence } = window.Motion || {};
 
@@ -190,8 +192,8 @@ function App() {
             startTime: startTime,
             endTime: endTime,
             room: item.room || "",
-            className: "DHQLMT20B",
-            classCode: "420301767823",
+            className: item.class || "",
+            // classCode: "420301767823",
             lesson: item.time || "",
             isExam: false,
           };
@@ -220,8 +222,8 @@ function App() {
             startTime: startTime,
             endTime: endTime,
             room: item.room || "",
-            className: "DHQLMT20B",
-            classCode: "420301767823",
+            className: item.class || "",
+            // classCode: "420301767823",
             lesson: item.time || item.lesson || "",
             isExam: true,
           };
@@ -553,7 +555,7 @@ function Item(props) {
     React.createElement(
       "div",
       { className: "class-name" },
-      `${props.item.className || "N/A"} - ${props.item.classCode || "N/A"}`
+      `${props.item.className || "N/A"}`
     ),
     React.createElement(
       "div",

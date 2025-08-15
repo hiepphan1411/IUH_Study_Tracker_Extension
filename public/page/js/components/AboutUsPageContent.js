@@ -63,7 +63,7 @@ ${feedback || "Không có nội dung phản hồi cụ thể"}
 Thời gian gửi: ${new Date(feedbackData.timestamp).toLocaleString("vi-VN")}
 
 ---
-Gửi từ IUH Study Tracker Extension
+Gửi từ IUH Grade Guard Extension
   `.trim();
 
     try {
@@ -211,7 +211,7 @@ Gửi từ IUH Study Tracker Extension
             textAlign: "center",
           },
         },
-        "🎓 IUH Study Tracker"
+        "🎓 IUH Grade Guard"
       ),
       React.createElement(
         "p",
