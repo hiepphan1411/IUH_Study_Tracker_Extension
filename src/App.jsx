@@ -41,12 +41,6 @@ function MainApp() {
     }
   }, []);
 
-  useEffect(() => {
-    if (key.trim()) {
-      localStorage.setItem("iuh-tracker-key", key);
-    }
-  }, [key]);
-
   const validateKey = (inputKey) => {
     if (!inputKey.trim()) {
       setError("Vui lòng nhập key");
@@ -85,7 +79,7 @@ function MainApp() {
           // Kiểm tra dữ liệu đã lưu
           const result = await new Promise((resolve) => {
             chrome.storage.local.get(
-              ["schedule_json", "schedule_timestamp"],
+              ["schedule_json", "schedule_timestamp", "schedule_key"],
               function (res) {
                 if (chrome.runtime.lastError) {
                   console.error(
@@ -101,7 +95,7 @@ function MainApp() {
           });
 
           // Nếu có dữ liệu lịch học và timestamp
-          if (result.schedule_json && result.schedule_timestamp) {
+          if (result.schedule_json && result.schedule_timestamp && result.schedule_key === key) {
             try {
               const scheduleData = JSON.parse(result.schedule_json);
               if (scheduleData.capNhatLuc) {
@@ -129,6 +123,9 @@ function MainApp() {
 
         let createdTabId = null;
         let tabClosed = false;
+        if (key.trim()) {
+          localStorage.setItem("iuh-tracker-key", key);
+        }
 
         const messageListener = (message, sender, sendResponse) => {
           if (message.type === "SCHEDULE_SAVED") {
@@ -220,7 +217,7 @@ function MainApp() {
           // Kiểm tra dữ liệu điểm đã lưu
           const result = await new Promise((resolve) => {
             chrome.storage.local.get(
-              ["diem_json", "diem_timestamp"],
+              ["diem_json", "diem_timestamp", "diem_key"],
               function (res) {
                 if (chrome.runtime.lastError) {
                   console.log("Lỗi khi lấy dữ liệu:", chrome.runtime.lastError);
@@ -232,7 +229,7 @@ function MainApp() {
             );
           });
 
-          if (result.diem_json && result.diem_timestamp) {
+          if (result.diem_json && result.diem_timestamp && result.diem_key === key) {
             try {
               const currentTime = new Date();
               const updateTime = new Date(result.diem_timestamp);
@@ -257,6 +254,9 @@ function MainApp() {
 
         let createdTabId = null;
         let tabClosed = false;
+        if (key.trim()) {
+          localStorage.setItem("iuh-tracker-key", key);
+        }
 
         const messageListener = (message, sender, sendResponse) => {
           if (message.type === "GRADES_SAVED") {
