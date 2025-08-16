@@ -772,6 +772,7 @@ body {
   color: #334155;
   font-size: 0.95rem;
   cursor: pointer;
+  outline: none;
 }
 
 .last-updated {
@@ -809,7 +810,6 @@ body {
 }
 
 .schedule-content {
-  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -1050,10 +1050,12 @@ body::-webkit-scrollbar {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
   overflow-y: auto;
+  overflow-x: auto;
 }
 
 .schedule-table-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: block; 
+  height: 8px; 
 }
 
 .schedule-main-area,

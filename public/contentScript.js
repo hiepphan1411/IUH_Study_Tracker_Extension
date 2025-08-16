@@ -1,3 +1,4 @@
+/* eslint-disable */
 //Lấy điểm
 (function () {
   if (
@@ -110,10 +111,14 @@
     }
 
     if (result.length > 0) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("k");
+
       chrome.storage.local.set(
         {
           diem_json: JSON.stringify(result, null, 2),
           diem_timestamp: new Date().toISOString(),
+          diem_key: token,
         },
         function () {
           chrome.runtime.sendMessage({
@@ -172,7 +177,8 @@ function loadScheduleData(token) {
     // const startDate = new Date(now);
     // startDate.setDate(now.getDate() - 7);
 
-    loadWithBatchFetch(mondayThisWeek.toISOString(), 5, 0, token, () => { //5 tuần tiếp theo
+    loadWithBatchFetch(mondayThisWeek.toISOString(), 5, 0, token, () => {
+      //5 tuần tiếp theo
       processAndSaveScheduleData();
     });
   } catch (error) {
@@ -341,6 +347,9 @@ function processAndSaveScheduleData() {
     const lichHoc = tatCaTietHoc.filter((t) => t.type === "lich_hoc");
     const lichThi = tatCaTietHoc.filter((t) => t.type === "lich_thi");
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("k");
+
     const scheduleData = {
       lichHoc,
       lichThi,
@@ -348,11 +357,11 @@ function processAndSaveScheduleData() {
       capNhatLuc: new Date().toISOString(),
     };
 
-    console.log(scheduleData);
     chrome.storage.local.set(
       {
         schedule_json: JSON.stringify(scheduleData),
         schedule_timestamp: Date.now(),
+        schedule_key: token,
       },
       () => {
         if (chrome.runtime.lastError) {

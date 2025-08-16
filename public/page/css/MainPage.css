@@ -417,48 +417,44 @@ body {
   }
 }
 
-/* Dialog Styles - Modern Design */
+/* Dialog Styles */
 .dialog-overlay {
-    position: fixed;
+    position: fixed; 
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    width: 100vw;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
-    padding: 16px;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 9999; 
 }
 
 .dialog-container {
-    background: #ffffff;
+    background-color: white;
     border-radius: 16px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-    width: 25vw;
-    max-width: 700px;
-    overflow: hidden;
-    position: absolute;
-    top: 40%;
-    left: 45vw;
-    transform: none;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+    width: 400px;
 }
 
+
+
 .dialog-content {
-    padding: 32px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 24px;
 }
 
 .dialog-title {
-    font-size: 24px;
+    font-size: 30px;
     font-weight: 700;
     color: #111827;
     margin: 0;
     line-height: 1.2;
+    padding-bottom: 5px;
 }
 
 .dialog-message {
@@ -467,6 +463,7 @@ body {
     margin: 0;
     line-height: 1.6;
     max-width: 650px;
+    padding-bottom: 20px;
 }
 
 .dialog-actions {
@@ -521,23 +518,23 @@ body {
     transform: translateY(0);
 }
 
-/* Icon styles - nếu bạn muốn thêm icon */
+
 .dialog-title::before {
     content: '⚠️';
     display: block;
-    font-size: 48px;
+    font-size: 58px;
     margin-bottom: 16px;
     opacity: 0.8;
 }
 
-/* Responsive design */
+
 @media (max-width: 700px) {
     .dialog-overlay {
         padding: 12px;
     }
 
     .dialog-content {
-        padding: 24px;
+        padding: 10px;
         gap: 20px;
     }
 
@@ -591,4 +588,3 @@ body {
 .dialog-button:disabled:hover {
     transform: none !important;
 }
-
