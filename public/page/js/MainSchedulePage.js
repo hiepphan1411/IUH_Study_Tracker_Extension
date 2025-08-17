@@ -19,8 +19,8 @@ function mapTietToTime(t) {
     12: "16:50",
     13: "18:00",
     14: "18:50",
-    15: "19:30",
-    16: "20:20",
+    15: "19:50",
+    16: "20:40",
   };
   return m[t] || "";
 }
@@ -42,8 +42,8 @@ function mapTimeToTiet(time) {
     "16:50": 12,
     "18:00": 13,
     "18:50": 14,
-    "19:30": 15,
-    "20:20": 16,
+    "19:50": 15,
+    "20:40": 16,
   };
   return timeMap[time] || 0;
 }
@@ -277,19 +277,19 @@ function App() {
       { className: "content-wrapper" },
       isLoading
         ? React.createElement(
-            "div",
-            { className: "loading-container" },
-            React.createElement("div", { className: "spinner" }),
-            React.createElement(
-              "span",
-              { className: "loading-text" },
-              "Đang tải dữ liệu..."
-            )
+          "div",
+          { className: "loading-container" },
+          React.createElement("div", { className: "spinner" }),
+          React.createElement(
+            "span",
+            { className: "loading-text" },
+            "Đang tải dữ liệu..."
           )
+        )
         : React.createElement(ScheduleContent, {
-            data: getDisplayData(),
-            viewType: currentView,
-          })
+          data: getDisplayData(),
+          viewType: currentView,
+        })
     ),
     React.createElement(ConfirmationDialog, {
       isOpen: isConfirmDialogOpen,
@@ -339,11 +339,10 @@ function ModernHeader({ currentView, onViewChange, onBackClick }) {
   }, []);
 
   const formattedTime = lastUpdated
-    ? `${lastUpdated.getDate()}/${
-        lastUpdated.getMonth() + 1
-      }/${lastUpdated.getFullYear()} ${lastUpdated.getHours()}:${String(
-        lastUpdated.getMinutes()
-      ).padStart(2, "0")}`
+    ? `${lastUpdated.getDate()}/${lastUpdated.getMonth() + 1
+    }/${lastUpdated.getFullYear()} ${lastUpdated.getHours()}:${String(
+      lastUpdated.getMinutes()
+    ).padStart(2, "0")}`
     : "Chưa cập nhật";
 
   return React.createElement(
@@ -565,8 +564,7 @@ function Item(props) {
     React.createElement(
       "div",
       { className: "class-time" },
-      `Thời gian: ${props.item.startTime || "N/A"} - ${
-        props.item.endTime || "N/A"
+      `Thời gian: ${props.item.startTime || "N/A"} - ${props.item.endTime || "N/A"
       }`
     ),
     React.createElement(
@@ -588,9 +586,8 @@ function TimeSlotCell(props) {
     return React.createElement(
       "td",
       {
-        className: `time-slot-cell ${
-          props.isCurrentDay ? "current-day-cell" : ""
-        }`,
+        className: `time-slot-cell ${props.isCurrentDay ? "current-day-cell" : ""
+          }`,
       },
       null
     );
@@ -649,17 +646,16 @@ function TimeSlotCell(props) {
   return React.createElement(
     "td",
     {
-      className: `time-slot-cell ${
-        props.isCurrentDay ? "current-day-cell" : ""
-      }`,
+      className: `time-slot-cell ${props.isCurrentDay ? "current-day-cell" : ""
+        }`,
     },
     filteredItems.length > 0
       ? filteredItems.map((item) =>
-          React.createElement(Item, {
-            key: item.id || `item-${Date.now()}-${Math.random()}`,
-            item: item,
-          })
-        )
+        React.createElement(Item, {
+          key: item.id || `item-${Date.now()}-${Math.random()}`,
+          item: item,
+        })
+      )
       : React.createElement("div", { className: "no-data-cell" }, "")
   );
 }
@@ -707,9 +703,8 @@ function ScheduleTable(props) {
               "th",
               {
                 key: day.date,
-                className: `day-header ${
-                  day.date === todayFormatted ? "current-day" : ""
-                }`,
+                className: `day-header ${day.date === todayFormatted ? "current-day" : ""
+                  }`,
               },
               React.createElement(
                 "div",
@@ -781,9 +776,8 @@ function WeekNavigation(props) {
   return React.createElement(
     motion.div,
     {
-      className: `week-navigation-sidebar ${
-        isExpanded ? "expanded" : "collapsed"
-      }`,
+      className: `week-navigation-sidebar ${isExpanded ? "expanded" : "collapsed"
+        }`,
       animate: {
         width: isExpanded ? "200px" : "50px",
       },
@@ -803,222 +797,216 @@ function WeekNavigation(props) {
         },
         isExpanded
           ? React.createElement(
-              "svg",
-              {
-                width: "20",
-                height: "20",
-                viewBox: "0 0 24 24",
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: "2",
-              },
-              React.createElement("polyline", { points: "15,6 9,12 15,18" })
-            )
+            "svg",
+            {
+              width: "20",
+              height: "20",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+            },
+            React.createElement("polyline", { points: "15,6 9,12 15,18" })
+          )
           : React.createElement(
-              "svg",
-              {
-                width: "20",
-                height: "20",
-                viewBox: "0 0 24 24",
-                fill: "none",
-                stroke: "currentColor",
-                strokeWidth: "2",
-              },
-              React.createElement("polyline", { points: "9,6 15,12 9,18" })
-            )
+            "svg",
+            {
+              width: "20",
+              height: "20",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+            },
+            React.createElement("polyline", { points: "9,6 15,12 9,18" })
+          )
       )
     ),
     React.createElement(
       AnimatePresence,
       null,
       isExpanded &&
+      React.createElement(
+        motion.div,
+        {
+          className: "week-nav-content",
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          exit: { opacity: 0 },
+          transition: { duration: 0.2 },
+        },
         React.createElement(
-          motion.div,
-          {
-            className: "week-nav-content",
-            initial: { opacity: 0 },
-            animate: { opacity: 1 },
-            exit: { opacity: 0 },
-            transition: { duration: 0.2 },
-          },
+          "div",
+          { className: "month-year-display" },
           React.createElement(
-            "div",
-            { className: "month-year-display" },
-            React.createElement(
-              "span",
-              { className: "month-year-label" },
-              `Tháng ${props.currentMonth}, ${props.currentYear}`
-            ),
-            props.isPrevDisabled || props.isNextDisabled
-              ? React.createElement(
-                  "div",
-                  {
-                    className: "data-range-notice",
-                    style: {
-                      fontSize: "0.75rem",
-                      color: "#ff9800",
-                      marginTop: "4px",
-                      fontStyle: "italic",
-                    },
-                  },
-                  "Truy cập sv.iuh để xem thêm!"
-                )
-              : null
+            "span",
+            { className: "month-year-label" },
+            `Tháng ${props.currentMonth}, ${props.currentYear}`
+          ),
+          props.isPrevDisabled || props.isNextDisabled
+            ? React.createElement(
+              "div",
+              {
+                className: "data-range-notice",
+                style: {
+                  fontSize: "0.75rem",
+                  color: "#ff9800",
+                  marginTop: "4px",
+                  fontStyle: "italic",
+                },
+              },
+              "Truy cập sv.iuh để xem thêm!"
+            )
+            : null
+        ),
+        React.createElement(
+          "div",
+          { className: "week-nav-buttons" },
+          React.createElement(
+            motion.button,
+            {
+              className: `nav-button prev-week ${props.isPrevDisabled ? "disabled" : ""
+                }`,
+              onClick: () =>
+                !props.isPrevDisabled && props.onWeekChange("prev"),
+              whileHover: !props.isPrevDisabled ? { scale: 1.05 } : {},
+              whileTap: !props.isPrevDisabled ? { scale: 0.95 } : {},
+              disabled: props.isPrevDisabled,
+              title: props.isPrevDisabled
+                ? "Không có dữ liệu cho tuần trước"
+                : "Xem tuần trước",
+              style: props.isPrevDisabled ? disabledButtonStyle : {},
+            },
+            React.createElement(ChevronLeftIcon, { size: 20 }),
+            React.createElement("span", null, "Tuần trước")
           ),
           React.createElement(
-            "div",
-            { className: "week-nav-buttons" },
-            React.createElement(
-              motion.button,
-              {
-                className: `nav-button prev-week ${
-                  props.isPrevDisabled ? "disabled" : ""
+            motion.button,
+            {
+              className: `nav-button current-week-button ${isCurrentWeek ? "disabled" : ""
                 }`,
-                onClick: () =>
-                  !props.isPrevDisabled && props.onWeekChange("prev"),
-                whileHover: !props.isPrevDisabled ? { scale: 1.05 } : {},
-                whileTap: !props.isPrevDisabled ? { scale: 0.95 } : {},
-                disabled: props.isPrevDisabled,
-                title: props.isPrevDisabled
-                  ? "Không có dữ liệu cho tuần trước"
-                  : "Xem tuần trước",
-                style: props.isPrevDisabled ? disabledButtonStyle : {},
-              },
-              React.createElement(ChevronLeftIcon, { size: 20 }),
-              React.createElement("span", null, "Tuần trước")
-            ),
+              onClick: () => !isCurrentWeek && props.onWeekChange("current"),
+              whileHover: !isCurrentWeek ? { scale: 1.05 } : {},
+              whileTap: !isCurrentWeek ? { scale: 0.95 } : {},
+              disabled: isCurrentWeek,
+              title: isCurrentWeek
+                ? "Đang ở tuần hiện tại"
+                : "Quay về tuần hiện tại",
+              style: isCurrentWeek ? disabledButtonStyle : {},
+            },
             React.createElement(
-              motion.button,
+              "span",
               {
-                className: `nav-button current-week-button ${
-                  isCurrentWeek ? "disabled" : ""
-                }`,
-                onClick: () => !isCurrentWeek && props.onWeekChange("current"),
-                whileHover: !isCurrentWeek ? { scale: 1.05 } : {},
-                whileTap: !isCurrentWeek ? { scale: 0.95 } : {},
-                disabled: isCurrentWeek,
-                title: isCurrentWeek
-                  ? "Đang ở tuần hiện tại"
-                  : "Quay về tuần hiện tại",
-                style: isCurrentWeek ? disabledButtonStyle : {},
+                style: {
+                  display: "flex",
+                  alignItems: "center",
+                },
               },
               React.createElement(
-                "span",
+                "svg",
                 {
-                  style: {
-                    display: "flex",
-                    alignItems: "center",
-                  },
+                  width: "16",
+                  height: "16",
+                  viewBox: "0 0 24 24",
+                  fill: "none",
+                  stroke: "currentColor",
+                  strokeWidth: "2",
+                  style: { marginRight: "5px" },
                 },
-                React.createElement(
-                  "svg",
-                  {
-                    width: "16",
-                    height: "16",
-                    viewBox: "0 0 24 24",
-                    fill: "none",
-                    stroke: "currentColor",
-                    strokeWidth: "2",
-                    style: { marginRight: "5px" },
-                  },
-                  React.createElement("circle", {
-                    cx: "12",
-                    cy: "12",
-                    r: "10",
-                  }),
-                  React.createElement("polyline", {
-                    points: "12 6 12 12 16 14",
-                  })
-                ),
-                "Tuần hiện tại"
-              )
-            ),
-            React.createElement(
-              motion.button,
-              {
-                className: `nav-button next-week ${
-                  props.isNextDisabled ? "disabled" : ""
-                }`,
-                onClick: () =>
-                  !props.isNextDisabled && props.onWeekChange("next"),
-                whileHover: !props.isNextDisabled ? { scale: 1.05 } : {},
-                whileTap: !props.isNextDisabled ? { scale: 0.95 } : {},
-                disabled: props.isNextDisabled,
-                title: props.isNextDisabled
-                  ? "Không có dữ liệu cho tuần sau"
-                  : "Xem tuần sau",
-                style: props.isNextDisabled ? disabledButtonStyle : {},
-              },
-              React.createElement("span", null, "Tuần sau"),
-              React.createElement(ChevronRightIcon, { size: 20 })
+                React.createElement("circle", {
+                  cx: "12",
+                  cy: "12",
+                  r: "10",
+                }),
+                React.createElement("polyline", {
+                  points: "12 6 12 12 16 14",
+                })
+              ),
+              "Tuần hiện tại"
             )
-          )
-        )
-    ),
-    !isExpanded &&
-      React.createElement(
-        "div",
-        { className: "collapsed-controls" },
-        React.createElement(
-          motion.button,
-          {
-            className: `mini-nav-button ${
-              props.isPrevDisabled ? "disabled" : ""
-            }`,
-            onClick: () => !props.isPrevDisabled && props.onWeekChange("prev"),
-            whileHover: !props.isPrevDisabled ? { scale: 1.1 } : {},
-            whileTap: !props.isPrevDisabled ? { scale: 0.9 } : {},
-            disabled: props.isPrevDisabled,
-            title: "Tuần trước",
-            style: props.isPrevDisabled ? disabledButtonStyle : {},
-          },
-          React.createElement(ChevronLeftIcon, { size: 16 })
-        ),
-        React.createElement(
-          motion.button,
-          {
-            className: `mini-nav-button current-week ${
-              isCurrentWeek ? "disabled" : ""
-            }`,
-            onClick: () => !isCurrentWeek && props.onWeekChange("current"),
-            whileHover: !isCurrentWeek ? { scale: 1.1 } : {},
-            whileTap: !isCurrentWeek ? { scale: 0.9 } : {},
-            disabled: isCurrentWeek,
-            title: isCurrentWeek
-              ? "Đang ở tuần hiện tại"
-              : "Quay về tuần hiện tại",
-            style: isCurrentWeek ? disabledButtonStyle : {},
-          },
+          ),
           React.createElement(
-            "svg",
+            motion.button,
             {
-              width: "16",
-              height: "16",
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
+              className: `nav-button next-week ${props.isNextDisabled ? "disabled" : ""
+                }`,
+              onClick: () =>
+                !props.isNextDisabled && props.onWeekChange("next"),
+              whileHover: !props.isNextDisabled ? { scale: 1.05 } : {},
+              whileTap: !props.isNextDisabled ? { scale: 0.95 } : {},
+              disabled: props.isNextDisabled,
+              title: props.isNextDisabled
+                ? "Không có dữ liệu cho tuần sau"
+                : "Xem tuần sau",
+              style: props.isNextDisabled ? disabledButtonStyle : {},
             },
-            React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
-            React.createElement("polyline", { points: "12 6 12 12 16 14" })
+            React.createElement("span", null, "Tuần sau"),
+            React.createElement(ChevronRightIcon, { size: 20 })
           )
-        ),
-        React.createElement(
-          motion.button,
-          {
-            className: `mini-nav-button ${
-              props.isNextDisabled ? "disabled" : ""
-            }`,
-            onClick: () => !props.isNextDisabled && props.onWeekChange("next"),
-            whileHover: !props.isNextDisabled ? { scale: 1.1 } : {},
-            whileTap: !props.isNextDisabled ? { scale: 0.9 } : {},
-            disabled: props.isNextDisabled,
-            title: "Tuần sau",
-            style: props.isNextDisabled ? disabledButtonStyle : {},
-          },
-          React.createElement(ChevronRightIcon, { size: 16 })
         )
       )
+    ),
+    !isExpanded &&
+    React.createElement(
+      "div",
+      { className: "collapsed-controls" },
+      React.createElement(
+        motion.button,
+        {
+          className: `mini-nav-button ${props.isPrevDisabled ? "disabled" : ""
+            }`,
+          onClick: () => !props.isPrevDisabled && props.onWeekChange("prev"),
+          whileHover: !props.isPrevDisabled ? { scale: 1.1 } : {},
+          whileTap: !props.isPrevDisabled ? { scale: 0.9 } : {},
+          disabled: props.isPrevDisabled,
+          title: "Tuần trước",
+          style: props.isPrevDisabled ? disabledButtonStyle : {},
+        },
+        React.createElement(ChevronLeftIcon, { size: 16 })
+      ),
+      React.createElement(
+        motion.button,
+        {
+          className: `mini-nav-button current-week ${isCurrentWeek ? "disabled" : ""
+            }`,
+          onClick: () => !isCurrentWeek && props.onWeekChange("current"),
+          whileHover: !isCurrentWeek ? { scale: 1.1 } : {},
+          whileTap: !isCurrentWeek ? { scale: 0.9 } : {},
+          disabled: isCurrentWeek,
+          title: isCurrentWeek
+            ? "Đang ở tuần hiện tại"
+            : "Quay về tuần hiện tại",
+          style: isCurrentWeek ? disabledButtonStyle : {},
+        },
+        React.createElement(
+          "svg",
+          {
+            width: "16",
+            height: "16",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+          },
+          React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
+          React.createElement("polyline", { points: "12 6 12 12 16 14" })
+        )
+      ),
+      React.createElement(
+        motion.button,
+        {
+          className: `mini-nav-button ${props.isNextDisabled ? "disabled" : ""
+            }`,
+          onClick: () => !props.isNextDisabled && props.onWeekChange("next"),
+          whileHover: !props.isNextDisabled ? { scale: 1.1 } : {},
+          whileTap: !props.isNextDisabled ? { scale: 0.9 } : {},
+          disabled: props.isNextDisabled,
+          title: "Tuần sau",
+          style: props.isNextDisabled ? disabledButtonStyle : {},
+        },
+        React.createElement(ChevronRightIcon, { size: 16 })
+      )
+    )
   );
 }
 
@@ -1100,7 +1088,7 @@ function ScheduleContent({ data, viewType }) {
 
   firstDayOfWeek.setHours(0, 0, 0, 0);
   lastDayOfWeek.setHours(0, 0, 0, 0);
-  
+
   console.log("FirstDate: " + firstDayOfWeek);
 
   const isPrevDisabled = firstDayOfWeek <= minDate;
