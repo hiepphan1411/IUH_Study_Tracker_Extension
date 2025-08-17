@@ -266,7 +266,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                 ),
             ),
         ),
-        React.createElement(ConfirmationDialog, {
+        React.createElement(ConfirmationDialogExit, {
             isOpen: isDialogOpen,
             onClose: () => setIsDialogOpen(false),
             onConfirm: () => {
@@ -277,7 +277,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
     );
 }
 
-function ConfirmationDialog({ isOpen, onClose, onConfirm }) {
+function ConfirmationDialogExit({ isOpen, onClose, onConfirm }) {
     if (!isOpen) return null;
 
     return React.createElement(
