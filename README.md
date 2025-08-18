@@ -82,29 +82,31 @@ To use the extension, you'll need to obtain an access key from the IUH student p
 - Chrome Extension APIs
 
 ### Project Structure
-├── public/ # Static assets and extension files 
-│ 
-├── background.js # Background script for extension 
-│ 
-├── contentScript.js # Content script for page interaction 
-│ 
-├── manifest.json # Extension manifest file 
-│ 
-└── ... # Icons and other assets 
-├── src/ # Source code 
-│ 
-├── components/ # React components 
-│ 
-├── layout/ # Layout components 
-│ 
-├── templates/ # HTML templates 
-│ 
-├── utils/ # Utility functions 
-│ 
-├── App.jsx # Main application component 
-│ 
-└── ... # Other source files 
-└── ... # Configuration files
+### Project Structure  
+├── public/ # Static assets and extension files <br>
+│ <br>
+├── background.js # Background script for extension <br>
+│ <br>
+├── contentScript.js # Content script for page interaction <br>
+│ <br>
+├── manifest.json # Extension manifest file <br>
+│ <br>
+└── ... # Icons and other assets <br>
+├── src/ # Source code <br>
+│ <br>
+├── components/ # React components <br>
+│ <br>
+├── layout/ # Layout components <br>
+│ <br>
+├── templates/ # HTML templates <br>
+│ <br>
+├── utils/ # Utility functions <br>
+│ <br>
+├── App.jsx # Main application component <br>
+│ <br>
+└── ... # Other source files <br>
+└── ... # Configuration files  
+
 ###Load the built extension in Chrome:
 - Go to `chrome://extensions/`
 - Enable Developer mode
