@@ -422,7 +422,7 @@ function MainApp() {
                     type="text"
                     value={key}
                     onChange={handleKeyChange}
-                    placeholder="npUdG8auRX8sVUZRemnNTSaTq2eis8LJxZo-Tvx-AN4"
+                    placeholder="npUdG8auRX8sVUZRemnNTSaTq2eis8LJxZo"
                     className={`w-full px-3 py-2.5 border-2 rounded-lg focus:outline-none transition-all duration-500 text-sm transform focus:scale-105 ${
                       error
                         ? "border-red-500 focus:border-red-600 bg-red-50"
