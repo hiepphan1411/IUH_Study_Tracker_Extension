@@ -135,8 +135,4 @@ If you have any issues or need support, please contact us through:
 
 - Email: hgnd27811.dev@gmail.com
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Acknowledgements: All contributors who have helped develop this extension
