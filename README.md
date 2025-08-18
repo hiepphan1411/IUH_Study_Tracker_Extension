@@ -1,6 +1,6 @@
 # IUH Study Tracker Extension
 
-![Logo](public/logo-extension.png)
+![Logo](public/icon128.png)
 
 ## Overview
 
