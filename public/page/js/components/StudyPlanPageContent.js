@@ -1582,9 +1582,10 @@ function StudyPlanPageContent() {
                     style: {
                         position: 'absolute',
                         top: 0,
-                        left: 0,
-                        right: 0,
                         bottom: 0,
+                        left: -100,
+                        right: -100,
+                        width: 'calc(100% + 200px)',
                         background:
                             'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(251, 191, 36, 0.1) 10px, rgba(251, 191, 36, 0.1) 20px)',
                         animation: 'slide 3s linear infinite',
