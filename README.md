@@ -70,7 +70,6 @@ To use the extension, you'll need to obtain an access key from the IUH student p
 
 ## Important Notes
 
-- Your access key has a limited validity period, so get a new one if it stops working
 - Never share your access key with others
 - If you can't access your information, make sure your phone number is updated in the university system
 - The extension only works with official IUH student portal URLs
