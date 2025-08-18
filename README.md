@@ -133,14 +133,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 If you have any issues or need support, please contact us through:
 
-- Email: your-email@example.com
-- GitHub Issues: [Create an issue](https://github.com/your-username/IUH_Study_Tracker_Extension/issues)
+- Email: hgnd27811.dev@gmail.com
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgements
-
-- Industrial University of Ho Chi Minh City for providing the student data API
-- All contributors who have helped develop this extension
+## Acknowledgements: All contributors who have helped develop this extension
