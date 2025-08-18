@@ -1,12 +1,145 @@
-# React + Vite
+# IUH Study Tracker Extension
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Logo](public/icon128.png)
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+IUH Study Tracker is a browser extension designed specifically for students at Industrial University of Ho Chi Minh City (IUH). It helps students track their academic progress, view schedules, and access grades more conveniently without repeatedly logging into the university portal.
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Schedule Viewing**: Easily access your class schedule with a single click
+- **Grade Tracking**: View your academic results and track your progress
+- **User-friendly Interface**: Clean, modern UI designed for ease of use
+- **Quick Access**: Save time by avoiding repeated logins to the university portal
+- **Secure Access**: Uses the university's official API with your personal access key
+
+## Installation
+
+### Chrome Web Store (Recommended)
+1. Visit the [Chrome Web Store](https://chrome.google.com/webstore) and search for "IUH Study Tracker"
+2. Click "Add to Chrome" and follow the prompts
+
+### Manual Installation
+1. Download the latest release from this repository
+2. Unzip the downloaded file
+3. Open Chrome and navigate to `chrome://extensions`
+4. Enable "Developer Mode" in the top right
+5. Click "Load Unpacked" and select the unzipped folder
+6. The extension should now appear in your browser toolbar
+
+## Getting Started
+
+1. Click on the IUH Study Tracker icon in your browser toolbar
+2. Follow the instructions to obtain your access key (see "How to Get Your Access Key" section)
+3. Enter your access key in the extension
+4. You can now view your schedule and grades with a single click!
+
+## How to Get Your Access Key
+
+To use the extension, you'll need to obtain an access key from the IUH student portal:
+
+1. **Access the IUH Student Portal**
+   - Open your web browser
+   - Navigate to [https://sv.iuh.edu.vn/sinh-vien-dang-nhap.html](https://sv.iuh.edu.vn/sinh-vien-dang-nhap.html)
+   - Select "Chế độ dành cho phụ huynh"
+   - Click "Tra cứu thông tin"
+
+2. **Enter Student Information**
+   - Fill in all required information:
+     - Student ID
+     - Full name
+     - Date of birth (dd/mm/yyyy)
+     - Registered phone number
+     - CAPTCHA code
+
+3. **View Academic Results**
+   - After entering correct information, the system will show search results
+   - Select "Xem điểm" to continue
+   - The system will redirect you to the academic results page
+
+4. **Copy the Key from URL**
+   - Look at your browser's address bar
+   - Find the URL with the format: `https://sv.iuh.edu.vn/tra-cuu/ket-qua-hoc-tap.html?k=XXXX`
+   - Copy the string after "k=" (Example: `8k_Zf30Gv5L81suIlYeau3pKsgdRG`)
+   - This is your access key
+
+5. **Enter the Key in Extension**
+   - Paste the copied key into the extension's input field
+   - You're all set!
+
+## Important Notes
+
+- Your access key has a limited validity period, so get a new one if it stops working
+- Never share your access key with others
+- If you can't access your information, make sure your phone number is updated in the university system
+- The extension only works with official IUH student portal URLs
+
+## Development
+
+### Tech Stack
+- React + Vite
+- Tailwind CSS for styling
+- Chrome Extension APIs
+
+### Project Structure
+├── public/ # Static assets and extension files 
+│ 
+├── background.js # Background script for extension 
+│ 
+├── contentScript.js # Content script for page interaction 
+│ 
+├── manifest.json # Extension manifest file 
+│ 
+└── ... # Icons and other assets 
+├── src/ # Source code 
+│ 
+├── components/ # React components 
+│ 
+├── layout/ # Layout components 
+│ 
+├── templates/ # HTML templates 
+│ 
+├── utils/ # Utility functions 
+│ 
+├── App.jsx # Main application component 
+│ 
+└── ... # Other source files 
+└── ... # Configuration files
+###Load the built extension in Chrome:
+- Go to `chrome://extensions/`
+- Enable Developer mode
+- Click "Load unpacked"
+- Select the `dist` folder
+## Privacy
+
+This extension:
+- Does not collect or store your personal information
+- Only uses your access key to retrieve data from the official IUH portal
+- Does not share any data with third parties
+- All processing happens locally in your browser
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add some amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
+
+## Contact
+
+If you have any issues or need support, please contact us through:
+
+- Email: your-email@example.com
+- GitHub Issues: [Create an issue](https://github.com/your-username/IUH_Study_Tracker_Extension/issues)
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgements
+
+- Industrial University of Ho Chi Minh City for providing the student data API
+- All contributors who have helped develop this extension
