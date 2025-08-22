@@ -1827,7 +1827,7 @@ function StudyPlanPageContent() {
                         display: 'inline-block',
                     },
                 },
-                'Danh sách các môn đang học',
+                'Danh sách các môn học đang lên điểm',
             ),
             currentSubj.length === 0
                 ? React.createElement(
