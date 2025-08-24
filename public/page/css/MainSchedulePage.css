@@ -1069,3 +1069,168 @@ body::-webkit-scrollbar {
 .schedule-content::-webkit-scrollbar {
   display: none;
 }
+
+.class-note {
+  position: relative;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #fffbeb;
+  border-radius: 4px;
+  color: #92400e;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+/* 
+setting page */
+.settings-main-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #374151;
+}
+
+.settings-description {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section-title {
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1.1rem;
+  color: #374151;
+  display: flex;
+  align-items: center;
+}
+
+.settings-select {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 12px;
+  min-width: 120px;
+  color: #374151;
+  font-size: 0.9rem;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  padding-right: 28px;
+}
+
+.settings-back-section {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.settings-back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  padding: 8px 16px;
+  border-radius: 6px;
+  color: #4b5563;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.settings-back-button:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.settings-back-button svg {
+  margin-right: 4px;
+}
+
+/* Định nghĩa các lớp Tailwind mà component Toggle sử dụng */
+.relative {
+  position: relative;
+}
+
+.inline-flex {
+  display: inline-flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.h-6 {
+  height: 1.5rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.w-11 {
+  width: 2.75rem;
+}
+
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.focus\:outline-none:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.bg-indigo-600 {
+  background-color: #4f46e5;
+}
+
+.bg-gray-600 {
+  background-color: #4b5563;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.size-4 {
+  width: 1rem;
+  height: 1rem;
+}
+
+.transform {
+  transform: var(--transform);
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.bg-white {
+  background-color: white;
+}
+
+.translate-x-6 {
+  --transform: translateX(1.5rem);
+  transform: translateX(1.5rem);
+}
+
+.translate-x-1 {
+  --transform: translateX(0.25rem);
+  transform: translateX(0.25rem);
+}
+
+.settings-title {
+  color: white;
+}
