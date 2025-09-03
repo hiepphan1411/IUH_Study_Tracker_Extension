@@ -308,6 +308,14 @@ function parseLichHocFromHTML(htmlString) {
         const teacher =
           paragraphs[3]?.textContent.trim().replace(/^GV:\s*/, "") || "";
 
+        let note = "";
+        paragraphs.forEach((p) => {
+          const text = p.textContent.trim();
+          if (text.startsWith("Ghi chú:")) {
+            note = text.replace(/^Ghi chú:\s*/, "");
+          }
+        });
+
         const type = buoiHoc.classList.contains("color-lichhoc")
           ? "lich_hoc"
           : "lich_thi";
@@ -326,6 +334,7 @@ function parseLichHocFromHTML(htmlString) {
             time,
             room,
             teacher,
+            note,
             type,
           });
         }

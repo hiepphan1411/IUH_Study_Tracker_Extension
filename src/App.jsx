@@ -1,3 +1,13 @@
+//utils
+function getRefreshHoursFromSetting(refreshSetting) {
+  if (!refreshSetting) return 24; 
+  
+  if (refreshSetting === "3day") return 72; 
+  
+  const hours = parseInt(refreshSetting);
+  return isNaN(hours) ? 24 : hours; 
+}
+
 /* eslint-disable */
 import "./App.css";
 import { useState, useEffect } from "react";
@@ -79,7 +89,7 @@ function MainApp() {
           // Kiểm tra dữ liệu đã lưu
           const result = await new Promise((resolve) => {
             chrome.storage.local.get(
-              ["schedule_json", "schedule_timestamp", "schedule_key"],
+              ["schedule_json", "schedule_timestamp", "schedule_key", "refresh_interval"],
               function (res) {
                 if (chrome.runtime.lastError) {
                   console.error(
@@ -104,8 +114,10 @@ function MainApp() {
 
                 const diffTime = currentTime - updateTime;
                 const diffHours = diffTime / (1000 * 60 * 60);
-
-                if (diffHours < 24) {
+                
+                const refreshInterval = getRefreshHoursFromSetting(result.refresh_interval) || 24;
+                // alert(refreshInterval);
+                if (diffHours < refreshInterval) {
                   const schedulePageUrl = chrome.runtime.getURL(
                     `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
                   );

@@ -1,5 +1,4 @@
 // const { i } = require("framer-motion/client");
-
 /* eslint-disable */
 const { motion, AnimatePresence } = window.Motion || {};
 
@@ -135,6 +134,7 @@ function App() {
   const [showTodayPopup, setShowTodayPopup] = React.useState(false);
   const [todayClasses, setTodayClasses] = React.useState([]);
   const [todayExams, setTodayExams] = React.useState([]);
+  const [showSettings, setShowSettings] = React.useState(false);
 
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -155,7 +155,7 @@ function App() {
           ["schedule_json", "schedule_timestamp", "hide_today_popup"],
           function (res) {
             if (chrome.runtime.lastError) {
-              console.error("Lỗi Chrome Storage:", chrome.runtime.lastError);
+              console.log("Lỗi Chrome Storage:", chrome.runtime.lastError);
               resolve({ schedule_json: null });
               return;
             }
@@ -170,7 +170,7 @@ function App() {
 
       if (scheduleJson) {
         const parsedData = JSON.parse(scheduleJson);
-        console.log(parsedData);
+        // console.log(parsedData);
         const lichHoc = parsedData.lichHoc || [];
         const lichThi = parsedData.lichThi || [];
 
@@ -197,6 +197,7 @@ function App() {
             endTime: endTime,
             room: item.room || "",
             className: item.class || "",
+            note: item.note || "",
             // classCode: "420301767823",
             lesson: item.time || "",
             isExam: false,
@@ -227,6 +228,7 @@ function App() {
             endTime: endTime,
             room: item.room || "",
             className: item.class || "",
+            note: item.note,
             // classCode: "420301767823",
             lesson: item.time || item.lesson || "",
             isExam: true,
@@ -237,32 +239,39 @@ function App() {
           classes: transformedClasses,
           exams: transformedExams,
         });
-        
-        // Find today's classes and exams
+
+
         const today = new Date();
-        const todayFormatted = `${today.getDate().toString().padStart(2, "0")}/${(today.getMonth() + 1).toString().padStart(2, "0")}/${today.getFullYear()}`;
-        
-        const todayClassItems = transformedClasses.filter(
-          item => item.date === todayFormatted
-        ).sort((a, b) => {
-          if (a.startTime < b.startTime) return -1;
-          if (a.startTime > b.startTime) return 1;
-          return 0;
-        });
-        
-        const todayExamItems = transformedExams.filter(
-          item => item.date === todayFormatted
-        ).sort((a, b) => {
-          if (a.startTime < b.startTime) return -1;
-          if (a.startTime > b.startTime) return 1;
-          return 0;
-        });
-        
+        const todayFormatted = `${today
+          .getDate()
+          .toString()
+          .padStart(2, "0")}/${(today.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}/${today.getFullYear()}`;
+
+        const todayClassItems = transformedClasses
+          .filter((item) => item.date === todayFormatted)
+          .sort((a, b) => {
+            if (a.startTime < b.startTime) return -1;
+            if (a.startTime > b.startTime) return 1;
+            return 0;
+          });
+
+        const todayExamItems = transformedExams
+          .filter((item) => item.date === todayFormatted)
+          .sort((a, b) => {
+            if (a.startTime < b.startTime) return -1;
+            if (a.startTime > b.startTime) return 1;
+            return 0;
+          });
+
         setTodayClasses(todayClassItems);
         setTodayExams(todayExamItems);
-        
-        // Show popup if there are classes or exams today and the user hasn't chosen to hide it
-        if ((todayClassItems.length > 0 || todayExamItems.length > 0) && !hideTodayPopup) {
+
+        if (
+          (todayClassItems.length > 0 || todayExamItems.length > 0) &&
+          !hideTodayPopup
+        ) {
           setShowTodayPopup(true);
         }
       } else {
@@ -296,15 +305,18 @@ function App() {
 
   const handleHideTodayPopup = (shouldHide) => {
     setShowTodayPopup(false);
-    
+
     if (shouldHide) {
-      // Save preference to chrome storage
-      chrome.storage.local.set({ hide_today_popup: true }, function() {
+      chrome.storage.local.set({ hide_today_popup: true }, function () {
         if (chrome.runtime.lastError) {
-          console.error("Error saving preference:", chrome.runtime.lastError);
+          console.log("Error saving preference:", chrome.runtime.lastError);
         }
       });
     }
+  };
+
+  const toggleSettings = () => {
+    setShowSettings(!showSettings);
   };
 
   return React.createElement(
@@ -314,25 +326,31 @@ function App() {
       currentView: currentView,
       onViewChange: setCurrentView,
       onBackClick: handleBackToPortal,
+      onSettingsClick: toggleSettings,
+      showSettingsView: showSettings,
     }),
     React.createElement(
       "div",
       { className: "content-wrapper" },
       isLoading
         ? React.createElement(
-          "div",
-          { className: "loading-container" },
-          React.createElement("div", { className: "spinner" }),
-          React.createElement(
-            "span",
-            { className: "loading-text" },
-            "Đang tải dữ liệu..."
+            "div",
+            { className: "loading-container" },
+            React.createElement("div", { className: "spinner" }),
+            React.createElement(
+              "span",
+              { className: "loading-text" },
+              "Đang tải dữ liệu..."
+            )
           )
-        )
-        : React.createElement(ScheduleContent, {
-          data: getDisplayData(),
-          viewType: currentView,
+        : showSettings
+        ? React.createElement(SettingsContent, {
+          onBack: toggleSettings
         })
+        : React.createElement(ScheduleContent, {
+            data: getDisplayData(),
+            viewType: currentView,
+          })
     ),
     React.createElement(ConfirmationDialog, {
       isOpen: isConfirmDialogOpen,
@@ -343,13 +361,19 @@ function App() {
       isOpen: showTodayPopup,
       onClose: handleHideTodayPopup,
       classes: todayClasses,
-      exams: todayExams
+      exams: todayExams,
     })
   );
 }
 
 // Modern Header Component
-function ModernHeader({ currentView, onViewChange, onBackClick }) {
+function ModernHeader({
+  currentView,
+  onViewChange,
+  onBackClick,
+  onSettingsClick,
+  showSettingsView,
+}) {
   const [lastUpdated, setLastUpdated] = React.useState(null);
 
   const viewOptions = [
@@ -388,10 +412,11 @@ function ModernHeader({ currentView, onViewChange, onBackClick }) {
   }, []);
 
   const formattedTime = lastUpdated
-    ? `${lastUpdated.getDate()}/${lastUpdated.getMonth() + 1
-    }/${lastUpdated.getFullYear()} ${lastUpdated.getHours()}:${String(
-      lastUpdated.getMinutes()
-    ).padStart(2, "0")}`
+    ? `${lastUpdated.getDate()}/${
+        lastUpdated.getMonth() + 1
+      }/${lastUpdated.getFullYear()} ${lastUpdated.getHours()}:${String(
+        lastUpdated.getMinutes()
+      ).padStart(2, "0")}`
     : "Chưa cập nhật";
 
   return React.createElement(
@@ -428,28 +453,31 @@ function ModernHeader({ currentView, onViewChange, onBackClick }) {
     React.createElement(
       "div",
       { className: "header-center" },
-      React.createElement(
-        "div",
-        { className: "view-selector" },
+      !showSettingsView &&
         React.createElement(
-          "select",
-          {
-            value: currentView,
-            onChange: (e) => onViewChange(e.target.value),
-            className: "view-dropdown",
-          },
-          viewOptions.map((option) =>
-            React.createElement(
-              "option",
-              {
-                key: option.value,
-                value: option.value,
-              },
-              option.label
+          "div",
+          { className: "view-selector" },
+          React.createElement(
+            "select",
+            {
+              value: currentView,
+              onChange: (e) => onViewChange(e.target.value),
+              className: "view-dropdown",
+            },
+            viewOptions.map((option) =>
+              React.createElement(
+                "option",
+                {
+                  key: option.value,
+                  value: option.value,
+                },
+                option.label
+              )
             )
           )
-        )
-      )
+        ),
+      showSettingsView &&
+        React.createElement("div", { className: "settings-title" }, "Cài đặt")
     ),
     React.createElement(
       "div",
@@ -471,6 +499,43 @@ function ModernHeader({ currentView, onViewChange, onBackClick }) {
           React.createElement("polyline", { points: "12 6 12 12 16 14" })
         ),
         React.createElement("span", null, formattedTime)
+      ),
+      React.createElement(
+        "button",
+        {
+          className: `nav-button settings-button ${
+            showSettingsView ? "active" : ""
+          }`,
+          onClick: onSettingsClick,
+          title: showSettingsView ? "Lịch học" : "Cài đặt",
+        },
+        React.createElement(
+          "svg",
+          {
+            width: "16",
+            height: "16",
+            viewBox: "0 0 24 24",
+            fill: "none",
+            stroke: "currentColor",
+            strokeWidth: "2",
+          },
+          showSettingsView
+            ? React.createElement("path", {
+                d: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+              })
+            : [
+                React.createElement("circle", {
+                  cx: "12",
+                  cy: "12",
+                  r: "3",
+                  key: "circle",
+                }),
+                React.createElement("path", {
+                  d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z",
+                  key: "path",
+                }),
+              ]
+        )
       ),
       React.createElement(
         "button",
@@ -585,47 +650,57 @@ function ConfirmationDialog({ isOpen, onClose, onConfirm }) {
 }
 
 function Item(props) {
+  const { item } = props;
+
   return React.createElement(
     motion.div,
     {
-      className: `class-item ${props.item.isExam ? "exam-item" : ""}`,
+      className: `class-item ${item.isExam ? "exam-item" : ""}`,
       style: {
-        borderLeft: `3px solid ${props.item.isExam ? "#f59e0b" : "#3b82f6"}`,
+        borderLeft: `3px solid ${item.isExam ? "#f59e0b" : "#3b82f6"}`,
       },
       whileHover: { scale: 1.02 },
       transition: { duration: 0.2 },
     },
-    React.createElement(
-      "div",
-      { className: "class-subject" },
-      `${props.item.subject || "Không xác định"}`
-    ),
-    React.createElement(
-      "div",
-      { className: "class-name" },
-      `${props.item.className || "N/A"}`
-    ),
-    React.createElement(
-      "div",
-      { className: "class-lesson" },
-      `${props.item.lesson || "N/A"}`
-    ),
-    React.createElement(
-      "div",
-      { className: "class-time" },
-      `Thời gian: ${props.item.startTime || "N/A"} - ${props.item.endTime || "N/A"
-      }`
-    ),
-    React.createElement(
-      "div",
-      { className: "class-room" },
-      `Phòng: ${props.item.room || "N/A"}`
-    ),
-    React.createElement(
-      "div",
-      { className: "class-teacher" },
-      `GV: ${props.item.supervisor || "Không xác định"}`
-    )
+    [
+      React.createElement(
+        "div",
+        { className: "class-subject", key: "subject" },
+        item.subject || "Không xác định"
+      ),
+      React.createElement(
+        "div",
+        { className: "class-name", key: "className" },
+        item.className || "N/A"
+      ),
+      React.createElement(
+        "div",
+        { className: "class-lesson", key: "lesson" },
+        item.lesson || "N/A"
+      ),
+      React.createElement(
+        "div",
+        { className: "class-time", key: "time" },
+        `Thời gian: ${item.startTime || "N/A"} - ${item.endTime || "N/A"}`
+      ),
+      React.createElement(
+        "div",
+        { className: "class-room", key: "room" },
+        `Phòng: ${item.room || "N/A"}`
+      ),
+      React.createElement(
+        "div",
+        { className: "class-teacher", key: "teacher" },
+        `GV: ${item.supervisor || "Không xác định"}`
+      ),
+      item.note
+        ? React.createElement(
+            "div",
+            { className: "class-note", key: "note" },
+            `Ghi chú: ${item.note}`
+          )
+        : null,
+    ]
   );
 }
 
@@ -635,8 +710,9 @@ function TimeSlotCell(props) {
     return React.createElement(
       "td",
       {
-        className: `time-slot-cell ${props.isCurrentDay ? "current-day-cell" : ""
-          }`,
+        className: `time-slot-cell ${
+          props.isCurrentDay ? "current-day-cell" : ""
+        }`,
       },
       null
     );
@@ -671,15 +747,6 @@ function TimeSlotCell(props) {
       startTiet = item.startTime ? mapTimeToTiet(item.startTime) : 0;
     }
 
-    // console.log(
-    //   "Extracted startTiet for item:",
-    //   startTiet,
-    //   "isExam:",
-    //   item.isExam,
-    //   "original lesson:",
-    //   item.lesson
-    // );
-
     switch (props.timeSlot) {
       case "morning":
         return startTiet >= 1 && startTiet <= 6;
@@ -695,17 +762,249 @@ function TimeSlotCell(props) {
   return React.createElement(
     "td",
     {
-      className: `time-slot-cell ${props.isCurrentDay ? "current-day-cell" : ""
-        }`,
+      className: `time-slot-cell ${
+        props.isCurrentDay ? "current-day-cell" : ""
+      }`,
     },
     filteredItems.length > 0
       ? filteredItems.map((item) =>
-        React.createElement(Item, {
-          key: item.id || `item-${Date.now()}-${Math.random()}`,
-          item: item,
-        })
-      )
+          React.createElement(Item, {
+            key: item.id || `item-${Date.now()}-${Math.random()}`,
+            item: item,
+          })
+        )
       : React.createElement("div", { className: "no-data-cell" }, "")
+  );
+}
+
+// Settings Content Component
+function SettingsContent({onBack}) {
+  const [refreshInterval, setRefreshInterval] = React.useState("24h");
+  const [showTodayPopup, setShowTodayPopup] = React.useState(true);
+  const [isSuccess, setIsSuccess] = React.useState(false);
+
+React.useEffect(() => {
+  chrome.storage.local.get(
+    ["refresh_interval", "hide_today_popup"],
+    function (result) {
+      if (result.refresh_interval) {
+        setRefreshInterval(result.refresh_interval);
+      }
+      setShowTodayPopup(result.hide_today_popup === undefined ? true : !result.hide_today_popup);
+    }
+  );
+}, []);
+
+  const handleSaveSettings = () => {
+    chrome.storage.local.set(
+      {
+        refresh_interval: refreshInterval,
+        hide_today_popup: !showTodayPopup,
+      },
+      function () {
+        if (chrome.runtime.lastError) {
+          console.log("Lỗi khi lưu cài đặt:", chrome.runtime.lastError);
+        } else {
+          setIsSuccess(true);
+          setTimeout(() => setIsSuccess(false), 2000);
+        }
+      }
+    );
+  };
+
+  const refreshOptions = [
+    { value: "6h", label: "6 giờ" },
+    { value: "12h", label: "12 giờ" },
+    { value: "24h", label: "24 giờ" },
+    { value: "3day", label: "3 ngày" },
+  ];
+
+  return React.createElement(
+    motion.div,
+    {
+      className: "settings-container",
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      exit: { opacity: 0 },
+      transition: { duration: 0.3 },
+    },
+    React.createElement(
+      "div",
+      { className: "settings-card" },
+      React.createElement(
+        "h1",
+        { className: "settings-main-title" },
+        "Cài đặt"
+      ),
+
+      // Phần Cài đặt thời gian làm mới
+      React.createElement(
+        "div",
+        { className: "settings-section" },
+        React.createElement(
+          "div",
+          { className: "settings-section-title" },
+          React.createElement(
+            "svg",
+            {
+              width: "20",
+              height: "20",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+              className: "settings-section-icon",
+            },
+            React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
+            React.createElement("polyline", { points: "12 6 12 12 16 14" })
+          ),
+          "Thời gian làm mới dữ liệu"
+        ),
+        React.createElement(
+          "div",
+          { className: "settings-option" },
+          React.createElement(
+            "div",
+            { className: "settings-option-text" },
+            React.createElement(
+              "div",
+              { className: "settings-option-title" },
+              "Tần suất làm mới"
+            ),
+            React.createElement(
+              "div",
+              { className: "settings-option-description" },
+              "Dữ liệu lịch học sẽ được tự động cập nhật sau khoảng thời gian này"
+            )
+          ),
+          React.createElement(
+            "select",
+            {
+              className: "settings-select",
+              value: refreshInterval,
+              onChange: (e) => setRefreshInterval(e.target.value),
+            },
+            refreshOptions.map((option) =>
+              React.createElement(
+                "option",
+                { value: option.value, key: option.value },
+                option.label
+              )
+            )
+          )
+        )
+      ),
+
+      // Phần Cài đặt Hiển thị popup
+      React.createElement(
+        "div",
+        { className: "settings-section" },
+        React.createElement(
+          "div",
+          { className: "settings-section-title" },
+          React.createElement(
+            "svg",
+            {
+              width: "20",
+              height: "20",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+              className: "settings-section-icon",
+            },
+            React.createElement("path", {
+              d: "M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z",
+            }),
+            React.createElement("polyline", { points: "13 2 13 9 20 9" })
+          ),
+          "Thông báo"
+        ),
+        React.createElement(
+          "div",
+          { className: "settings-option" },
+          React.createElement(
+            "div",
+            { className: "settings-option-text" },
+            React.createElement(
+              "div",
+              { className: "settings-option-title" },
+              "Hiển thị thông báo lịch học hôm nay"
+            ),
+            React.createElement(
+              "div",
+              { className: "settings-option-description" },
+              "Khi được bật, một cửa sổ thông báo sẽ hiển thị lịch học và lịch thi của ngày hôm nay"
+            )
+          ),
+          React.createElement(ToggleSwitchCustom, {
+            isOn: showTodayPopup,
+            onToggle: () => setShowTodayPopup(!showTodayPopup),
+          })
+        )
+      ),
+
+      // Nút lưu cài đặt
+      React.createElement(
+        "div",
+        { className: "settings-actions" },
+        React.createElement(
+          "button",
+          {
+            className: `settings-save-button ${isSuccess ? "success" : ""}`,
+            onClick: handleSaveSettings,
+          },
+          isSuccess ? "Đã lưu" : "Lưu cài đặt"
+        )
+      ),
+
+      // Nút quay về trang lịch học
+      React.createElement(
+        "div",
+        { className: "settings-back-section" },
+        React.createElement(
+          motion.button,
+          {
+            className: "settings-back-button",
+            onClick: onBack,
+            whileHover: { scale: 1.02 },
+            whileTap: { scale: 0.98 },
+          },
+          React.createElement(
+            "svg",
+            {
+              width: "16",
+              height: "16",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+            },
+            React.createElement("path", { d: "M10 19l-7-7 7-7" }),
+            React.createElement("path", { d: "M3 12h18" })
+          ),
+          "Quay lại trang lịch học"
+        )
+      )
+    )
+  );
+}
+
+// Toggle Switch Custom Component
+function ToggleSwitchCustom({ isOn, onToggle }) {
+  return React.createElement(
+    "button",
+    {
+      className: `relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none ${
+        isOn ? "bg-indigo-600" : "bg-gray-600"
+      }`,
+      onClick: onToggle,
+    },
+    React.createElement("span", {
+      className: `inline-block size-4 transform transition-transform bg-white rounded-full ${
+        isOn ? "translate-x-6" : "translate-x-1"
+      }`,
+    })
   );
 }
 
@@ -752,8 +1051,9 @@ function ScheduleTable(props) {
               "th",
               {
                 key: day.date,
-                className: `day-header ${day.date === todayFormatted ? "current-day" : ""
-                  }`,
+                className: `day-header ${
+                  day.date === todayFormatted ? "current-day" : ""
+                }`,
               },
               React.createElement(
                 "div",
@@ -799,17 +1099,14 @@ function ScheduleTable(props) {
 function WeekNavigation(props) {
   const [isExpanded, setIsExpanded] = React.useState(true);
 
-  // Calculate the current week number to compare with props.currentWeek
   const now = new Date();
   const currentWeekNumber = getWeekNumber(now);
   const currentYear = now.getFullYear();
 
-  // Check if we're on the current week
   const isCurrentWeek =
     props.currentWeek === currentWeekNumber &&
     props.currentYear === currentYear;
 
-  // Styles for disabled buttons
   const disabledButtonStyle = {
     opacity: 0.4,
     cursor: "not-allowed",
@@ -825,8 +1122,9 @@ function WeekNavigation(props) {
   return React.createElement(
     motion.div,
     {
-      className: `week-navigation-sidebar ${isExpanded ? "expanded" : "collapsed"
-        }`,
+      className: `week-navigation-sidebar ${
+        isExpanded ? "expanded" : "collapsed"
+      }`,
       animate: {
         width: isExpanded ? "200px" : "50px",
       },
@@ -846,216 +1144,222 @@ function WeekNavigation(props) {
         },
         isExpanded
           ? React.createElement(
-            "svg",
-            {
-              width: "20",
-              height: "20",
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-            },
-            React.createElement("polyline", { points: "15,6 9,12 15,18" })
-          )
+              "svg",
+              {
+                width: "20",
+                height: "20",
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2",
+              },
+              React.createElement("polyline", { points: "15,6 9,12 15,18" })
+            )
           : React.createElement(
-            "svg",
-            {
-              width: "20",
-              height: "20",
-              viewBox: "0 0 24 24",
-              fill: "none",
-              stroke: "currentColor",
-              strokeWidth: "2",
-            },
-            React.createElement("polyline", { points: "9,6 15,12 9,18" })
-          )
+              "svg",
+              {
+                width: "20",
+                height: "20",
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "2",
+              },
+              React.createElement("polyline", { points: "9,6 15,12 9,18" })
+            )
       )
     ),
     React.createElement(
       AnimatePresence,
       null,
       isExpanded &&
-      React.createElement(
-        motion.div,
-        {
-          className: "week-nav-content",
-          initial: { opacity: 0 },
-          animate: { opacity: 1 },
-          exit: { opacity: 0 },
-          transition: { duration: 0.2 },
-        },
         React.createElement(
-          "div",
-          { className: "month-year-display" },
+          motion.div,
+          {
+            className: "week-nav-content",
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            exit: { opacity: 0 },
+            transition: { duration: 0.2 },
+          },
           React.createElement(
-            "span",
-            { className: "month-year-label" },
-            `Tháng ${props.currentMonth}, ${props.currentYear}`
-          ),
-          props.isPrevDisabled || props.isNextDisabled
-            ? React.createElement(
-              "div",
-              {
-                className: "data-range-notice",
-                style: {
-                  fontSize: "0.75rem",
-                  color: "#ff9800",
-                  marginTop: "4px",
-                  fontStyle: "italic",
-                },
-              },
-              "Truy cập sv.iuh để xem thêm!"
-            )
-            : null
-        ),
-        React.createElement(
-          "div",
-          { className: "week-nav-buttons" },
-          React.createElement(
-            motion.button,
-            {
-              className: `nav-button prev-week ${props.isPrevDisabled ? "disabled" : ""
-                }`,
-              onClick: () =>
-                !props.isPrevDisabled && props.onWeekChange("prev"),
-              whileHover: !props.isPrevDisabled ? { scale: 1.05 } : {},
-              whileTap: !props.isPrevDisabled ? { scale: 0.95 } : {},
-              disabled: props.isPrevDisabled,
-              title: props.isPrevDisabled
-                ? "Không có dữ liệu cho tuần trước"
-                : "Xem tuần trước",
-              style: props.isPrevDisabled ? disabledButtonStyle : {},
-            },
-            React.createElement(ChevronLeftIcon, { size: 20 }),
-            React.createElement("span", null, "Tuần trước")
-          ),
-          React.createElement(
-            motion.button,
-            {
-              className: `nav-button current-week-button ${isCurrentWeek ? "disabled" : ""
-                }`,
-              onClick: () => !isCurrentWeek && props.onWeekChange("current"),
-              whileHover: !isCurrentWeek ? { scale: 1.05 } : {},
-              whileTap: !isCurrentWeek ? { scale: 0.95 } : {},
-              disabled: isCurrentWeek,
-              title: isCurrentWeek
-                ? "Đang ở tuần hiện tại"
-                : "Quay về tuần hiện tại",
-              style: isCurrentWeek ? disabledButtonStyle : {},
-            },
+            "div",
+            { className: "month-year-display" },
             React.createElement(
               "span",
-              {
-                style: {
-                  display: "flex",
-                  alignItems: "center",
-                },
-              },
-              React.createElement(
-                "svg",
-                {
-                  width: "16",
-                  height: "16",
-                  viewBox: "0 0 24 24",
-                  fill: "none",
-                  stroke: "currentColor",
-                  strokeWidth: "2",
-                  style: { marginRight: "5px" },
-                },
-                React.createElement("circle", {
-                  cx: "12",
-                  cy: "12",
-                  r: "10",
-                }),
-                React.createElement("polyline", {
-                  points: "12 6 12 12 16 14",
-                })
-              ),
-              "Tuần hiện tại"
-            )
+              { className: "month-year-label" },
+              `Tháng ${props.currentMonth}, ${props.currentYear}`
+            ),
+            props.isPrevDisabled || props.isNextDisabled
+              ? React.createElement(
+                  "div",
+                  {
+                    className: "data-range-notice",
+                    style: {
+                      fontSize: "0.75rem",
+                      color: "#ff9800",
+                      marginTop: "4px",
+                      fontStyle: "italic",
+                    },
+                  },
+                  "Truy cập sv.iuh để xem thêm!"
+                )
+              : null
           ),
           React.createElement(
-            motion.button,
-            {
-              className: `nav-button next-week ${props.isNextDisabled ? "disabled" : ""
+            "div",
+            { className: "week-nav-buttons" },
+            React.createElement(
+              motion.button,
+              {
+                className: `nav-button prev-week ${
+                  props.isPrevDisabled ? "disabled" : ""
                 }`,
-              onClick: () =>
-                !props.isNextDisabled && props.onWeekChange("next"),
-              whileHover: !props.isNextDisabled ? { scale: 1.05 } : {},
-              whileTap: !props.isNextDisabled ? { scale: 0.95 } : {},
-              disabled: props.isNextDisabled,
-              title: props.isNextDisabled
-                ? "Không có dữ liệu cho tuần sau"
-                : "Xem tuần sau",
-              style: props.isNextDisabled ? disabledButtonStyle : {},
-            },
-            React.createElement("span", null, "Tuần sau"),
-            React.createElement(ChevronRightIcon, { size: 20 })
+                onClick: () =>
+                  !props.isPrevDisabled && props.onWeekChange("prev"),
+                whileHover: !props.isPrevDisabled ? { scale: 1.05 } : {},
+                whileTap: !props.isPrevDisabled ? { scale: 0.95 } : {},
+                disabled: props.isPrevDisabled,
+                title: props.isPrevDisabled
+                  ? "Không có dữ liệu cho tuần trước"
+                  : "Xem tuần trước",
+                style: props.isPrevDisabled ? disabledButtonStyle : {},
+              },
+              React.createElement(ChevronLeftIcon, { size: 20 }),
+              React.createElement("span", null, "Tuần trước")
+            ),
+            React.createElement(
+              motion.button,
+              {
+                className: `nav-button current-week-button ${
+                  isCurrentWeek ? "disabled" : ""
+                }`,
+                onClick: () => !isCurrentWeek && props.onWeekChange("current"),
+                whileHover: !isCurrentWeek ? { scale: 1.05 } : {},
+                whileTap: !isCurrentWeek ? { scale: 0.95 } : {},
+                disabled: isCurrentWeek,
+                title: isCurrentWeek
+                  ? "Đang ở tuần hiện tại"
+                  : "Quay về tuần hiện tại",
+                style: isCurrentWeek ? disabledButtonStyle : {},
+              },
+              React.createElement(
+                "span",
+                {
+                  style: {
+                    display: "flex",
+                    alignItems: "center",
+                  },
+                },
+                React.createElement(
+                  "svg",
+                  {
+                    width: "16",
+                    height: "16",
+                    viewBox: "0 0 24 24",
+                    fill: "none",
+                    stroke: "currentColor",
+                    strokeWidth: "2",
+                    style: { marginRight: "5px" },
+                  },
+                  React.createElement("circle", {
+                    cx: "12",
+                    cy: "12",
+                    r: "10",
+                  }),
+                  React.createElement("polyline", {
+                    points: "12 6 12 12 16 14",
+                  })
+                ),
+                "Tuần hiện tại"
+              )
+            ),
+            React.createElement(
+              motion.button,
+              {
+                className: `nav-button next-week ${
+                  props.isNextDisabled ? "disabled" : ""
+                }`,
+                onClick: () =>
+                  !props.isNextDisabled && props.onWeekChange("next"),
+                whileHover: !props.isNextDisabled ? { scale: 1.05 } : {},
+                whileTap: !props.isNextDisabled ? { scale: 0.95 } : {},
+                disabled: props.isNextDisabled,
+                title: props.isNextDisabled
+                  ? "Không có dữ liệu cho tuần sau"
+                  : "Xem tuần sau",
+                style: props.isNextDisabled ? disabledButtonStyle : {},
+              },
+              React.createElement("span", null, "Tuần sau"),
+              React.createElement(ChevronRightIcon, { size: 20 })
+            )
           )
         )
-      )
     ),
     !isExpanded &&
-    React.createElement(
-      "div",
-      { className: "collapsed-controls" },
       React.createElement(
-        motion.button,
-        {
-          className: `mini-nav-button ${props.isPrevDisabled ? "disabled" : ""
-            }`,
-          onClick: () => !props.isPrevDisabled && props.onWeekChange("prev"),
-          whileHover: !props.isPrevDisabled ? { scale: 1.1 } : {},
-          whileTap: !props.isPrevDisabled ? { scale: 0.9 } : {},
-          disabled: props.isPrevDisabled,
-          title: "Tuần trước",
-          style: props.isPrevDisabled ? disabledButtonStyle : {},
-        },
-        React.createElement(ChevronLeftIcon, { size: 16 })
-      ),
-      React.createElement(
-        motion.button,
-        {
-          className: `mini-nav-button current-week ${isCurrentWeek ? "disabled" : ""
-            }`,
-          onClick: () => !isCurrentWeek && props.onWeekChange("current"),
-          whileHover: !isCurrentWeek ? { scale: 1.1 } : {},
-          whileTap: !isCurrentWeek ? { scale: 0.9 } : {},
-          disabled: isCurrentWeek,
-          title: isCurrentWeek
-            ? "Đang ở tuần hiện tại"
-            : "Quay về tuần hiện tại",
-          style: isCurrentWeek ? disabledButtonStyle : {},
-        },
+        "div",
+        { className: "collapsed-controls" },
         React.createElement(
-          "svg",
+          motion.button,
           {
-            width: "16",
-            height: "16",
-            viewBox: "0 0 24 24",
-            fill: "none",
-            stroke: "currentColor",
-            strokeWidth: "2",
-          },
-          React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
-          React.createElement("polyline", { points: "12 6 12 12 16 14" })
-        )
-      ),
-      React.createElement(
-        motion.button,
-        {
-          className: `mini-nav-button ${props.isNextDisabled ? "disabled" : ""
+            className: `mini-nav-button ${
+              props.isPrevDisabled ? "disabled" : ""
             }`,
-          onClick: () => !props.isNextDisabled && props.onWeekChange("next"),
-          whileHover: !props.isNextDisabled ? { scale: 1.1 } : {},
-          whileTap: !props.isNextDisabled ? { scale: 0.9 } : {},
-          disabled: props.isNextDisabled,
-          title: "Tuần sau",
-          style: props.isNextDisabled ? disabledButtonStyle : {},
-        },
-        React.createElement(ChevronRightIcon, { size: 16 })
+            onClick: () => !props.isPrevDisabled && props.onWeekChange("prev"),
+            whileHover: !props.isPrevDisabled ? { scale: 1.1 } : {},
+            whileTap: !props.isPrevDisabled ? { scale: 0.9 } : {},
+            disabled: props.isPrevDisabled,
+            title: "Tuần trước",
+            style: props.isPrevDisabled ? disabledButtonStyle : {},
+          },
+          React.createElement(ChevronLeftIcon, { size: 16 })
+        ),
+        React.createElement(
+          motion.button,
+          {
+            className: `mini-nav-button current-week ${
+              isCurrentWeek ? "disabled" : ""
+            }`,
+            onClick: () => !isCurrentWeek && props.onWeekChange("current"),
+            whileHover: !isCurrentWeek ? { scale: 1.1 } : {},
+            whileTap: !isCurrentWeek ? { scale: 0.9 } : {},
+            disabled: isCurrentWeek,
+            title: isCurrentWeek
+              ? "Đang ở tuần hiện tại"
+              : "Quay về tuần hiện tại",
+            style: isCurrentWeek ? disabledButtonStyle : {},
+          },
+          React.createElement(
+            "svg",
+            {
+              width: "16",
+              height: "16",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
+            },
+            React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
+            React.createElement("polyline", { points: "12 6 12 12 16 14" })
+          )
+        ),
+        React.createElement(
+          motion.button,
+          {
+            className: `mini-nav-button ${
+              props.isNextDisabled ? "disabled" : ""
+            }`,
+            onClick: () => !props.isNextDisabled && props.onWeekChange("next"),
+            whileHover: !props.isNextDisabled ? { scale: 1.1 } : {},
+            whileTap: !props.isNextDisabled ? { scale: 0.9 } : {},
+            disabled: props.isNextDisabled,
+            title: "Tuần sau",
+            style: props.isNextDisabled ? disabledButtonStyle : {},
+          },
+          React.createElement(ChevronRightIcon, { size: 16 })
+        )
       )
-    )
   );
 }
 
@@ -1078,7 +1382,6 @@ function ScheduleContent({ data, viewType }) {
     mondayThisWeek.setHours(0, 0, 0, 0);
 
     mondayThisWeek.setDate(mondayThisWeek.getDate() - 7);
-    console.log("minDate: " + mondayThisWeek);
     return mondayThisWeek;
   }, []);
 
@@ -1091,7 +1394,6 @@ function ScheduleContent({ data, viewType }) {
     mondayThisWeek.setHours(0, 0, 0, 0);
 
     mondayThisWeek.setDate(mondayThisWeek.getDate() - 8 + 5 * 7);
-    console.log("MaxDate: " + mondayThisWeek);
     return mondayThisWeek;
   }, []);
 
@@ -1188,21 +1490,31 @@ function ScheduleContent({ data, viewType }) {
   );
 }
 
-// Today's Classes Popup Component
+// Today Popup
 function TodayClassesPopup({ isOpen, onClose, classes, exams }) {
   const [doNotShowAgain, setDoNotShowAgain] = React.useState(false);
-  
+
   if (!isOpen) return null;
-  
+
   const today = new Date();
-  const dayNames = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+  const dayNames = [
+    "Chủ Nhật",
+    "Thứ Hai",
+    "Thứ Ba",
+    "Thứ Tư",
+    "Thứ Năm",
+    "Thứ Sáu",
+    "Thứ Bảy",
+  ];
   const dayName = dayNames[today.getDay()];
-  const dayFormatted = `${dayName}, ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-  
+  const dayFormatted = `${dayName}, ${today.getDate()}/${
+    today.getMonth() + 1
+  }/${today.getFullYear()}`;
+
   const handleClose = () => {
     onClose(doNotShowAgain);
   };
-  
+
   return React.createElement(
     "div",
     { className: "today-popup-overlay" },
@@ -1213,356 +1525,450 @@ function TodayClassesPopup({ isOpen, onClose, classes, exams }) {
         initial: { opacity: 0, y: -50 },
         animate: { opacity: 1, y: 0 },
         exit: { opacity: 0, y: -50 },
-        transition: { type: "spring", damping: 25, stiffness: 300 }
+        transition: { type: "spring", damping: 25, stiffness: 300 },
       },
       React.createElement(
-        "div", 
+        "div",
         { className: "today-popup-header" },
         React.createElement("h2", null, "Lịch học & thi hôm nay"),
         React.createElement(
           "button",
-          { 
+          {
             className: "today-popup-close",
             onClick: handleClose,
-            "aria-label": "Đóng"
+            "aria-label": "Đóng",
           },
           "×"
         )
       ),
       React.createElement(
-        "div", 
+        "div",
         { className: "today-popup-date" },
         React.createElement(
-          "div", 
+          "div",
           { className: "today-date-icon" },
           React.createElement(
-            "svg", 
-            { 
-              width: "24", 
-              height: "24", 
-              viewBox: "0 0 24 24", 
-              fill: "none", 
-              stroke: "currentColor", 
-              strokeWidth: "2" 
+            "svg",
+            {
+              width: "24",
+              height: "24",
+              viewBox: "0 0 24 24",
+              fill: "none",
+              stroke: "currentColor",
+              strokeWidth: "2",
             },
-            React.createElement("rect", { x: "3", y: "4", width: "18", height: "18", rx: "2", ry: "2" }),
-            React.createElement("line", { x1: "16", y1: "2", x2: "16", y2: "6" }),
+            React.createElement("rect", {
+              x: "3",
+              y: "4",
+              width: "18",
+              height: "18",
+              rx: "2",
+              ry: "2",
+            }),
+            React.createElement("line", {
+              x1: "16",
+              y1: "2",
+              x2: "16",
+              y2: "6",
+            }),
             React.createElement("line", { x1: "8", y1: "2", x2: "8", y2: "6" }),
-            React.createElement("line", { x1: "3", y1: "10", x2: "21", y2: "10" })
+            React.createElement("line", {
+              x1: "3",
+              y1: "10",
+              x2: "21",
+              y2: "10",
+            })
           )
         ),
         React.createElement("span", null, dayFormatted)
       ),
-      (classes.length === 0 && exams.length === 0) ?
-        React.createElement(
-          "div", 
-          { className: "today-popup-no-classes" },
-          React.createElement(
-            "svg", 
-            { 
-              width: "64", 
-              height: "64", 
-              viewBox: "0 0 24 24", 
-              fill: "none", 
-              stroke: "currentColor", 
-              strokeWidth: "1", 
-              className: "today-no-classes-icon"
-            },
-            React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
-            React.createElement("path", { d: "M8 14s1.5 2 4 2 4-2 4-2" }),
-            React.createElement("line", { x1: "9", y1: "9", x2: "9.01", y2: "9" }),
-            React.createElement("line", { x1: "15", y1: "9", x2: "15.01", y2: "9" })
-          ),
-          React.createElement("p", null, "Hôm nay không có lịch học hoặc thi")
-        ) :
-        React.createElement(
-          "div", 
-          { className: "today-popup-content" },
-          classes.length > 0 && React.createElement(
-            React.Fragment,
-            null,
+      classes.length === 0 && exams.length === 0
+        ? React.createElement(
+            "div",
+            { className: "today-popup-no-classes" },
             React.createElement(
-              "div",
-              { className: "today-section-header" },
-              React.createElement(
-                "svg", 
-                { 
-                  width: "18", 
-                  height: "18", 
-                  viewBox: "0 0 24 24", 
-                  fill: "none", 
-                  stroke: "currentColor", 
-                  strokeWidth: "2",
-                  className: "today-section-icon"
-                },
-                React.createElement("path", { d: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" })
-              ),
-              React.createElement("h3", null, "Lịch học")
+              "svg",
+              {
+                width: "64",
+                height: "64",
+                viewBox: "0 0 24 24",
+                fill: "none",
+                stroke: "currentColor",
+                strokeWidth: "1",
+                className: "today-no-classes-icon",
+              },
+              React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
+              React.createElement("path", { d: "M8 14s1.5 2 4 2 4-2 4-2" }),
+              React.createElement("line", {
+                x1: "9",
+                y1: "9",
+                x2: "9.01",
+                y2: "9",
+              }),
+              React.createElement("line", {
+                x1: "15",
+                y1: "9",
+                x2: "15.01",
+                y2: "9",
+              })
             ),
-            React.createElement(
-              "div",
-              { className: "today-classes-list" },
-              classes.map((item, index) => 
+            React.createElement("p", null, "Hôm nay không có lịch học hoặc thi")
+          )
+        : React.createElement(
+            "div",
+            { className: "today-popup-content" },
+            classes.length > 0 &&
+              React.createElement(
+                React.Fragment,
+                null,
                 React.createElement(
-                  motion.div,
-                  {
-                    key: `today-class-${index}`,
-                    className: "today-class-item",
-                    initial: { opacity: 0, x: -20 },
-                    animate: { opacity: 1, x: 0 },
-                    transition: { delay: index * 0.1 }
-                  },
+                  "div",
+                  { className: "today-section-header" },
                   React.createElement(
-                    "div", 
-                    { className: "today-class-time" },
-                    React.createElement(
-                      "div", 
-                      { className: "today-time-indicator" },
-                      React.createElement(
-                        "svg", 
-                        { 
-                          width: "16", 
-                          height: "16", 
-                          viewBox: "0 0 24 24", 
-                          fill: "none", 
-                          stroke: "currentColor", 
-                          strokeWidth: "2" 
-                        },
-                        React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
-                        React.createElement("polyline", { points: "12 6 12 12 16 14" })
-                      )
-                    ),
-                    React.createElement("span", null, `${item.startTime} - ${item.endTime}`)
+                    "svg",
+                    {
+                      width: "18",
+                      height: "18",
+                      viewBox: "0 0 24 24",
+                      fill: "none",
+                      stroke: "currentColor",
+                      strokeWidth: "2",
+                      className: "today-section-icon",
+                    },
+                    React.createElement("path", {
+                      d: "M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z",
+                    })
                   ),
-                  React.createElement(
-                    "div", 
-                    { className: "today-class-details" },
-                    React.createElement("h3", null, item.subject),
+                  React.createElement("h3", null, "Lịch học")
+                ),
+                React.createElement(
+                  "div",
+                  { className: "today-classes-list" },
+                  classes.map((item, index) =>
                     React.createElement(
-                      "div", 
-                      { className: "today-class-info" },
+                      motion.div,
+                      {
+                        key: `today-class-${index}`,
+                        className: "today-class-item",
+                        initial: { opacity: 0, x: -20 },
+                        animate: { opacity: 1, x: 0 },
+                        transition: { delay: index * 0.1 },
+                      },
                       React.createElement(
-                        "span", 
-                        { className: "today-class-room" },
+                        "div",
+                        { className: "today-class-time" },
                         React.createElement(
-                          "svg", 
-                          { 
-                            width: "14", 
-                            height: "14", 
-                            viewBox: "0 0 24 24", 
-                            fill: "none", 
-                            stroke: "currentColor", 
-                            strokeWidth: "2" 
-                          },
-                          React.createElement("path", { d: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" }),
-                          React.createElement("polyline", { points: "9 22 9 12 15 12 15 22" })
+                          "div",
+                          { className: "today-time-indicator" },
+                          React.createElement(
+                            "svg",
+                            {
+                              width: "16",
+                              height: "16",
+                              viewBox: "0 0 24 24",
+                              fill: "none",
+                              stroke: "currentColor",
+                              strokeWidth: "2",
+                            },
+                            React.createElement("circle", {
+                              cx: "12",
+                              cy: "12",
+                              r: "10",
+                            }),
+                            React.createElement("polyline", {
+                              points: "12 6 12 12 16 14",
+                            })
+                          )
                         ),
-                        `Phòng: ${item.room}`
+                        React.createElement(
+                          "span",
+                          null,
+                          `${item.startTime} - ${item.endTime}`
+                        )
                       ),
                       React.createElement(
-                        "span", 
-                        { className: "today-class-teacher" },
+                        "div",
+                        { className: "today-class-details" },
+                        React.createElement("h3", null, item.subject),
                         React.createElement(
-                          "svg", 
-                          { 
-                            width: "14", 
-                            height: "14", 
-                            viewBox: "0 0 24 24", 
-                            fill: "none", 
-                            stroke: "currentColor", 
-                            strokeWidth: "2" 
-                          },
-                          React.createElement("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
-                          React.createElement("circle", { cx: "12", cy: "7", r: "4" })
+                          "div",
+                          { className: "today-class-info" },
+                          React.createElement(
+                            "span",
+                            { className: "today-class-room" },
+                            React.createElement(
+                              "svg",
+                              {
+                                width: "14",
+                                height: "14",
+                                viewBox: "0 0 24 24",
+                                fill: "none",
+                                stroke: "currentColor",
+                                strokeWidth: "2",
+                              },
+                              React.createElement("path", {
+                                d: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+                              }),
+                              React.createElement("polyline", {
+                                points: "9 22 9 12 15 12 15 22",
+                              })
+                            ),
+                            `Phòng: ${item.room}`
+                          )
                         ),
-                        item.supervisor
+                        React.createElement(
+                          "div",
+                          { className: "today-class-lesson" },
+                          React.createElement(
+                            "svg",
+                            {
+                              width: "14",
+                              height: "14",
+                              viewBox: "0 0 24 24",
+                              fill: "none",
+                              stroke: "currentColor",
+                              strokeWidth: "2",
+                            },
+                            React.createElement("rect", {
+                              x: "3",
+                              y: "3",
+                              width: "18",
+                              height: "18",
+                              rx: "2",
+                              ry: "2",
+                            }),
+                            React.createElement("line", {
+                              x1: "9",
+                              y1: "9",
+                              x2: "15",
+                              y2: "9",
+                            }),
+                            React.createElement("line", {
+                              x1: "9",
+                              y1: "15",
+                              x2: "15",
+                              y2: "15",
+                            }),
+                            React.createElement("line", {
+                              x1: "9",
+                              y1: "12",
+                              x2: "15",
+                              y2: "12",
+                            })
+                          ),
+                          item.lesson.replace("Tiết: ", "Tiết ")
+                        )
                       )
-                    ),
+                    )
+                  )
+                ),
+                exams.length > 0 &&
+                  React.createElement(
+                    React.Fragment,
+                    null,
                     React.createElement(
                       "div",
-                      { className: "today-class-lesson" },
+                      { className: "today-section-header today-exam-section" },
                       React.createElement(
                         "svg",
                         {
-                          width: "14",
-                          height: "14",
+                          width: "18",
+                          height: "18",
                           viewBox: "0 0 24 24",
                           fill: "none",
                           stroke: "currentColor",
-                          strokeWidth: "2"
+                          strokeWidth: "2",
+                          className: "today-section-icon",
                         },
-                        React.createElement("rect", { x: "3", y: "3", width: "18", height: "18", rx: "2", ry: "2" }),
-                        React.createElement("line", { x1: "9", y1: "9", x2: "15", y2: "9" }),
-                        React.createElement("line", { x1: "9", y1: "15", x2: "15", y2: "15" }),
-                        React.createElement("line", { x1: "9", y1: "12", x2: "15", y2: "12" })
+                        React.createElement("path", {
+                          d: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7",
+                        }),
+                        React.createElement("path", {
+                          d: "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z",
+                        })
                       ),
-                      item.lesson.replace("Tiết: ", "Tiết ")
-                    )
-                  )
-                )
-              )
-            )
-          ),
-          exams.length > 0 && React.createElement(
-            React.Fragment,
-            null,
-            React.createElement(
-              "div",
-              { className: "today-section-header today-exam-section" },
-              React.createElement(
-                "svg", 
-                { 
-                  width: "18", 
-                  height: "18", 
-                  viewBox: "0 0 24 24", 
-                  fill: "none", 
-                  stroke: "currentColor", 
-                  strokeWidth: "2",
-                  className: "today-section-icon"
-                },
-                React.createElement("path", { d: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" }),
-                React.createElement("path", { d: "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" })
-              ),
-              React.createElement("h3", null, "Lịch thi")
-            ),
-            React.createElement(
-              "div", 
-              { className: "today-classes-list" },
-              exams.map((item, index) => 
-                React.createElement(
-                  motion.div,
-                  {
-                    key: `today-exam-${index}`,
-                    className: "today-class-item today-exam-item",
-                    initial: { opacity: 0, x: -20 },
-                    animate: { opacity: 1, x: 0 },
-                    transition: { delay: (classes.length + index) * 0.1 }
-                  },
-                  React.createElement(
-                    "div", 
-                    { className: "today-class-time" },
-                    React.createElement(
-                      "div", 
-                      { className: "today-time-indicator exam-time" },
-                      React.createElement(
-                        "svg", 
-                        { 
-                          width: "16", 
-                          height: "16", 
-                          viewBox: "0 0 24 24", 
-                          fill: "none", 
-                          stroke: "currentColor", 
-                          strokeWidth: "2" 
-                        },
-                        React.createElement("circle", { cx: "12", cy: "12", r: "10" }),
-                        React.createElement("polyline", { points: "12 6 12 12 16 14" })
-                      )
-                    ),
-                    React.createElement("span", null, `${item.startTime} - ${item.endTime}`)
-                  ),
-                  React.createElement(
-                    "div", 
-                    { className: "today-class-details" },
-                    React.createElement("h3", null, item.subject),
-                    React.createElement(
-                      "div", 
-                      { className: "today-class-info" },
-                      React.createElement(
-                        "span", 
-                        { className: "today-class-room" },
-                        React.createElement(
-                          "svg", 
-                          { 
-                            width: "14", 
-                            height: "14", 
-                            viewBox: "0 0 24 24", 
-                            fill: "none", 
-                            stroke: "currentColor", 
-                            strokeWidth: "2" 
-                          },
-                          React.createElement("path", { d: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" }),
-                          React.createElement("polyline", { points: "9 22 9 12 15 12 15 22" })
-                        ),
-                        `Phòng: ${item.room}`
-                      ),
-                      React.createElement(
-                        "span", 
-                        { className: "today-class-teacher" },
-                        React.createElement(
-                          "svg", 
-                          { 
-                            width: "14", 
-                            height: "14", 
-                            viewBox: "0 0 24 24", 
-                            fill: "none", 
-                            stroke: "currentColor", 
-                            strokeWidth: "2" 
-                          },
-                          React.createElement("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }),
-                          React.createElement("circle", { cx: "12", cy: "7", r: "4" })
-                        ),
-                        item.supervisor
-                      )
+                      React.createElement("h3", null, "Lịch thi")
                     ),
                     React.createElement(
                       "div",
-                      { className: "today-class-lesson" },
-                      React.createElement(
-                        "svg",
-                        {
-                          width: "14",
-                          height: "14",
-                          viewBox: "0 0 24 24",
-                          fill: "none",
-                          stroke: "currentColor",
-                          strokeWidth: "2"
-                        },
-                        React.createElement("rect", { x: "3", y: "3", width: "18", height: "18", rx: "2", ry: "2" }),
-                        React.createElement("line", { x1: "9", y1: "9", x2: "15", y2: "9" }),
-                        React.createElement("line", { x1: "9", y1: "15", x2: "15", y2: "15" }),
-                        React.createElement("line", { x1: "9", y1: "12", x2: "15", y2: "12" })
-                      ),
-                      item.lesson.replace("Tiết: ", "Tiết ")
-                    ),
-                    React.createElement(
-                      "div", 
-                      { className: "today-exam-badge" },
-                      "Thi"
+                      { className: "today-classes-list" },
+                      exams.map((item, index) =>
+                        React.createElement(
+                          motion.div,
+                          {
+                            key: `today-exam-${index}`,
+                            className: "today-class-item today-exam-item",
+                            initial: { opacity: 0, x: -20 },
+                            animate: { opacity: 1, x: 0 },
+                            transition: {
+                              delay: (classes.length + index) * 0.1,
+                            },
+                          },
+                          React.createElement(
+                            "div",
+                            { className: "today-class-time" },
+                            React.createElement(
+                              "div",
+                              { className: "today-time-indicator exam-time" },
+                              React.createElement(
+                                "svg",
+                                {
+                                  width: "16",
+                                  height: "16",
+                                  viewBox: "0 0 24 24",
+                                  fill: "none",
+                                  stroke: "currentColor",
+                                  strokeWidth: "2",
+                                },
+                                React.createElement("circle", {
+                                  cx: "12",
+                                  cy: "12",
+                                  r: "10",
+                                }),
+                                React.createElement("polyline", {
+                                  points: "12 6 12 12 16 14",
+                                })
+                              )
+                            ),
+                            React.createElement(
+                              "span",
+                              null,
+                              `${item.startTime} - ${item.endTime}`
+                            )
+                          ),
+                          React.createElement(
+                            "div",
+                            { className: "today-class-details" },
+                            React.createElement("h3", null, item.subject),
+                            React.createElement(
+                              "div",
+                              { className: "today-class-info" },
+                              React.createElement(
+                                "span",
+                                { className: "today-class-room" },
+                                React.createElement(
+                                  "svg",
+                                  {
+                                    width: "14",
+                                    height: "14",
+                                    viewBox: "0 0 24 24",
+                                    fill: "none",
+                                    stroke: "currentColor",
+                                    strokeWidth: "2",
+                                  },
+                                  React.createElement("path", {
+                                    d: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+                                  }),
+                                  React.createElement("polyline", {
+                                    points: "9 22 9 12 15 12 15 22",
+                                  })
+                                ),
+                                `Phòng: ${item.room}`
+                              ),
+                              React.createElement(
+                                "span",
+                                { className: "today-class-teacher" },
+                                React.createElement(
+                                  "svg",
+                                  {
+                                    width: "14",
+                                    height: "14",
+                                    viewBox: "0 0 24 24",
+                                    fill: "none",
+                                    stroke: "currentColor",
+                                    strokeWidth: "2",
+                                  },
+                                  React.createElement("path", {
+                                    d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2",
+                                  }),
+                                  React.createElement("circle", {
+                                    cx: "12",
+                                    cy: "7",
+                                    r: "4",
+                                  })
+                                ),
+                                item.supervisor
+                              )
+                            ),
+                            React.createElement(
+                              "div",
+                              { className: "today-class-lesson" },
+                              React.createElement(
+                                "svg",
+                                {
+                                  width: "14",
+                                  height: "14",
+                                  viewBox: "0 0 24 24",
+                                  fill: "none",
+                                  stroke: "currentColor",
+                                  strokeWidth: "2",
+                                },
+                                React.createElement("rect", {
+                                  x: "3",
+                                  y: "3",
+                                  width: "18",
+                                  height: "18",
+                                  rx: "2",
+                                  ry: "2",
+                                }),
+                                React.createElement("line", {
+                                  x1: "9",
+                                  y1: "9",
+                                  x2: "15",
+                                  y2: "9",
+                                }),
+                                React.createElement("line", {
+                                  x1: "9",
+                                  y1: "15",
+                                  x2: "15",
+                                  y2: "15",
+                                }),
+                                React.createElement("line", {
+                                  x1: "9",
+                                  y1: "12",
+                                  x2: "15",
+                                  y2: "12",
+                                })
+                              ),
+                              item.lesson.replace("Tiết: ", "Tiết ")
+                            ),
+                            React.createElement(
+                              "div",
+                              { className: "today-exam-badge" },
+                              "Thi"
+                            )
+                          )
+                        )
+                      )
                     )
                   )
-                )
+              ),
+            React.createElement(
+              "div",
+              { className: "today-popup-footer" },
+              React.createElement(
+                "label",
+                { className: "today-popup-checkbox" },
+                React.createElement("input", {
+                  type: "checkbox",
+                  checked: doNotShowAgain,
+                  onChange: (e) => setDoNotShowAgain(e.target.checked),
+                }),
+                React.createElement("span", { className: "checkmark" }),
+                "Không hiển thị lại"
+              ),
+              React.createElement(
+                motion.button,
+                {
+                  className: "today-popup-button",
+                  onClick: handleClose,
+                  whileHover: { scale: 1.05 },
+                  whileTap: { scale: 0.95 },
+                },
+                "Đóng"
               )
             )
           )
-        ),
-      React.createElement(
-        "div", 
-        { className: "today-popup-footer" },
-        React.createElement(
-          "label", 
-          { className: "today-popup-checkbox" },
-          React.createElement(
-            "input", 
-            { 
-              type: "checkbox", 
-              checked: doNotShowAgain, 
-              onChange: (e) => setDoNotShowAgain(e.target.checked) 
-            }
-          ),
-          React.createElement("span", { className: "checkmark" }),
-          "Không hiển thị lại"
-        ),
-        React.createElement(
-          motion.button,
-          { 
-            className: "today-popup-button",
-            onClick: handleClose,
-            whileHover: { scale: 1.05 },
-            whileTap: { scale: 0.95 }
-          },
-          "Đóng"
-        )
-      )
     )
   );
 }
@@ -1571,7 +1977,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(React.createElement(App));
 
 // Add CSS to head
-const todayPopupStyles = document.createElement('style');
+const todayPopupStyles = document.createElement("style");
 todayPopupStyles.textContent = `
 .today-popup-overlay {
   position: fixed;
@@ -1883,6 +2289,219 @@ todayPopupStyles.textContent = `
   margin-bottom: 16px;
 }
 
+.settings-button {
+  margin-right: 8px;
+  padding: 6px;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.settings-button svg {
+  color: #666;
+}
+
+.settings-button:hover svg {
+  color: #4f46e5;
+}
+
+.settings-button.active {
+  background-color: #6366f1;
+}
+
+.settings-button.active svg {
+  color: #fff;
+}
+
+.settings-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #444;
+}
+
+.settings-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.settings-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.settings-section-title {
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1.1rem;
+  color: #374151;
+  display: flex;
+  align-items: center;
+}
+
+.settings-section-icon {
+  margin-right: 8px;
+  color: #6366f1;
+}
+
+.settings-option {
+  display: flex;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.settings-option:last-child {
+  border-bottom: none;
+}
+
+.settings-switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.settings-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .switch-slider {
+  background-color: #6366f1;
+}
+
+input:checked + .switch-slider:before {
+  transform: translateX(22px);
+}
+
+.settings-option-text {
+  flex: 1;
+}
+
+.settings-option-title {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.settings-option-description {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.settings-range {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.settings-range .settings-option-text {
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.settings-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #6366f1;
+  cursor: pointer;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.settings-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.settings-save-button {
+  background-color: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.settings-save-button:hover {
+  background-color: #4f46e5;
+}
+
+.settings-save-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.settings-save-button.success {
+  background-color: #10b981;
+}
+
+.settings-info {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-top: 40px;
+}
+
+.settings-info p {
+  margin: 5px 0;
+}
+
 @media (max-width: 640px) {
   .today-popup-container {
     width: 95%;
@@ -1895,6 +2514,18 @@ todayPopupStyles.textContent = `
   .today-popup-footer {
     flex-direction: column;
     gap: 16px;
+  }
+
+  .settings-container {
+    padding: 0 12px;
+  }
+  
+  .settings-card {
+    padding: 16px;
+  }
+  
+  .settings-option {
+    padding: 12px 0;
   }
 }
 `;
