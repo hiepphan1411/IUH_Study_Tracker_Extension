@@ -176,7 +176,7 @@ function MainApp() {
         chrome.runtime.sendMessage({
           type: "AUTO_CLOSE_TAB",
           tabId: createdTabId,
-          timeout: 15000,
+          timeout: 25000,
         });
 
         // setTimeout(() => {
@@ -209,7 +209,7 @@ function MainApp() {
       state: {
         message,
         loadingOperation: loadScheduleData,
-        timeoutDuration: 12,
+        timeoutDuration: 25,
       },
     });
   };
@@ -305,7 +305,7 @@ function MainApp() {
         chrome.runtime.sendMessage({
           type: "AUTO_CLOSE_TAB",
           tabId: createdTabId,
-          timeout: 5000,
+          timeout: 10000,
         });
 
         // setTimeout(() => {
@@ -344,7 +344,7 @@ function MainApp() {
       state: {
         message,
         loadingOperation: loadViewGrades,
-        timeoutDuration: 7,
+        timeoutDuration: 10,
       },
     });
   };
