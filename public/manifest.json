@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "IUH Grade Guard",
-  "description": "IUH Grade Guard is a Chrome extension that helps students at the Industrial University of Ho Chi Minh City (IUH) to monitor their grades and academic performance. The extension provides features such as grade tracking, notifications for new grades, and visualization of academic progress.",
+  "description": "IUH Grade Guard is a Chrome extension that helps students at the Industrial University of Ho Chi Minh City (IUH) to monitor their grades and academic performance.",
   "version": "1.0",
   "icons": {
     "16": "icon16.png",
@@ -10,7 +10,7 @@
     "128": "icon128.png"
   },
   "action": {
-    "default_icon":{
+    "default_icon": {
       "16": "icon16.png",
       "32": "icon32.png",
       "48": "icon48.png",
