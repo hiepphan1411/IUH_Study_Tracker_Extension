@@ -501,7 +501,7 @@ function PrivacyPolicyModal({ isOpen, onClose }) {
                   marginBottom: "15px",
                 },
               },
-              "Tiện ích hỗ trợ tự động điền phiếu khảo sát sinh viên với giá trị mặc định: mức đánh giá 'Hài lòng' và ý kiến 'Em không có ý kiến gì thêm'. Việc này nhằm tiết kiệm thời gian cho sinh viên trong các đợt khảo sát, không lưu lại bất kỳ thông tin nào về kết quả khảo sát."
+              "Tiện ích hỗ trợ tự động điền phiếu khảo sát sinh viên. Việc này nhằm tiết kiệm thời gian cho sinh viên trong các đợt khảo sát, không lưu lại bất kỳ thông tin nào về kết quả khảo sát."
             ),
             React.createElement(
               "h4",

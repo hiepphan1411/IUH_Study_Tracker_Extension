@@ -1,3 +1,13 @@
+//utils
+function getRefreshHoursFromSetting(refreshSetting) {
+  if (!refreshSetting) return 24; 
+  
+  if (refreshSetting === "3day") return 72; 
+  
+  const hours = parseInt(refreshSetting);
+  return isNaN(hours) ? 24 : hours; 
+}
+
 /* eslint-disable */
 import "./App.css";
 import { useState, useEffect } from "react";
@@ -79,7 +89,7 @@ function MainApp() {
           // Kiểm tra dữ liệu đã lưu
           const result = await new Promise((resolve) => {
             chrome.storage.local.get(
-              ["schedule_json", "schedule_timestamp", "schedule_key"],
+              ["schedule_json", "schedule_timestamp", "schedule_key", "refresh_interval"],
               function (res) {
                 if (chrome.runtime.lastError) {
                   console.error(
@@ -104,8 +114,10 @@ function MainApp() {
 
                 const diffTime = currentTime - updateTime;
                 const diffHours = diffTime / (1000 * 60 * 60);
-
-                if (diffHours < 24) {
+                
+                const refreshInterval = getRefreshHoursFromSetting(result.refresh_interval) || 24;
+                // alert(refreshInterval);
+                if (diffHours < refreshInterval) {
                   const schedulePageUrl = chrome.runtime.getURL(
                     `page/MainSchedulePage.html?k=${encodeURIComponent(key)}`
                   );
@@ -164,7 +176,7 @@ function MainApp() {
         chrome.runtime.sendMessage({
           type: "AUTO_CLOSE_TAB",
           tabId: createdTabId,
-          timeout: 15000,
+          timeout: 25000,
         });
 
         // setTimeout(() => {
@@ -197,7 +209,7 @@ function MainApp() {
       state: {
         message,
         loadingOperation: loadScheduleData,
-        timeoutDuration: 12,
+        timeoutDuration: 25,
       },
     });
   };
@@ -293,7 +305,7 @@ function MainApp() {
         chrome.runtime.sendMessage({
           type: "AUTO_CLOSE_TAB",
           tabId: createdTabId,
-          timeout: 5000,
+          timeout: 10000,
         });
 
         // setTimeout(() => {
@@ -332,7 +344,7 @@ function MainApp() {
       state: {
         message,
         loadingOperation: loadViewGrades,
-        timeoutDuration: 7,
+        timeoutDuration: 10,
       },
     });
   };
@@ -422,7 +434,7 @@ function MainApp() {
                     type="text"
                     value={key}
                     onChange={handleKeyChange}
-                    placeholder="npUdG8auRX8sVUZRemnNTSaTq2eis8LJxZo-Tvx-AN4"
+                    placeholder="npUdG8auRX8sVUZRemnNTSaTq2eis8LJxZo"
                     className={`w-full px-3 py-2.5 border-2 rounded-lg focus:outline-none transition-all duration-500 text-sm transform focus:scale-105 ${
                       error
                         ? "border-red-500 focus:border-red-600 bg-red-50"

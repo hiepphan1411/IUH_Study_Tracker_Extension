@@ -464,6 +464,7 @@ body {
     line-height: 1.6;
     max-width: 650px;
     padding-bottom: 20px;
+    text-align: center;
 }
 
 .dialog-actions {
@@ -588,3 +589,4 @@ body {
 .dialog-button:disabled:hover {
     transform: none !important;
 }
+

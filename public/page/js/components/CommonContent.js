@@ -50,29 +50,29 @@ function LayoutWithNavigation({
 
 const SIDEBAR_ITEMS = [
     {
-        name: 'Overview',
+        name: 'Tổng Quan',
         icon: '📊',
         color: '#ffffff',
         page: 'overview',
     },
     {
-        name: 'View Learning Results',
+        name: 'Kết quả học tập',
         icon: '📚',
         color: '#ffffff',
         page: 'grades',
     },
     {
-        name: 'Study Plan',
+        name: 'Lập kế hoạch',
         icon: '📅',
         color: '#ffffff',
         page: 'study-plan',
     },
     {
-        name: 'About Us',
+        name: 'Giới thiệu',
         icon: 'ℹ️',
         color: '#ffffff',
         page: 'about',
-    },
+    }
 ];
 
 function MenuIcon({ size = 24 }) {
@@ -99,10 +99,9 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
 
     const handleBackClick = () => {
         setIsDialogOpen(true);
-        // Đặt timeout để tự động đóng dialog sau 5 giây
         setTimeout(() => {
             setIsDialogOpen(false);
-        }, 5000); // 5000 milliseconds = 5 giây
+        }, 5000); 
     };
     const handleItemClick = (item) => {
         if (item.page === 'study-plan') {
@@ -117,7 +116,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
         motion.div,
         {
             className: `sidebar ${isSidebarOpen ? 'open' : 'closed'}`,
-            animate: { width: isSidebarOpen ? 215 : 70 },
+            animate: { width: isSidebarOpen ? 180 : 70 },
         },
         React.createElement(
             'div',
@@ -266,7 +265,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
                 ),
             ),
         ),
-        React.createElement(ConfirmationDialog, {
+        React.createElement(ConfirmationDialogExit, {
             isOpen: isDialogOpen,
             onClose: () => setIsDialogOpen(false),
             onConfirm: () => {
@@ -277,7 +276,7 @@ function SidebarWithNavigation({ currentPage, onNavigate, onOpenStudyPlan }) {
     );
 }
 
-function ConfirmationDialog({ isOpen, onClose, onConfirm }) {
+function ConfirmationDialogExit({ isOpen, onClose, onConfirm }) {
     if (!isOpen) return null;
 
     return React.createElement(

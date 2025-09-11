@@ -370,7 +370,7 @@ Gửi từ IUH Grade Guard Extension
         React.createElement(
           "a",
           {
-            href: "https://youtube.com",
+            href: "https://www.youtube.com/watch?v=tnTMyfOBWF0",
             target: "_blank",
             style: {
               display: "inline-flex",
